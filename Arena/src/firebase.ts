@@ -2,15 +2,17 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getDatabase } from "firebase/database";
 
+// Firebase config is supplied at build time from GitHub repository variables
+// (Settings -> Secrets and variables -> Actions -> Variables).
 const firebaseConfig = {
-  apiKey: "AIzaSyB4AuvcCqXYvXSfqVSwNNzJvqfDborf1F0",
-  authDomain: "arena-5eae8.firebaseapp.com",
-  databaseURL: "https://arena-5eae8-default-rtdb.firebaseio.com",
-  projectId: "arena-5eae8",
-  storageBucket: "arena-5eae8.firebasestorage.app",
-  messagingSenderId: "918579400564",
-  appId: "1:918579400564:web:83ddf3fb6cdf8c62d36621",
-  measurementId: "G-B9FPLL0C2B"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 // Initialize Firebase
