@@ -3,14 +3,14 @@ import { getAuth } from "firebase/auth";
 import { getDatabase } from "firebase/database";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAQj9PaUy4z0YCfdAvvSJxLEkbFXIBwTkA",
-  authDomain: "kuldeep-fcb48.firebaseapp.com",
-  databaseURL: "https://kuldeep-fcb48-default-rtdb.firebaseio.com",
-  projectId: "kuldeep-fcb48",
-  storageBucket: "kuldeep-fcb48.firebasestorage.app",
-  messagingSenderId: "868463391327",
-  appId: "1:868463391327:web:798219ac1b6809c55721ea",
-  measurementId: "G-C8W01TS9XT"
+  apiKey: "AIzaSyB4AuvcCqXYvXSfqVSwNNzJvqfDborf1F0",
+  authDomain: "arena-5eae8.firebaseapp.com",
+  databaseURL: "https://arena-5eae8-default-rtdb.firebaseio.com",
+  projectId: "arena-5eae8",
+  storageBucket: "arena-5eae8.firebasestorage.app",
+  messagingSenderId: "918579400564",
+  appId: "1:918579400564:web:83ddf3fb6cdf8c62d36621",
+  measurementId: "G-B9FPLL0C2B"
 };
 
 // Initialize Firebase
