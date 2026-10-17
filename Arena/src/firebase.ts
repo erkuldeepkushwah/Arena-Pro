@@ -3,14 +3,14 @@ import { getAuth } from "firebase/auth";
 import { getDatabase } from "firebase/database";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCr9M4t9kTgqKK7VlAr-_JfvT_N3Qb2xgY",
-  authDomain: "career-68877.firebaseapp.com",
-  databaseURL: "https://career-68877-default-rtdb.firebaseio.com",
-  projectId: "career-68877",
-  storageBucket: "career-68877.firebasestorage.app",
-  messagingSenderId: "828433949673",
-  appId: "1:828433949673:web:8f7a3436edb0b1655a6178",
-  measurementId: "G-9051DT2C2F"
+  apiKey: "AIzaSyAQj9PaUy4z0YCfdAvvSJxLEkbFXIBwTkA",
+  authDomain: "kuldeep-fcb48.firebaseapp.com",
+  databaseURL: "https://kuldeep-fcb48-default-rtdb.firebaseio.com",
+  projectId: "kuldeep-fcb48",
+  storageBucket: "kuldeep-fcb48.firebasestorage.app",
+  messagingSenderId: "868463391327",
+  appId: "1:868463391327:web:798219ac1b6809c55721ea",
+  measurementId: "G-C8W01TS9XT"
 };
 
 // Initialize Firebase
