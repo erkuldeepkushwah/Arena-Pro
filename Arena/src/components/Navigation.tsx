@@ -1,5 +1,6 @@
 import React from "react";
-import { Home, Package, Gift, Gamepad2, User, Trophy } from "lucide-react";
+import { Home, Package, User, Trophy } from "lucide-react";
+import playIcon from "../assets/play.png";
 
 type Tab = "home" | "product" | "play" | "profile" | "rewards";
 
@@ -63,9 +64,12 @@ export const Navigation: React.FC<NavigationProps> = ({
         className="flex flex-col items-center gap-1 w-14"
       >
         <img
-          src="https://uploads.onecompiler.io/44pbfr3gy/44pbfr8db/console.png"
-          alt="Play"
-          className={`w-6 h-6 object-contain ${activeTab === "play" ? "" : "grayscale opacity-60"}`}
+          src={playIcon}
+          alt=""
+          aria-hidden="true"
+          className={`w-6 h-6 object-contain transition-opacity ${
+            activeTab === "play" ? "opacity-100" : "opacity-45"
+          }`}
         />
         <span
           className={`text-[10px] mb-0.5 font-medium ${activeTab === "play" ? "text-[#6D28D9]" : "text-gray-500"}`}
