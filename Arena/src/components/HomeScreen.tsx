@@ -10,10 +10,12 @@ import {
   X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { auth } from "../firebase";
-import { useUserProfile, useTopPromotions, useAllUsers } from "../hooks/useFirebaseData";
+import { auth, rtdb } from "../firebase";
+import { ref, onValue } from "firebase/database";
+import { useUserProfile, useTopPromotions } from "../hooks/useFirebaseData";
 import { useNotifications } from "../hooks/useNotifications";
 import { playCoinSound, playNotificationSound } from "../utils/sounds";
+import coinIcon from "../assets/coin.png";
 
 interface HomeScreenProps {
   onNavigate: (page: string) => void;
@@ -60,6 +62,9 @@ const BANNERS = [
   },
 ];
 
+/** A banner as configured in the admin dashboard, overlaid on the defaults. */
+type Banner = (typeof BANNERS)[number] & { targetUrl?: string };
+
 export const HomeScreen: React.FC<HomeScreenProps> = ({
   onNavigate,
   onTabChange,
@@ -87,12 +92,40 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
   const userProfile = useUserProfile();
   const notifications = useNotifications();
+
+  // Admin-editable banners. Falls back to the built-in defaults until the
+  // admin saves something.
+  const [banners, setBanners] = useState<Banner[]>(BANNERS);
+  useEffect(() => {
+    const unsub = onValue(
+      ref(rtdb, "global/siteConfig/banners"),
+      (snap) => {
+        const val = snap.val();
+        if (!Array.isArray(val)) return;
+        const merged = BANNERS.map((base, i) => ({
+          ...base,
+          imageUrl: val[i]?.imageUrl || "",
+          targetUrl: val[i]?.targetUrl || "",
+        }));
+        if (merged.some((b) => b.imageUrl)) setBanners(merged);
+      },
+      console.error,
+    );
+    return () => unsub();
+  }, []);
   const visibleNotifications = notifications.filter((n) => !dismissedNotifs.includes(n.id));
   const unreadCount = visibleNotifications.length > 0 ? visibleNotifications.length : 0;
   
   const prevNotifIdsRef = useRef<string[]>([]);
   const isDataLoadedRef = useRef(false);
   const [showCongratsPopup, setShowCongratsPopup] = useState<{show: boolean, title: string, message: string, type: 'success' | 'error' | 'info' | 'warning'} | null>(null);
+  const popupTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (popupTimer.current) clearTimeout(popupTimer.current);
+    },
+    [],
+  );
 
   useEffect(() => {
     if (userProfile && !isDataLoadedRef.current) {
@@ -121,7 +154,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           type: (latestNotif.type as any) || 'info'
         });
         // Auto dismiss popup after 5 seconds
-        setTimeout(() => {
+        if (popupTimer.current) clearTimeout(popupTimer.current);
+        popupTimer.current = setTimeout(() => {
           setShowCongratsPopup(null);
         }, 5000);
       }
@@ -132,18 +166,15 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
 
   const coins = userProfile?.coins || 0;
-  
-  const allUsers = useAllUsers();
-  
-  // Calculate top 3 by coins for Top Promotion
-  const topPromoters = [...allUsers]
-    .filter(u => (u.coins || 0) > 0)
-    .sort((a, b) => (b.coins || 0) - (a.coins || 0))
-    .slice(0, 3);
+
+  // Read the small, purpose-built `topPromotions` node instead of pulling the
+  // entire users collection into every client (privacy + bandwidth + cost).
+  const promotions = useTopPromotions();
+  const topPromoters = promotions.slice(0, 3);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setActiveSlide((prev) => (prev + 1) % BANNERS.length);
+      setActiveSlide((prev) => (prev + 1) % banners.length);
     }, 5000);
     return () => clearInterval(timer);
   }, []);
@@ -220,7 +251,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         >
           <Bell className="w-5 h-5" />
           {unreadCount > 0 && (
-            <div className="absolute 1 top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></div>
+            <div className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></div>
           )}
         </button>
       </div>
@@ -238,7 +269,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               <Eye className="w-4 h-4" />
             </div>
             <div className="bg-white/20 px-3 py-1.5 rounded-full flex items-center gap-1.5 backdrop-blur-sm">
-              <span className="text-sm">🪙</span>
+              <img src={coinIcon} alt="" aria-hidden="true" className="w-4 h-4 object-contain" />
               <span className="text-sm font-semibold">{coins} Coins</span>
             </div>
           </div>
@@ -293,7 +324,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             className="flex h-full transition-transform duration-500 ease-in-out"
             style={{ transform: `translateX(-${activeSlide * 100}%)` }}
           >
-            {BANNERS.map((banner) => (
+            {banners.map((banner) => (
               <div
                 key={banner.id}
                 className={`min-w-full h-full relative ${banner.bgClass} p-5 flex items-center`}
@@ -343,6 +374,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   <div
                     className="absolute inset-0 cursor-pointer"
                     onClick={() => {
+                      if (banner.targetUrl) {
+                        window.open(banner.targetUrl, "_blank", "noopener,noreferrer");
+                        return;
+                      }
                       if (
                         banner.action === "promotion" ||
                         banner.action === "offers"
@@ -358,7 +393,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
           {/* Pagination Indicators */}
           <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-20">
-            {BANNERS.map((_, idx) => (
+            {banners.map((_, idx) => (
               <div
                 key={idx}
                 onClick={() => setActiveSlide(idx)}
@@ -386,13 +421,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
         <div className="bg-white rounded-3xl p-2 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100">
           {topPromoters.length > 0 ? (
-            topPromoters.map((user, idx) => {
-              const name = user.displayName || user.bankDetails?.mobileNumber || user.email?.split("@")[0] || `Player ${user.uid.slice(0,5)}`;
-              const cup = idx === 0 ? "🏆" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : "";
-              
+            topPromoters.map((promo, idx) => {
+              const name = promo.name || `Player ${idx + 1}`;
+              const cup = promo.cup || (idx === 0 ? "🏆" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : "");
+
               return (
                 <div
-                  key={user.uid}
+                  key={promo.id ?? idx}
                   className="flex justify-between items-center py-3 px-2 sm:py-4 sm:px-4 border-b border-gray-50 last:border-0"
                 >
                   <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
@@ -410,7 +445,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   </div>
                   <div className="flex flex-col items-end shrink-0 ml-1">
                     <div className="text-green-600 font-bold text-[13px] sm:text-[16px] flex items-center gap-1 mt-0.5">
-                      ₹{idx === 0 ? 100 : idx === 1 ? 50 : idx === 2 ? 25 : 0}
+                      ₹{promo.amount ?? 0}
                     </div>
                   </div>
                 </div>

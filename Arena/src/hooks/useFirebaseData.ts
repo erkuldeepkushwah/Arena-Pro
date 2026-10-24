@@ -195,15 +195,12 @@ export const useTopPromotions = () => {
       ref(rtdb, "topPromotions"),
       (snap) => {
         const val = snap.val();
+        // Empty until the admin publishes a leaderboard from the dashboard —
+        // better than showing invented names as if they were real players.
         if (val && typeof val === 'object') {
           setPromotions(Object.values(val));
         } else {
-          // Default mock data if none in rtdb
-          setPromotions([
-            { id: 1, name: "Rohit Sharma", amount: 100, cup: "🏆" },
-            { id: 2, name: "Ankit Verma", amount: 50, cup: "🥈" },
-            { id: 3, name: "Vikas Singh", amount: 25, cup: "🥉" },
-          ]);
+          setPromotions([]);
         }
       },
       console.error,

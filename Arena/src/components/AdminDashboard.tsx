@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   ChevronDown,
   ChevronUp,
@@ -9,7 +9,6 @@ import {
   Play,
   Check,
 } from "lucide-react";
-import { MOCK_PRODUCTS } from "@/src/constants";
 import {
   saveCricketMatches,
   saveQuizConfig,
@@ -28,7 +27,7 @@ import {
 } from "../hooks/useFirebaseData";
 import { saveEarnTasks } from "../gameplayConfig";
 import { rtdb } from "../firebase";
-import { ref, update, get } from "firebase/database";
+import { ref, update, get, set, onValue, increment, runTransaction } from "firebase/database";
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -70,109 +69,209 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
       });
       if (Object.keys(updates).length > 0) {
         await update(ref(rtdb), updates);
-        alert(`Distributed ${entryFee * 2} coins to ${distributedCount} winners!`);
+        notify(`Distributed ${entryFee * 2} coins to ${distributedCount} winners!`);
       } else {
-        alert("Recorded winners. No users found to receive reward, or already distributed.");
+        notify("Recorded winners. No users found to receive reward, or already distributed.");
       }
     } catch (error) {
       console.error(error);
-      alert("Failed to distribute winnings");
+      notify("Failed to distribute winnings");
     }
   };
 
   const handleWithdrawAction = async (requestId: string, userId: string, amount: number, status: "approved" | "rejected") => {
+    if (!userId) {
+      notify("User ID is missing for this withdrawal request.", "error");
+      return;
+    }
+    const requestRef = ref(rtdb, `withdrawalRequests/${requestId}`);
     try {
-      if (!userId) {
-        alert("Error: User ID is missing for this withdrawal request!");
+      // Only act while the request is still pending. Without this check a
+      // double-click (or two admins working at once) refunds/approves twice.
+      const snap = await get(requestRef);
+      if (!snap.exists()) {
+        notify("This request no longer exists.", "error");
         return;
       }
-      if (status === "rejected") {
-        const userRef = ref(rtdb, `users/${userId}`);
-        const userSnap = await get(userRef);
-        const currentBalance = Number(userSnap.val()?.balance || 0);
-        const newBalance = currentBalance + Number(amount);
-        await update(userRef, { balance: newBalance });
-        alert(`Refunded ₹${Number(amount)} back to user. New balance: ${newBalance}`);
+      const current = snap.val();
+      if (current?.status && current.status !== "pending") {
+        notify(`Already ${current.status}.`, "info");
+        return;
       }
-      await update(ref(rtdb, `withdrawalRequests/${requestId}`), {
-        status,
-        handledAt: Date.now(),
-      });
-      alert(`Withdrawal request marked as ${status}`);
+
+      if (status === "rejected") {
+        // Transaction instead of read-then-write, so concurrent wallet
+        // changes are not silently lost.
+        await runTransaction(
+          ref(rtdb, `users/${userId}/balance`),
+          (balance) => Number(balance || 0) + Number(amount),
+        );
+      }
+      await update(requestRef, { status, handledAt: Date.now() });
+      notify(
+        status === "approved"
+          ? `Withdrawal of \u20b9${Number(amount)} approved.`
+          : `Withdrawal rejected \u2014 \u20b9${Number(amount)} refunded.`,
+        status === "approved" ? "success" : "info",
+      );
     } catch (error) {
       console.error(error);
-      alert("Failed to process withdrawal: " + String(error));
+      notify("Failed to process withdrawal.", "error");
     }
   };
 
   const handleRechargeAction = async (requestId: string, userId: string, amount: number, status: "approved" | "rejected") => {
+    if (!userId) {
+      notify("User ID is missing for this recharge request.", "error");
+      return;
+    }
+    const requestRef = ref(rtdb, `rechargeRequests/${requestId}`);
     try {
-      if (!userId) {
-        alert("Error: User ID is missing for this request!");
+      const snap = await get(requestRef);
+      if (!snap.exists()) {
+        notify("This request no longer exists.", "error");
         return;
       }
-      if (status === "approved") {
-        const userRef = ref(rtdb, `users/${userId}`);
-        const userSnap = await get(userRef);
-        const currentBalance = Number(userSnap.val()?.balance || 0);
-        const newBalance = currentBalance + Number(amount);
-        
-        await update(userRef, { balance: newBalance });
-        alert(`Successfully added ${Number(amount)} to user. New balance: ${newBalance}`);
+      const current = snap.val();
+      if (current?.status && current.status !== "pending") {
+        notify(`Already ${current.status}.`, "info");
+        return;
       }
 
-      await update(ref(rtdb, `rechargeRequests/${requestId}`), {
-        status,
-        handledAt: Date.now(),
-      });
-      alert(`Recharge request marked as ${status}`);
+      if (status === "approved") {
+        await runTransaction(
+          ref(rtdb, `users/${userId}/balance`),
+          (balance) => Number(balance || 0) + Number(amount),
+        );
+      }
+      await update(requestRef, { status, handledAt: Date.now() });
+      notify(
+        status === "approved"
+          ? `\u20b9${Number(amount)} added to the user's wallet.`
+          : "Recharge request rejected.",
+        status === "approved" ? "success" : "info",
+      );
     } catch (error) {
       console.error(error);
-      alert("Failed to process recharge: " + String(error));
+      notify("Failed to process recharge.", "error");
     }
   };
 
   const [products, _setProducts] = useState<any[]>([]);
-  const setProducts = (newProducts: any[]) => {
-    _setProducts(newProducts);
-    import("../gameplayConfig").then(({ saveProducts, saveWelfareProducts }) => {
-      saveProducts(newProducts.filter(p => !p.category || p.category === 'daily'));
-      saveWelfareProducts(newProducts.filter(p => p.category === 'welfare'));
-    });
-  };
   const [cricketMatches, _setCricketMatches] = useState<any[]>([]);
-  const setCricketMatches = (val: any[]) => {
-    _setCricketMatches(val);
-    saveCricketMatches(val);
-  };
   const [earnTasks, setEarnTasks] = useState<any[]>([]);
   const [quizConfig, _setQuizConfig] = useState<any>({
     entryFee: 10,
     questions: [],
   });
-  const setQuizConfig = (val: any) => {
-    _setQuizConfig(val);
-    saveQuizConfig(val);
-  };
   const [tournaments, _setTournaments] = useState<any[]>([]);
-  const setTournaments = (val: any[]) => {
-    _setTournaments(val);
-    saveMatchRooms(val);
+
+  // Small inline toast, so admin feedback never blocks the UI thread the way
+  // a browser alert does.
+  const [toast, setToast] = useState<{ msg: string; type: "success" | "error" | "info" } | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const notify = (msg: string, type: "success" | "error" | "info" = "info") => {
+    setToast({ msg, type });
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), 3500);
+  };
+  useEffect(
+    () => () => {
+      if (toastTimer.current) clearTimeout(toastTimer.current);
+    },
+    [],
+  );
+
+  // Editing a product/match used to hit Realtime Database on every keystroke.
+  // Coalesce those writes into one per burst.
+  const pendingWrites = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  const debouncedSave = (key: string, fn: () => Promise<unknown> | void) => {
+    if (pendingWrites.current[key]) clearTimeout(pendingWrites.current[key]);
+    pendingWrites.current[key] = setTimeout(() => {
+      Promise.resolve(fn()).catch(console.error);
+    }, 500);
+  };
+  useEffect(
+    () => () => {
+      Object.values(pendingWrites.current).forEach(clearTimeout);
+    },
+    [],
+  );
+
+  const setProducts = (next: any[]) => {
+    _setProducts(next);
+    debouncedSave("products", async () => {
+      const { saveProducts, saveWelfareProducts } = await import("../gameplayConfig");
+      await Promise.all([
+        saveProducts(next.filter((p) => !p.category || p.category === "daily")),
+        saveWelfareProducts(next.filter((p) => p.category === "welfare")),
+      ]);
+    });
+  };
+  const setCricketMatches = (next: any[]) => {
+    _setCricketMatches(next);
+    debouncedSave("cricket", () => saveCricketMatches(next));
+  };
+  const setTournaments = (next: any[]) => {
+    _setTournaments(next);
+    debouncedSave("tournaments", () => saveMatchRooms(next));
+  };
+  const setQuizConfig = (next: any) => {
+    _setQuizConfig(next);
+    debouncedSave("quiz", () => saveQuizConfig(next));
+  };
+
+  /** Immutably replace one item of a list. Never mutates state objects. */
+  const patchAt = <T,>(list: T[], index: number, patch: Partial<T>): T[] =>
+    list.map((item, i) => (i === index ? { ...item, ...patch } : item));
+
+  // ---- Site config (redeem code / payment QR / banners) -------------------
+  const [siteCfg, setSiteCfg] = useState<any>({
+    redeemCode: "",
+    redeemAmount: "",
+    paymentQr: "",
+    banners: [],
+  });
+  useEffect(() => {
+    const unsub = onValue(
+      ref(rtdb, "global/siteConfig"),
+      (snap) => {
+        if (snap.exists()) setSiteCfg((prev: any) => ({ ...prev, ...snap.val() }));
+      },
+      console.error,
+    );
+    return () => unsub();
+  }, []);
+
+  const saveSiteConfig = async (patch: Record<string, any>) => {
+    const next = { ...siteCfg, ...patch };
+    setSiteCfg(next);
+    try {
+      await set(ref(rtdb, "global/siteConfig"), next);
+      notify("Saved.", "success");
+    } catch (error) {
+      console.error(error);
+      notify("Could not save.", "error");
+    }
+  };
+
+  const updateBanner = (index: number, patch: { imageUrl?: string; targetUrl?: string }) => {
+    const banners = [...(siteCfg.banners || [])];
+    while (banners.length < 3) banners.push({});
+    banners[index] = { ...banners[index], ...patch };
+    setSiteCfg((prev: any) => ({ ...prev, banners }));
   };
 
   useEffect(() => {
-    if (firestoreEarnTasks && firestoreEarnTasks.length > 0)
-      setEarnTasks(firestoreEarnTasks);
+    if (firestoreEarnTasks) setEarnTasks(firestoreEarnTasks);
   }, [firestoreEarnTasks]);
 
   useEffect(() => {
-    if (firestoreCricket && firestoreCricket.length > 0)
-      _setCricketMatches(firestoreCricket);
+    if (firestoreCricket) _setCricketMatches(firestoreCricket);
   }, [firestoreCricket]);
 
   useEffect(() => {
-    if (firestoreTournaments && firestoreTournaments.length > 0)
-      _setTournaments(firestoreTournaments);
+    if (firestoreTournaments) _setTournaments(firestoreTournaments);
   }, [firestoreTournaments]);
 
   useEffect(() => {
@@ -209,6 +308,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
 
   return (
     <div className="min-h-screen bg-[#f4f5f7] pb-10 text-[#1f2937]">
+      {toast && (
+        <div
+          role="status"
+          className={`fixed bottom-4 left-1/2 -translate-x-1/2 z-[999] px-4 py-2.5 rounded-lg shadow-lg text-white text-[13px] font-medium max-w-[90%] text-center whitespace-pre-line ${
+            toast.type === "success" ? "bg-green-600" : toast.type === "error" ? "bg-red-600" : "bg-gray-800"
+          }`}
+        >
+          {toast.msg}
+        </div>
+      )}
       {/* Header */}
       <div className="flex justify-between items-center bg-white p-4 shadow-sm border-b border-gray-200 z-10 sticky top-0">
         <h1 className="text-[22px] font-bold text-[#1f2937] tracking-tight">
@@ -270,7 +379,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                 <div key={req.id} className="bg-white p-3 rounded shadow-sm border border-gray-200">
                   <div className="flex justify-between items-start mb-2">
                     <div>
-                      <p className="font-bold text-[14px]">UID: {req.uid.slice(0, 8)}...</p>
+                      <p className="font-bold text-[14px]">UID: {(req.uid || req.userId || "—").slice(0, 8)}...</p>
                       <p className="text-[#16a34a] font-bold text-[15px]">Amount: ₹{req.amount}</p>
                     </div>
                     <span className="bg-yellow-100 text-yellow-800 text-[10px] font-bold px-2 py-1 rounded uppercase">Pending</span>
@@ -324,13 +433,26 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                     <div className="space-y-3">
                       <input
                         className="w-full border border-gray-200 rounded p-2.5 text-[15px] focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                        defaultValue="POZZY10"
+                        value={siteCfg.redeemCode || ""}
+                        onChange={(e) => setSiteCfg((prev: any) => ({ ...prev, redeemCode: e.target.value }))}
+                        placeholder="Redeem code"
                       />
                       <input
+                        type="number"
                         className="w-full border border-gray-200 rounded p-2.5 text-[15px] focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                        defaultValue="10"
+                        value={siteCfg.redeemAmount || ""}
+                        onChange={(e) => setSiteCfg((prev: any) => ({ ...prev, redeemAmount: e.target.value }))}
+                        placeholder="Reward amount"
                       />
-                      <button className="w-full bg-[#16a34a] hover:bg-green-700 text-white font-medium py-2.5 rounded text-[15px] transition-colors shadow-sm">
+                      <button
+                        onClick={() =>
+                          saveSiteConfig({
+                            redeemCode: siteCfg.redeemCode || "",
+                            redeemAmount: siteCfg.redeemAmount || "",
+                          })
+                        }
+                        className="w-full bg-[#16a34a] hover:bg-green-700 text-white font-medium py-2.5 rounded text-[15px] transition-colors shadow-sm"
+                      >
                         Update Code
                       </button>
                     </div>
@@ -338,7 +460,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
 
                   <div className="border-t border-gray-200 pt-7">
                     <h3 className="font-bold text-[#4b5563] text-[15px] mb-3">
-                      System Date: 2025-10-10
+                      System Date: {new Date().toISOString().slice(0, 10)}
                     </h3>
                     <div className="flex gap-2">
                       <button 
@@ -366,13 +488,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             });
                             if (Object.keys(updates).length > 0) {
                               await update(ref(rtdb), updates);
-                              alert("Advanced 1 Day. Investments progressed.");
+                              notify("Advanced 1 Day. Investments progressed.");
                             } else {
-                              alert("Advanced. No active investments.");
+                              notify("Advanced. No active investments.");
                             }
                           } catch (e) {
                             console.error(e);
-                            alert("Failed to advance date.");
+                            notify("Failed to advance date.");
                           }
                         }}
                         className="flex-1 bg-[#ea580c] text-white font-bold py-3 px-2 rounded flex items-center justify-center text-[13px] shadow-sm active:bg-orange-700"
@@ -388,7 +510,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                               .slice(0, 10);
 
                             if (topUsers.length === 0) {
-                              alert("No users found with >0 coins to declare weekly results.");
+                              notify("No users found with >0 coins to declare weekly results.");
                               return;
                             }
 
@@ -417,6 +539,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                               }
                             }
 
+                            // Publish a small public leaderboard node, so clients can
+                            // render "Top Promotion" without reading every user record.
+                            updates["topPromotions"] = Object.fromEntries(
+                              winnersInfo.slice(0, 3).map((w) => [
+                                w.rank,
+                                {
+                                  id: w.rank,
+                                  name: w.name,
+                                  amount: w.prize,
+                                  cup: w.rank === 1 ? "🏆" : w.rank === 2 ? "🥈" : "🥉",
+                                },
+                              ]),
+                            );
+
                             // Optional: Reset coins for next week, but we'll leave it as is so they don't lose them entirely unless requested
                             if (Object.keys(updates).length > 0) {
                               await update(ref(rtdb), updates);
@@ -426,11 +562,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                 message += `Rank ${w.rank}: ${w.name} - Won ₹${w.prize}\n`;
                               });
                               message += "\nAmounts have been added to their wallets.";
-                              alert(message);
+                              notify(message);
                             }
                           } catch (e) {
                             console.error(e);
-                            alert("Failed to declare weekly results.");
+                            notify("Failed to declare weekly results.");
                           }
                         }}
                         className="flex-1 bg-[#eab308] text-white font-bold py-3 px-2 rounded flex flex-col items-center justify-center gap-1 text-[13px] shadow-sm active:bg-yellow-600">
@@ -455,10 +591,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                           if (Object.keys(updates).length > 0) {
                             await update(ref(rtdb), updates);
                           }
-                          alert("All user tasks have been renewed (reset)!");
+                          notify("All user tasks have been renewed (reset)!");
                         } catch (e) {
                           console.error(e);
-                          alert("Failed to renew tasks.");
+                          notify("Failed to renew tasks.");
                         }
                       }}
                       className="w-full bg-[#f59e0b] hover:bg-orange-600 text-white font-bold py-3 mt-4 rounded flex items-center justify-center text-sm shadow-sm transition-colors"
@@ -533,10 +669,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                           className="w-full border border-gray-200 rounded p-2.5 bg-white text-[15px] focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                           value={product.category || 'daily'}
                           onChange={(e) => {
-                            const newProducts = [...products];
-                            const idx = newProducts.findIndex(p => p.id === product.id);
-                            newProducts[idx].category = e.target.value;
-                            setProducts(newProducts);
+                            setProducts(products.map((p) => (p.id === product.id ? { ...p, category: e.target.value } : p)));
                           }}
                         >
                           <option value="daily">Daily Plan</option>
@@ -552,17 +685,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             className="w-full border border-gray-200 rounded p-2.5 text-[15px] focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white"
                             value={product.countdownHours || ""}
                             onChange={(e) => {
-                              const newProducts = [...products];
-                              const idx = newProducts.findIndex(p => p.id === product.id);
                               const val = e.target.value;
-                              if (val) {
-                                newProducts[idx].countdownHours = val;
-                                newProducts[idx].endTime = Date.now() + parseInt(val) * 3600000;
-                              } else {
-                                delete newProducts[idx].countdownHours;
-                                delete newProducts[idx].endTime;
-                              }
-                              setProducts(newProducts);
+                              setProducts(
+                                products.map((p) => {
+                                  if (p.id !== product.id) return p;
+                                  const { countdownHours, endTime, ...rest } = p;
+                                  return val
+                                    ? { ...rest, countdownHours: val, endTime: Date.now() + parseInt(val) * 3600000 }
+                                    : rest;
+                                }),
+                              );
                             }}
                           >
                             <option value="">None</option>
@@ -582,10 +714,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                           className="w-full border border-gray-200 rounded p-2.5 text-[15px] focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                           value={product.title}
                           onChange={(e) => {
-                            const newProducts = [...products];
-                            const idx = newProducts.findIndex(p => p.id === product.id);
-                            newProducts[idx].title = e.target.value;
-                            setProducts(newProducts);
+                            setProducts(products.map((p) => (p.id === product.id ? { ...p, title: e.target.value } : p)));
                           }}
                         />
                       </div>
@@ -597,10 +726,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                           className="w-full border border-gray-200 rounded p-2.5 text-[15px] focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                           value={product.thumbnail}
                           onChange={(e) => {
-                            const newProducts = [...products];
-                            const idx = newProducts.findIndex(p => p.id === product.id);
-                            newProducts[idx].thumbnail = e.target.value;
-                            setProducts(newProducts);
+                            setProducts(products.map((p) => (p.id === product.id ? { ...p, thumbnail: e.target.value } : p)));
                           }}
                         />
                       </div>
@@ -614,10 +740,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             className="w-full border border-gray-200 rounded p-2.5 text-[15px] focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                             value={product.price}
                             onChange={(e) => {
-                              const newProducts = [...products];
-                              const idx = newProducts.findIndex(p => p.id === product.id);
-                              newProducts[idx].price = Number(e.target.value);
-                              setProducts(newProducts);
+                              setProducts(products.map((p) => (p.id === product.id ? { ...p, price: Number(e.target.value) } : p)));
                             }}
                           />
                         </div>
@@ -630,10 +753,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             className="w-full border border-gray-200 rounded p-2.5 text-[15px] focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                             value={product.validDays}
                             onChange={(e) => {
-                              const newProducts = [...products];
-                              const idx = newProducts.findIndex(p => p.id === product.id);
-                              newProducts[idx].validDays = Number(e.target.value);
-                              setProducts(newProducts);
+                              setProducts(products.map((p) => (p.id === product.id ? { ...p, validDays: Number(e.target.value) } : p)));
                             }}
                           />
                         </div>
@@ -646,10 +766,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             className="w-full border border-gray-200 rounded p-2.5 text-[15px] focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                             value={product.totalIncome}
                             onChange={(e) => {
-                              const newProducts = [...products];
-                              const idx = newProducts.findIndex(p => p.id === product.id);
-                              newProducts[idx].totalIncome = Number(e.target.value);
-                              setProducts(newProducts);
+                              setProducts(products.map((p) => (p.id === product.id ? { ...p, totalIncome: Number(e.target.value) } : p)));
                             }}
                           />
                         </div>
@@ -735,9 +852,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                           className="border border-gray-300 rounded p-1 text-sm font-bold w-1/2"
                           value={match.title}
                           onChange={(e) => {
-                            const n = [...cricketMatches];
-                            n[index].title = e.target.value;
-                            setCricketMatches(n);
+                            setCricketMatches(patchAt(cricketMatches, index, { title: e.target.value }));
                           }}
                           onBlur={() => {
                             saveCricketMatches(cricketMatches);
@@ -750,10 +865,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                           className={`text-xs font-bold px-2 py-1 rounded border ${match.status === "live" ? "bg-red-50 text-red-600 border-red-200" : match.status === "ended" ? "bg-gray-100 text-gray-600 border-gray-300" : "bg-purple-50 text-purple-600 border-purple-200"}`}
                           value={match.status}
                           onChange={(e) => {
-                            const n = [...cricketMatches];
-                            n[index].status = e.target.value;
-                            setCricketMatches(n);
-                            saveCricketMatches(n);
+                            setCricketMatches(patchAt(cricketMatches, index, { status: e.target.value }));
                             window.dispatchEvent(
                               new Event("admin_config_updated"),
                             );
@@ -774,10 +886,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             className="w-full border border-gray-200 rounded p-1.5 text-sm uppercase"
                             value={match.team1.short}
                             onChange={(e) => {
-                              const n = [...cricketMatches];
-                              n[index].team1.short = e.target.value;
-                              n[index].team1.name = e.target.value;
-                              setCricketMatches(n);
+                              setCricketMatches(
+                                patchAt(cricketMatches, index, {
+                                  team1: {
+                                    ...cricketMatches[index].team1,
+                                    short: e.target.value,
+                                    name: e.target.value,
+                                  },
+                                }),
+                              );
                             }}
                             onBlur={() => {
                               saveCricketMatches(cricketMatches);
@@ -795,10 +912,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             className="w-full border border-gray-200 rounded p-1.5 text-sm uppercase"
                             value={match.team2.short}
                             onChange={(e) => {
-                              const n = [...cricketMatches];
-                              n[index].team2.short = e.target.value;
-                              n[index].team2.name = e.target.value;
-                              setCricketMatches(n);
+                              setCricketMatches(
+                                patchAt(cricketMatches, index, {
+                                  team2: {
+                                    ...cricketMatches[index].team2,
+                                    short: e.target.value,
+                                    name: e.target.value,
+                                  },
+                                }),
+                              );
                             }}
                             onBlur={() => {
                               saveCricketMatches(cricketMatches);
@@ -820,9 +942,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             placeholder="https://..."
                             value={match.team1.logoUrl || ""}
                             onChange={(e) => {
-                              const n = [...cricketMatches];
-                              n[index].team1.logoUrl = e.target.value;
-                              setCricketMatches(n);
+                              setCricketMatches(patchAt(cricketMatches, index, { team1: { ...(cricketMatches[index].team1 || {}), logoUrl: e.target.value } }));
                             }}
                             onBlur={() => {
                               saveCricketMatches(cricketMatches);
@@ -841,9 +961,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             placeholder="https://..."
                             value={match.team2.logoUrl || ""}
                             onChange={(e) => {
-                              const n = [...cricketMatches];
-                              n[index].team2.logoUrl = e.target.value;
-                              setCricketMatches(n);
+                              setCricketMatches(patchAt(cricketMatches, index, { team2: { ...(cricketMatches[index].team2 || {}), logoUrl: e.target.value } }));
                             }}
                             onBlur={() => {
                               saveCricketMatches(cricketMatches);
@@ -866,9 +984,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             className="w-full border border-gray-200 rounded p-1.5 text-sm"
                             value={match.time}
                             onChange={(e) => {
-                              const n = [...cricketMatches];
-                              n[index].time = e.target.value;
-                              setCricketMatches(n);
+                              setCricketMatches(patchAt(cricketMatches, index, { time: e.target.value }));
                             }}
                             onBlur={() => {
                               saveCricketMatches(cricketMatches);
@@ -887,9 +1003,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             className="w-full border border-gray-200 rounded p-1.5 text-sm"
                             value={match.entryFee}
                             onChange={(e) => {
-                              const n = [...cricketMatches];
-                              n[index].entryFee = Number(e.target.value);
-                              setCricketMatches(n);
+                              setCricketMatches(patchAt(cricketMatches, index, { entryFee: Number(e.target.value) }));
                             }}
                             onBlur={() => {
                               saveCricketMatches(cricketMatches);
@@ -932,12 +1046,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                               placeholder={`${match.team1.short} Score`}
                               value={match.liveDetails?.team1Score || ""}
                               onChange={(e) => {
-                                const n = [...cricketMatches];
-                                if (!n[index].liveDetails)
-                                  n[index].liveDetails = {};
-                                n[index].liveDetails.team1Score =
-                                  e.target.value;
-                                setCricketMatches(n);
+                                setCricketMatches(
+                                  patchAt(cricketMatches, index, {
+                                    liveDetails: {
+                                      ...(cricketMatches[index].liveDetails || {}),
+                                      team1Score: e.target.value,
+                                    },
+                                  }),
+                                );
                               }}
                               onBlur={() => {
                                 saveCricketMatches(cricketMatches);
@@ -951,12 +1067,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                               placeholder={`${match.team2.short} Score`}
                               value={match.liveDetails?.team2Score || ""}
                               onChange={(e) => {
-                                const n = [...cricketMatches];
-                                if (!n[index].liveDetails)
-                                  n[index].liveDetails = {};
-                                n[index].liveDetails.team2Score =
-                                  e.target.value;
-                                setCricketMatches(n);
+                                setCricketMatches(
+                                  patchAt(cricketMatches, index, {
+                                    liveDetails: {
+                                      ...(cricketMatches[index].liveDetails || {}),
+                                      team2Score: e.target.value,
+                                    },
+                                  }),
+                                );
                               }}
                               onBlur={() => {
                                 saveCricketMatches(cricketMatches);
@@ -977,10 +1095,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                           <div className="flex gap-2">
                             <button
                               onClick={() => {
-                                const n = [...cricketMatches];
-                                n[index].winningTeam = match.team1.short;
-                                setCricketMatches(n);
-                                saveCricketMatches(n);
+                                setCricketMatches(patchAt(cricketMatches, index, { winningTeam: match.team1.short }));
                                 handleDistributeCricketWinnings(match.id, match.team1.short, match.entryFee);
                                 window.dispatchEvent(
                                   new Event("admin_config_updated"),
@@ -992,10 +1107,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             </button>
                             <button
                               onClick={() => {
-                                const n = [...cricketMatches];
-                                n[index].winningTeam = match.team2.short;
-                                setCricketMatches(n);
-                                saveCricketMatches(n);
+                                setCricketMatches(patchAt(cricketMatches, index, { winningTeam: match.team2.short }));
                                 handleDistributeCricketWinnings(match.id, match.team2.short, match.entryFee);
                                 window.dispatchEvent(
                                   new Event("admin_config_updated"),
@@ -1132,10 +1244,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                           className="border border-gray-300 rounded p-1 text-sm font-bold w-1/3"
                           value={t.game}
                           onChange={(e) => {
-                            const n = [...tournaments];
-                            n[index].game = e.target.value;
-                            setTournaments(n);
-                            saveMatchRooms(n);
+                            setTournaments(patchAt(tournaments, index, { game: e.target.value }));
                             window.dispatchEvent(
                               new Event("admin_config_updated"),
                             );
@@ -1151,10 +1260,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                           className={`text-xs font-bold px-2 py-1 rounded border ${t.status === "live" ? "bg-red-50 text-red-600 border-red-200" : t.status === "ended" ? "bg-gray-100 text-gray-600 border-gray-300" : "bg-purple-50 text-purple-600 border-purple-200"}`}
                           value={t.status}
                           onChange={(e) => {
-                            const n = [...tournaments];
-                            n[index].status = e.target.value;
-                            setTournaments(n);
-                            saveMatchRooms(n);
+                            setTournaments(patchAt(tournaments, index, { status: e.target.value }));
                             window.dispatchEvent(
                               new Event("admin_config_updated"),
                             );
@@ -1173,10 +1279,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             placeholder="Match Title"
                             value={t.title}
                             onChange={(e) => {
-                              const n = [...tournaments];
-                              n[index].title = e.target.value;
-                              setTournaments(n);
-                              saveMatchRooms(n);
+                              setTournaments(patchAt(tournaments, index, { title: e.target.value }));
                               window.dispatchEvent(
                                 new Event("admin_config_updated"),
                               );
@@ -1186,10 +1289,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             className="border border-gray-200 p-1.5 text-xs rounded"
                             value={t.matchType}
                             onChange={(e) => {
-                              const n = [...tournaments];
-                              n[index].matchType = e.target.value;
-                              setTournaments(n);
-                              saveMatchRooms(n);
+                              setTournaments(patchAt(tournaments, index, { matchType: e.target.value }));
                               window.dispatchEvent(
                                 new Event("admin_config_updated"),
                               );
@@ -1204,10 +1304,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             type="date"
                             value={t.date}
                             onChange={(e) => {
-                              const n = [...tournaments];
-                              n[index].date = e.target.value;
-                              setTournaments(n);
-                              saveMatchRooms(n);
+                              setTournaments(patchAt(tournaments, index, { date: e.target.value }));
                               window.dispatchEvent(
                                 new Event("admin_config_updated"),
                               );
@@ -1218,10 +1315,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             type="time"
                             value={t.time}
                             onChange={(e) => {
-                              const n = [...tournaments];
-                              n[index].time = e.target.value;
-                              setTournaments(n);
-                              saveMatchRooms(n);
+                              setTournaments(patchAt(tournaments, index, { time: e.target.value }));
                               window.dispatchEvent(
                                 new Event("admin_config_updated"),
                               );
@@ -1231,10 +1325,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             className="border border-gray-200 p-1.5 text-xs rounded bg-white text-gray-700 h-8"
                             value={t.map}
                             onChange={(e) => {
-                              const n = [...tournaments];
-                              n[index].map = e.target.value;
-                              setTournaments(n);
-                              saveMatchRooms(n);
+                              setTournaments(patchAt(tournaments, index, { map: e.target.value }));
                               window.dispatchEvent(
                                 new Event("admin_config_updated"),
                               );
@@ -1255,19 +1346,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             placeholder="Total Slots"
                             value={t.totalSlots}
                             onChange={(e) => {
-                              const n = [...tournaments];
-                              n[index].totalSlots = Number(e.target.value);
-                              const E = n[index].entryFee || 0;
-                              const N = n[index].totalSlots || 0;
-                              if (E > 0 && N > 1) {
-                                const T = E * N;
-                                n[index].prizePool = Math.floor(T * 0.2);
-                                n[index].perKill = Math.floor(
-                                  (T * 0.3) / (N - 1),
-                                );
-                              }
-                              setTournaments(n);
-                              saveMatchRooms(n);
+                              const totalSlots = Number(e.target.value);
+                              const E = tournaments[index].entryFee || 0;
+                              const N = totalSlots || 0;
+                              setTournaments(
+                                patchAt(tournaments, index, {
+                                  totalSlots,
+                                  ...(E > 0 && N > 1
+                                    ? {
+                                        prizePool: Math.floor(E * N * 0.2),
+                                        perKill: Math.floor((E * N * 0.3) / (N - 1)),
+                                      }
+                                    : {}),
+                                }),
+                              );
                               window.dispatchEvent(
                                 new Event("admin_config_updated"),
                               );
@@ -1287,19 +1379,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                               className="w-full border border-gray-200 rounded p-1 text-xs"
                               value={t.entryFee}
                               onChange={(e) => {
-                                const n = [...tournaments];
-                                n[index].entryFee = Number(e.target.value);
-                                const E = n[index].entryFee || 0;
-                                const N = n[index].totalSlots || 0;
-                                if (E > 0 && N > 1) {
-                                  const T = E * N;
-                                  n[index].prizePool = Math.floor(T * 0.2);
-                                  n[index].perKill = Math.floor(
-                                    (T * 0.3) / (N - 1),
-                                  );
-                                }
-                                setTournaments(n);
-                                saveMatchRooms(n);
+                                const entryFee = Number(e.target.value);
+                                const E = entryFee || 0;
+                                const N = tournaments[index].totalSlots || 0;
+                                setTournaments(
+                                  patchAt(tournaments, index, {
+                                    entryFee,
+                                    ...(E > 0 && N > 1
+                                      ? {
+                                          prizePool: Math.floor(E * N * 0.2),
+                                          perKill: Math.floor((E * N * 0.3) / (N - 1)),
+                                        }
+                                      : {}),
+                                  }),
+                                );
                                 window.dispatchEvent(
                                   new Event("admin_config_updated"),
                                 );
@@ -1315,10 +1408,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                               className="w-full border border-gray-200 rounded p-1 text-xs"
                               value={t.perKill}
                               onChange={(e) => {
-                                const n = [...tournaments];
-                                n[index].perKill = Number(e.target.value);
-                                setTournaments(n);
-                                saveMatchRooms(n);
+                                setTournaments(patchAt(tournaments, index, { perKill: Number(e.target.value) }));
                                 window.dispatchEvent(
                                   new Event("admin_config_updated"),
                                 );
@@ -1334,10 +1424,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                               className="w-full border border-gray-200 rounded p-1 text-xs"
                               value={t.prizePool}
                               onChange={(e) => {
-                                const n = [...tournaments];
-                                n[index].prizePool = Number(e.target.value);
-                                setTournaments(n);
-                                saveMatchRooms(n);
+                                setTournaments(patchAt(tournaments, index, { prizePool: Number(e.target.value) }));
                                 window.dispatchEvent(
                                   new Event("admin_config_updated"),
                                 );
@@ -1375,12 +1462,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                               placeholder="Room ID"
                               value={t.roomDetails?.id || ""}
                               onChange={(e) => {
-                                const n = [...tournaments];
-                                if (!n[index].roomDetails)
-                                  n[index].roomDetails = { id: "", password: "" };
-                                n[index].roomDetails.id = e.target.value;
-                                setTournaments(n);
-                                saveMatchRooms(n);
+                                setTournaments(
+                                  patchAt(tournaments, index, {
+                                    roomDetails: {
+                                      ...{ id: "", password: "" },
+                                      ...(tournaments[index].roomDetails || {}),
+                                      id: e.target.value,
+                                    },
+                                  }),
+                                );
                                 window.dispatchEvent(
                                   new Event("admin_config_updated"),
                                 );
@@ -1391,12 +1481,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                               placeholder="Password"
                               value={t.roomDetails?.password || ""}
                               onChange={(e) => {
-                                const n = [...tournaments];
-                                if (!n[index].roomDetails)
-                                  n[index].roomDetails = { id: "", password: "" };
-                                n[index].roomDetails.password = e.target.value;
-                                setTournaments(n);
-                                saveMatchRooms(n);
+                                setTournaments(
+                                  patchAt(tournaments, index, {
+                                    roomDetails: {
+                                      ...{ id: "", password: "" },
+                                      ...(tournaments[index].roomDetails || {}),
+                                      password: e.target.value,
+                                    },
+                                  }),
+                                );
                                 window.dispatchEvent(
                                   new Event("admin_config_updated"),
                                 );
@@ -1408,10 +1501,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             placeholder="Live Stream URL (optional)"
                             value={t.streamLink || ""}
                             onChange={(e) => {
-                              const n = [...tournaments];
-                              n[index].streamLink = e.target.value;
-                              setTournaments(n);
-                              saveMatchRooms(n);
+                              setTournaments(patchAt(tournaments, index, { streamLink: e.target.value }));
                               window.dispatchEvent(
                                 new Event("admin_config_updated"),
                               );
@@ -1472,58 +1562,51 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                               const players = allUsers.filter((u: any) => u.joinedTournaments?.includes(t.id));
                               if (players.length === 0) return;
                               
-                              const n = [...tournaments];
-                              if (!n[index].results) n[index].results = [];
-                              
+                              const existingResults: any[] = tournaments[index].results || [];
+                              const newResults = [...existingResults];
                               let totalDistributed = 0;
-                              
+
                               for (const u of players) {
-                                const existingResult = n[index].results.find((r: any) => r.uid === u.uid);
+                                const existingResult = newResults.find((r: any) => r.uid === u.uid);
                                 if (existingResult?.distributed) continue;
-                                
+
                                 const killsInput = document.getElementById(`kills_input_${t.id}_${u.uid}`) as HTMLInputElement;
                                 const wonInput = document.getElementById(`won_input_${t.id}_${u.uid}`) as HTMLInputElement;
-                                
-                                if (killsInput) {
-                                  const kills = Number(killsInput.value) || 0;
-                                  const isWinner = wonInput?.checked || false;
-                                  
-                                  const reward = (kills * t.perKill) + (isWinner ? t.prizePool : 0);
-                                  
-                                  if (reward >= 0) {
-                                    // Make sure we have save operation
-                                    const { update, ref } = require("firebase/database");
-                                    const { rtdb } = require("../firebase");
-                                    // Distribute coins in db
-                                    if (reward > 0) {
-                                       await update(ref(rtdb, `users/${u.uid}`), {
-                                         coins: (u.coins || 0) + reward
-                                       });
-                                    }
-                                    
-                                    const resultData = {
-                                      uid: u.uid,
-                                      playerName: u.tournamentDetails?.[t.id]?.inGameName || "Player",
-                                      kills,
-                                      isWinner,
-                                      reward,
-                                      distributed: true
-                                    };
-                                    
-                                    if (existingResult) {
-                                      Object.assign(existingResult, resultData);
-                                    } else {
-                                      n[index].results.push(resultData);
-                                    }
-                                    totalDistributed += reward;
-                                  }
+                                if (!killsInput) continue;
+
+                                const kills = Number(killsInput.value) || 0;
+                                const isWinner = wonInput?.checked || false;
+                                const reward = kills * (t.perKill || 0) + (isWinner ? t.prizePool || 0 : 0);
+
+                                if (reward > 0) {
+                                  // increment() replaces the read-modify-write that
+                                  // could drop coins, and the require() call that
+                                  // threw "require is not defined" in the browser.
+                                  await update(ref(rtdb, `users/${u.uid}`), {
+                                    coins: increment(reward),
+                                  });
                                 }
+
+                                const resultData = {
+                                  uid: u.uid,
+                                  playerName: u.tournamentDetails?.[t.id]?.inGameName || "Player",
+                                  kills,
+                                  isWinner,
+                                  reward,
+                                  distributed: true,
+                                };
+
+                                if (existingResult) {
+                                  Object.assign(existingResult, resultData);
+                                } else {
+                                  newResults.push(resultData);
+                                }
+                                totalDistributed += reward;
                               }
-                              
-                              setTournaments(n);
-                              saveMatchRooms(n);
+
+                              setTournaments(patchAt(tournaments, index, { results: newResults }));
                               window.dispatchEvent(new Event("admin_config_updated"));
-                              alert(`Successfully distributed total ${totalDistributed} coins to players!`);
+                              notify(`Distributed ${totalDistributed} coins to players.`, "success");
                             }}
                             className="bg-yellow-400 font-bold py-2 rounded text-yellow-900 border border-yellow-500 shadow-sm text-xs w-full mt-1 hover:bg-yellow-500 transition-colors"
                           >
@@ -1722,9 +1805,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                               className="w-full border border-gray-300 rounded p-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                               value={task.url}
                               onChange={(e) => {
-                                 const n = [...earnTasks];
-                                 n[index].url = e.target.value;
-                                 setEarnTasks(n);
+                                 setEarnTasks(patchAt(earnTasks, index, { url: e.target.value }));
                               }}
                               onBlur={() => {
                                  saveEarnTasks(earnTasks);
@@ -1738,9 +1819,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                               className="w-full border border-gray-300 rounded p-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                               value={task.coins}
                               onChange={(e) => {
-                                 const n = [...earnTasks];
-                                 n[index].coins = Number(e.target.value);
-                                 setEarnTasks(n);
+                                 setEarnTasks(patchAt(earnTasks, index, { coins: Number(e.target.value) }));
                               }}
                               onBlur={() => {
                                  saveEarnTasks(earnTasks);
@@ -1781,32 +1860,33 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                       Banner (3 Images)
                     </h3>
                     <div className="space-y-5">
-                      {[1, 2, 3].map((slide) => (
+                      {[0, 1, 2].map((slide) => (
                         <div
                           key={slide}
                           className="border border-gray-200 rounded-lg p-3 space-y-3 relative pt-4 bg-gray-50"
                         >
                           <p className="text-[11px] font-bold text-[#4b5563] bg-white border border-gray-200 px-1.5 absolute -top-2 left-3 rounded">
-                            Slide #{slide}
+                            Slide #{slide + 1}
                           </p>
                           <input
                             className="w-full border border-gray-200 rounded p-2.5 text-[15px] focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                            defaultValue="https://uploads.onecompiler.io/43b6sbecd/..."
+                            value={siteCfg.banners?.[slide]?.imageUrl || ""}
+                            onChange={(e) => updateBanner(slide, { imageUrl: e.target.value })}
                             placeholder="Image URL"
                           />
                           <input
                             className="w-full border border-gray-200 rounded p-2.5 text-[15px] focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                            defaultValue={
-                              slide === 3
-                                ? "https://youtu.be/F1BTfxYQwhI"
-                                : "https://uploads.onecompiler.io/43b6secd/..."
-                            }
+                            value={siteCfg.banners?.[slide]?.targetUrl || ""}
+                            onChange={(e) => updateBanner(slide, { targetUrl: e.target.value })}
                             placeholder="Target URL (e.g., YouTube or Telegram)"
                           />
                         </div>
                       ))}
                     </div>
-                    <button className="w-full bg-[#2563eb] hover:bg-blue-700 text-white font-medium py-2.5 rounded text-[15px] mt-4 transition-colors shadow-sm">
+                    <button
+                      onClick={() => saveSiteConfig({ banners: siteCfg.banners || [] })}
+                      className="w-full bg-[#2563eb] hover:bg-blue-700 text-white font-medium py-2.5 rounded text-[15px] mt-4 transition-colors shadow-sm"
+                    >
                       Update Banners
                     </button>
                   </div>
@@ -1845,9 +1925,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                     </label>
                     <input
                       className="w-full border border-gray-200 rounded p-2.5 text-[15px] focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                      defaultValue="https://example.com/qr.png"
+                      value={siteCfg.paymentQr || ""}
+                      onChange={(e) => setSiteCfg((prev: any) => ({ ...prev, paymentQr: e.target.value }))}
+                      placeholder="https://.../qr.png"
                     />
-                    <button className="w-full bg-[#2563eb] hover:bg-blue-700 text-white font-medium py-2.5 rounded text-[15px] mt-3 transition-colors shadow-sm">
+                    <button
+                      onClick={() => saveSiteConfig({ paymentQr: siteCfg.paymentQr || "" })}
+                      className="w-full bg-[#2563eb] hover:bg-blue-700 text-white font-medium py-2.5 rounded text-[15px] mt-3 transition-colors shadow-sm"
+                    >
                       Update QR
                     </button>
                   </div>
@@ -1879,24 +1964,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                   <div className="space-y-3">
                     {allUsers.map((user: any, idx: number) => (
                       <div
-                        key={idx}
+                        key={user.uid || idx}
                         className="bg-white border border-gray-200 rounded-lg p-3.5 flex flex-col gap-2 shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
                       >
                         <div className="flex justify-between items-start">
                           <div>
                             <p className="font-bold text-[15px] text-[#1f2937] leading-tight mb-0.5">
-                              {user.bankDetails?.mobileNumber || user.email || `Player ${user.uid.slice(0,5)}`}
+                              {user.bankDetails?.mobileNumber || user.email || `Player ${(user.uid || "").slice(0, 5)}`}
                             </p>
                             <p className="text-gray-400 text-[13px] mb-0.5" title={user.uid}>
-                              UID: {user.uid.slice(0, 8)}...
+                              UID: {(user.uid || "—").slice(0, 8)}...
                             </p>
                           </div>
                           <button onClick={async () => {
-                            if (window.confirm("Are you sure you want to delete this user?")) {
+                            if (window.confirm("Delete this user's database record?\n\nNote: this does NOT delete their login \u2014 remove the account in Firebase Authentication too, otherwise the profile is recreated on their next sign-in.")) {
                               await update(ref(rtdb), {
                                 [`users/${user.uid}`]: null
                               });
-                              alert("User deleted!");
+                              notify("User deleted!");
                             }
                           }} className="bg-red-50 hover:bg-red-100 text-[#ef4444] font-bold px-3.5 py-1.5 rounded transition-colors text-[13px]">
                             Delete
