@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ChevronLeft, Star, Sparkles, CheckCircle2, AlertCircle } from "lucide-react";
 import { useUserProfile } from "../hooks/useFirebaseData";
-import { update, ref } from "firebase/database";
+import { update, ref, get, increment } from "firebase/database";
 import { rtdb, auth } from "../firebase";
 
 interface OffersScreenProps {
@@ -45,9 +45,17 @@ export const OffersScreen: React.FC<OffersScreenProps> = ({ onBack }) => {
     setLoadingOffer(offer.id);
     try {
       const userRef = ref(rtdb, `users/${auth.currentUser.uid}`);
+
+      // Check the balance that is actually stored, then apply both changes with
+      // increment() so a second purchase can't overwrite the first.
+      const snap = await get(userRef);
+      if (Number(snap.val()?.balance || 0) < Number(offer.money)) {
+        showToast("Insufficient wallet balance. Please recharge.", "error");
+        return;
+      }
       await update(userRef, {
-        balance: currentBalance - offer.money,
-        coins: (profile?.coins || 0) + offer.coins,
+        balance: increment(-Number(offer.money)),
+        coins: increment(Number(offer.coins) || 0),
       });
       showToast(`Successfully purchased ${offer.coins} coins!`, "success");
     } catch (error) {

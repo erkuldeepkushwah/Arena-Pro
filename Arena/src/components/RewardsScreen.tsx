@@ -24,7 +24,7 @@ export const RewardsScreen: React.FC = () => {
         {topUsers.length > 0 ? (
           <div className="bg-white rounded-3xl p-2 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100">
             {topUsers.map((user, idx) => {
-              const name = user.displayName || user.bankDetails?.mobileNumber || user.email?.split("@")[0] || `Player ${user.uid.slice(0,5)}`;
+              const name = user.displayName || user.bankDetails?.mobileNumber || user.email?.split("@")[0] || `Player ${(user.uid || "").slice(0, 5)}`;
               const cup = idx === 0 ? "🏆" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : "";
               
               return (

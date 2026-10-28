@@ -1,5 +1,5 @@
 import { rtdb, auth } from "./firebase";
-import { ref, set, update } from "firebase/database";
+import { ref, set, update, increment, runTransaction } from "firebase/database";
 
 export const saveCricketMatches = async (matches: any[]) => {
   const matchesObject: Record<string, any> = {};
@@ -59,28 +59,46 @@ export const saveBankDetails = async (bankDetails: any) => {
   });
 };
 
+/**
+ * Credit coins.
+ *
+ * `currentCoins` is accepted for backwards compatibility but deliberately
+ * ignored: it came from a render-time snapshot, so `currentCoins + amount`
+ * silently overwrote anything another tab (or the admin) had written in the
+ * meantime. increment() is applied server-side instead.
+ */
 export const addCoinsToWallet = async (
   amount: number,
-  currentCoins: number,
+  _currentCoins?: number,
 ) => {
   if (!auth.currentUser) return;
   await update(ref(rtdb, `users/${auth.currentUser.uid}`), {
-    coins: currentCoins + amount,
+    coins: increment(amount),
   });
 };
 
+/**
+ * Debit coins, atomically.
+ *
+ * The old version compared a stale `currentCoins` and then wrote
+ * `currentCoins - amount`, so two joins from the same account could both pass
+ * the check and only one deduction stuck. The transaction aborts when the
+ * stored balance is short, and `committed` tells the caller what happened.
+ */
 export const deductCoinsFromWallet = async (
   amount: number,
-  currentCoins: number,
+  _currentCoins?: number,
 ): Promise<boolean> => {
   if (!auth.currentUser) return false;
-  if (currentCoins >= amount) {
-    await update(ref(rtdb, `users/${auth.currentUser.uid}`), {
-      coins: currentCoins - amount,
-    });
-    return true;
-  }
-  return false;
+  const result = await runTransaction(
+    ref(rtdb, `users/${auth.currentUser.uid}/coins`),
+    (coins) => {
+      const current = Number(coins || 0);
+      if (current < amount) return; // abort, leave the balance untouched
+      return current - amount;
+    },
+  );
+  return result.committed;
 };
 
 export const saveEarnTasks = async (tasks: any[]) => {
