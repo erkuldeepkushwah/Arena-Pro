@@ -535,8 +535,7 @@ export const PlayScreen: React.FC = () => {
 
             {/* Room Details Card */}
             <div className="bg-white rounded-[20px] p-6 text-center border border-gray-200 shadow-sm">
-              <h4 className="text-[16px] font-bold text-[#111] mb-1">Room Details</h4>
-              <p className="text-gray-500 text-[13px] font-medium mb-6">About This Match</p>
+              <h4 className="text-[16px] font-bold text-[#111] mb-6">Room Details</h4>
 
               {joinedTournaments.includes(selectedRoom?.id) ? (
                   <>
