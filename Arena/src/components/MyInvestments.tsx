@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { useUserProfile } from '../hooks/useFirebaseData';
 import { rtdb, auth } from '../firebase';
-import { ref, update } from 'firebase/database';
+import { ref, update, get, increment } from 'firebase/database';
 
 interface MyInvestmentsProps {
   onBack: () => void;
@@ -15,21 +15,33 @@ export const MyInvestments: React.FC<MyInvestmentsProps> = ({ onBack }) => {
 
   const handleClaim = async (inv: any, index: number) => {
     if (!auth.currentUser) return;
-    const amount = inv.unclaimedIncome || 0;
-    if (amount <= 0) return;
+    if ((Number(inv.unclaimedIncome) || 0) <= 0) return;
 
     try {
       setClaiming(index);
-      const newInvestments = [...investments];
-      newInvestments[index].unclaimedIncome = 0;
-      
       const userRef = ref(rtdb, `users/${auth.currentUser.uid}`);
+
+      // Re-read: `investments` came from a render-time snapshot, and the old
+      // code mutated those objects in place before writing the whole array back.
+      const snap = await get(userRef);
+      const fresh = snap.val() || {};
+      const freshInvestments: any[] = Array.isArray(fresh.investments) ? [...fresh.investments] : [];
+      const target = freshInvestments[index];
+      const claimable = Number(target?.unclaimedIncome) || 0;
+
+      if (claimable <= 0) {
+        alert("This income was already claimed.");
+        return;
+      }
+
+      freshInvestments[index] = { ...target, unclaimedIncome: 0 };
+
       await update(userRef, {
-        balance: (profile.balance || 0) + amount,
-        investments: newInvestments
+        balance: increment(claimable),
+        investments: freshInvestments,
       });
 
-      alert(`Successfully claimed ₹${amount.toFixed(2)}`);
+      alert(`Successfully claimed ₹${claimable.toFixed(2)}`);
     } catch (e) {
       console.error(e);
       alert("Failed to claim daily income.");

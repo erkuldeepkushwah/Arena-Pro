@@ -31,6 +31,28 @@ export const AuthScreen: React.FC<AuthProps> = ({ onLogin }) => {
     }
   };
 
+/** Turn Firebase's codes into something a user can act on. */
+const friendlyAuthError = (err: any): string => {
+  switch (err?.code) {
+    case 'auth/invalid-credential':
+    case 'auth/wrong-password':
+    case 'auth/user-not-found':
+      return 'Wrong number or password. New here? Tap "Don\'t have an account?" first.';
+    case 'auth/email-already-in-use':
+      return 'This number is already registered. Please log in instead.';
+    case 'auth/weak-password':
+      return 'Password must be at least 6 characters.';
+    case 'auth/operation-not-allowed':
+      return 'Email/Password sign-in is not enabled for this Firebase project.';
+    case 'auth/too-many-requests':
+      return 'Too many attempts. Please wait a minute and try again.';
+    case 'auth/network-request-failed':
+      return 'Network error. Check your connection and try again.';
+    default:
+      return err?.message || 'Authentication failed';
+  }
+};
+
   const handleSubmit = async () => {
     setError('');
     
@@ -40,14 +62,11 @@ export const AuthScreen: React.FC<AuthProps> = ({ onLogin }) => {
     setLoading(true);
     try {
       if (isLogin) {
-        try {
-          await signInWithEmailAndPassword(auth, emailToUse, password);
-        } catch (signInErr: any) {
-             const userCred = await createUserWithEmailAndPassword(auth, emailToUse, password);
-             await update(ref(rtdb, `users/${userCred.user.uid}`), {
-               displayName: fullName || emailToUse,
-             });
-        }
+        // No createUser fallback here. It used to register a brand-new account
+        // whenever sign-in failed, so a typo in the number silently created a
+        // user, and a wrong password reported "email already in use" instead of
+        // "wrong password".
+        await signInWithEmailAndPassword(auth, emailToUse, password);
       } else {
         const userCred = await createUserWithEmailAndPassword(auth, emailToUse, password);
         const updates: any = {
@@ -60,7 +79,7 @@ export const AuthScreen: React.FC<AuthProps> = ({ onLogin }) => {
       }
       onLogin();
     } catch (err: any) {
-      setError(err.message || 'Authentication failed');
+      setError(friendlyAuthError(err));
     } finally {
       setLoading(false);
     }

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Coins, Star, Smile, Clock } from 'lucide-react';
 import { useUserProfile, useProducts, useWelfareProducts } from '../hooks/useFirebaseData';
 import { rtdb, auth } from '../firebase';
-import { ref, update, get } from 'firebase/database';
+import { ref, update, get, increment } from 'firebase/database';
 
 const CountdownTimer: React.FC<{ endTime: number }> = ({ endTime }) => {
   const [timeLeft, setTimeLeft] = useState(Math.max(0, endTime - Date.now()));
@@ -46,19 +46,30 @@ export const ProductScreen: React.FC = () => {
       return;
     }
 
-    // Determine current investments
-    const currentInvestments = userProfile.investments || [];
-    
-    if (currentInvestments.some((inv: any) => inv.productId === product.id)) {
-      alert("You already own this product!");
-      return;
-    }
-
     try {
       const userRef = ref(rtdb, `users/${auth.currentUser.uid}`);
+
+      // Re-read before writing. The old code derived the new balance, the new
+      // coin count and the new investment list from a possibly-stale
+      // userProfile, so two purchases in quick succession lost one of them.
+      const snap = await get(userRef);
+      const fresh = snap.val() || {};
+      const currentInvestments: any[] = Array.isArray(fresh.investments) ? fresh.investments : [];
+
+      if (currentInvestments.some((inv: any) => inv.productId === product.id)) {
+        alert("You already own this product!");
+        return;
+      }
+      if (Number(fresh.balance || 0) < Number(product.price || 0)) {
+        alert("Insufficient balance!");
+        return;
+      }
+
       await update(userRef, {
-        balance: userProfile.balance - product.price,
-        coins: (userProfile.coins || 0) + (product.price || 0),
+        // increment() is applied server-side, so concurrent purchases can't
+        // overwrite each other's balance.
+        balance: increment(-Number(product.price || 0)),
+        coins: increment(Number(product.coinsReward ?? product.price) || 0),
         investments: [...currentInvestments, {
           productId: product.id,
           title: product.title,
@@ -136,7 +147,7 @@ export const ProductScreen: React.FC = () => {
                 <div className="flex-1 flex flex-col justify-center">
                   <div className="grid grid-cols-3 gap-1 sm:gap-2 text-center mb-4 sm:mb-6">
                     <div>
-                      <p className="text-[#a855f7] font-bold text-[16px] sm:text-[19px] leading-none mb-1">₹{(product.totalIncome / product.validDays).toFixed(2).replace(/\.00$/, '')}</p>
+                      <p className="text-[#a855f7] font-bold text-[16px] sm:text-[19px] leading-none mb-1">₹{(product.validDays ? product.totalIncome / product.validDays : 0).toFixed(2).replace(/\.00$/, '')}</p>
                       <p className="text-[9px] sm:text-[10px] font-bold uppercase text-[#111]">Daily</p>
                     </div>
                     <div>
