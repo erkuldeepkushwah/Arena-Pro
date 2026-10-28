@@ -1,0 +1,26 @@
+name: Apply UI patch
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply patch
+        run: python3 tools/patch_play_screen.py
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Arena/src/components/PlayScreen.tsx
+          if git diff --cached --quiet; then
+            echo "Nothing to commit"
+          else
+            git commit -m "ui: compact match cards and add quiz tab icon"
+            git push
+          fi
