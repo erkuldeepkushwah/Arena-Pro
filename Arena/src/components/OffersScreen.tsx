@@ -3,6 +3,7 @@ import { ChevronLeft, Star, Sparkles, CheckCircle2, AlertCircle } from "lucide-r
 import { useUserProfile } from "../hooks/useFirebaseData";
 import { update, ref, get, increment } from "firebase/database";
 import { rtdb, auth } from "../firebase";
+import coinIcon from "../assets/coin.png";
 
 interface OffersScreenProps {
   onBack: () => void;
@@ -119,7 +120,7 @@ export const OffersScreen: React.FC<OffersScreenProps> = ({ onBack }) => {
             {/* Coins Illustration */}
             <div className="relative w-20 h-20 sm:w-28 sm:h-28 flex items-center justify-center">
               <div className="absolute inset-0 bg-yellow-400/20 blur-xl rounded-full"></div>
-              <div className="relative text-[65px] sm:text-[85px] leading-none drop-shadow-[0_10px_15px_rgba(0,0,0,0.5)] translate-x-2 -translate-y-2">🪙</div>
+              <img src={coinIcon} alt="" aria-hidden="true" className="relative w-[65px] h-[65px] sm:w-[85px] sm:h-[85px] object-contain drop-shadow-[0_10px_15px_rgba(0,0,0,0.5)] translate-x-2 -translate-y-2" />
               <div className="absolute top-2 right-2 text-white/80 scale-75">
                 <Sparkles className="w-6 h-6 fill-white" />
               </div>
@@ -144,7 +145,7 @@ export const OffersScreen: React.FC<OffersScreenProps> = ({ onBack }) => {
                   {offer.bonus}
                 </div>
                 
-                <div className="text-[36px] sm:text-[40px] leading-none mb-2 drop-shadow-md">🪙</div>
+                <img src={coinIcon} alt="" aria-hidden="true" className="w-[36px] h-[36px] sm:w-[40px] sm:h-[40px] object-contain mb-2 drop-shadow-md" />
                 
                 <span className="text-[24px] sm:text-[28px] font-black text-[#111] leading-none mb-1">
                   {offer.coins}

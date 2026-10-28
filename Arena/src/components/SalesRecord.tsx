@@ -3,6 +3,7 @@ import { ChevronLeft, Users, Gift, Coins } from 'lucide-react';
 import { ref, get } from 'firebase/database';
 import { rtdb, auth } from '../firebase';
 import { useUserProfile } from '../hooks/useFirebaseData';
+import coinIcon from '../assets/coin.png';
 
 interface SalesRecordProps {
   onBack: () => void;
@@ -88,7 +89,7 @@ export const SalesRecord: React.FC<SalesRecordProps> = ({ onBack }) => {
           {/* Right Image */}
           <div className="absolute -right-6 top-1/2 -translate-y-1/2 w-[180px] drop-shadow-[0_10px_20px_rgba(0,0,0,0.6)] z-0 transform hover:scale-105 transition-transform duration-500">
              <img 
-               src="https://cdn3d.iconscout.com/3d/premium/thumb/stack-of-gold-coins-6421319-5309657.png" 
+               src={coinIcon} 
                alt="Coins" 
                className="w-full object-contain drop-shadow-2xl"
                onError={(e) => {

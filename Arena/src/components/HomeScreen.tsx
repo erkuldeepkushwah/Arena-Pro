@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
-  Eye,
   Megaphone,
   Tag,
   Gift,
@@ -16,6 +15,7 @@ import { useUserProfile, useTopPromotions } from "../hooks/useFirebaseData";
 import { useNotifications } from "../hooks/useNotifications";
 import { playCoinSound, playNotificationSound } from "../utils/sounds";
 import coinIcon from "../assets/coin.png";
+import { fileToAvatarDataUrl, saveAvatar } from "../utils/avatar";
 
 interface HomeScreenProps {
   onNavigate: (page: string) => void;
@@ -92,6 +92,24 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
   const userProfile = useUserProfile();
   const notifications = useNotifications();
+
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    try {
+      setAvatarUploading(true);
+      const dataUrl = await fileToAvatarDataUrl(file);
+      await saveAvatar(dataUrl);
+    } catch (err: any) {
+      alert(err?.message || "Could not update your photo.");
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
 
   // Admin-editable banners. Falls back to the built-in defaults until the
   // admin saves something.
@@ -231,9 +249,30 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       {/* Header */}
       <div className="px-5 pt-8 pb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-[46px] h-[46px] rounded-full bg-[#5b21b6] flex items-center justify-center text-white font-semibold text-lg shadow-sm">
-            {userName.charAt(0).toUpperCase()}
-          </div>
+          <button
+            type="button"
+            onClick={() => avatarInputRef.current?.click()}
+            title="Change photo"
+            className="relative w-[46px] h-[46px] rounded-full bg-[#5b21b6] flex items-center justify-center text-white font-semibold text-lg shadow-sm overflow-hidden active:scale-95 transition-transform"
+          >
+            {userProfile?.photoURL ? (
+              <img src={userProfile.photoURL} alt="" className="w-full h-full object-cover" />
+            ) : (
+              userName.charAt(0).toUpperCase()
+            )}
+            {avatarUploading && (
+              <span className="absolute inset-0 bg-black/50 flex items-center justify-center text-[9px] font-bold">
+                ...
+              </span>
+            )}
+          </button>
+          <input
+            ref={avatarInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleAvatarChange}
+          />
           <div>
             <p className="text-gray-600 text-sm font-medium">Welcome back,</p>
             <p className="text-gray-900 font-bold text-[17px] flex items-center gap-1">
@@ -266,7 +305,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           <div className="flex justify-between items-start relative z-10">
             <div className="flex items-center gap-2 mb-2 opacity-90">
               <span className="text-sm font-medium">Total Balance</span>
-              <Eye className="w-4 h-4" />
             </div>
             <div className="bg-white/20 px-3 py-1.5 rounded-full flex items-center gap-1.5 backdrop-blur-sm">
               <img src={coinIcon} alt="" aria-hidden="true" className="w-4 h-4 object-contain" />
@@ -276,7 +314,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
           <div className="relative z-10">
             <span className="text-[34px] font-bold tracking-tight">
-              ₹ {Number(userProfile?.balance || 0).toFixed(2)}
+              ₹ {Number(userProfile?.balance || 0).toLocaleString("en-IN", { maximumFractionDigits: 2 })}
             </span>
           </div>
         </div>

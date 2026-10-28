@@ -29,6 +29,7 @@ import {
 } from "../hooks/useFirebaseData";
 
 import { auth } from "../firebase";
+import coinIcon from "../assets/coin.png";
 import { logTransaction } from "../utils/transactions";
 import {
   saveJoinedMatches,
@@ -527,7 +528,7 @@ export const PlayScreen: React.FC = () => {
               <div className="flex justify-between items-center text-sm">
                 <span className="text-gray-500 font-medium">Entry Fee :</span>
                 <span className="font-bold text-gray-800 flex items-center gap-1">
-                  <span className="text-xs">🪙</span>
+                  <img src={coinIcon} alt="" aria-hidden="true" className="w-3.5 h-3.5 object-contain" />
                   <span>{selectedRoom?.entryFee}</span>
                 </span>
               </div>
@@ -909,7 +910,7 @@ export const PlayScreen: React.FC = () => {
                     <div className="flex justify-between items-center p-4 bg-[#f8f5ff] rounded-xl border border-purple-100 mb-6">
                       <span className="text-sm font-bold text-gray-600">Entry Fee</span>
                       <div className="flex items-center gap-1 font-black text-[#5e35b1] text-lg">
-                        <span className="text-sm">🪙</span> {selectedCricketMatch.entryFee}
+                        <img src={coinIcon} alt="" aria-hidden="true" className="w-4 h-4 object-contain" /> {selectedCricketMatch.entryFee}
                       </div>
                     </div>
 

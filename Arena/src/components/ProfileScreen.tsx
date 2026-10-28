@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   LogOut,
   ChevronRight,
@@ -12,6 +12,8 @@ import {
   Receipt,
 } from "lucide-react";
 import { useUserProfile } from "../hooks/useFirebaseData";
+import coinIcon from "../assets/coin.png";
+import { fileToAvatarDataUrl, saveAvatar } from "../utils/avatar";
 
 interface ProfileScreenProps {
   onLogout: () => void;
@@ -24,6 +26,24 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
 }) => {
   const userProfile = useUserProfile();
   const coins = userProfile?.coins || 0;
+
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    try {
+      setAvatarUploading(true);
+      const dataUrl = await fileToAvatarDataUrl(file);
+      await saveAvatar(dataUrl);
+    } catch (err: any) {
+      alert(err?.message || "Could not update your photo.");
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
 
   const menuItems = [
     {
@@ -80,9 +100,32 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
     <div className="pb-28 bg-[#f8f9fa] min-h-screen">
       <div className="bg-[#6D28D9] pt-10 pb-16 px-6 rounded-b-[2.5rem] relative mb-16">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-full border border-white/30 flex items-center justify-center bg-transparent">
-            <span className="text-white text-xl font-bold">U</span>
-          </div>
+          <button
+            type="button"
+            onClick={() => avatarInputRef.current?.click()}
+            title="Change photo"
+            className="relative w-14 h-14 rounded-full border border-white/30 flex items-center justify-center bg-transparent overflow-hidden active:scale-95 transition-transform"
+          >
+            {userProfile?.photoURL ? (
+              <img src={userProfile.photoURL} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-white text-xl font-bold">
+                {(userProfile?.displayName || "U").charAt(0).toUpperCase()}
+              </span>
+            )}
+            {avatarUploading && (
+              <span className="absolute inset-0 bg-black/50 flex items-center justify-center text-[9px] font-bold text-white">
+                ...
+              </span>
+            )}
+          </button>
+          <input
+            ref={avatarInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleAvatarChange}
+          />
           <span className="text-[#f8f9fa] text-[15px] tracking-wide">
             {userProfile?.displayName || userProfile?.bankDetails?.mobileNumber || "Add Phone No."}
           </span>
@@ -102,7 +145,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               COINS
             </p>
             <div className="flex items-center justify-center gap-1.5 font-bold text-2xl text-[#222]">
-              <span className="text-yellow-400 text-xl">🪙</span>
+              <img src={coinIcon} alt="" aria-hidden="true" className="w-5 h-5 object-contain" />
               <span>{coins}</span>
             </div>
           </div>
