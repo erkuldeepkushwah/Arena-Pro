@@ -16,6 +16,7 @@ import { MyInvestments } from "./components/MyInvestments";
 import { RedeemCode } from "./components/RedeemCode";
 import { SalesRecord } from "./components/SalesRecord";
 import { EarnScreen } from "./components/EarnScreen";
+import { TransactionHistory } from "./components/TransactionHistory";
 import { AdminDashboard } from "./components/AdminDashboard";
 import { auth, rtdb } from "./firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
@@ -32,7 +33,8 @@ type Page =
   | "sales"
   | "promotion"
   | "offers"
-  | "earn";
+  | "earn"
+  | "transactions";
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -169,6 +171,10 @@ export default function App() {
 
     if (activePage === "earn") {
       return <EarnScreen onBack={() => setActivePage("dashboard")} />;
+    }
+
+    if (activePage === "transactions") {
+      return <TransactionHistory onBack={() => setActivePage("dashboard")} />;
     }
 
     switch (activeTab) {

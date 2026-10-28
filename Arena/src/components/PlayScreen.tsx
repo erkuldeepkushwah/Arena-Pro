@@ -27,6 +27,8 @@ import {
   useUserProfile,
 } from "../hooks/useFirebaseData";
 
+import { auth } from "../firebase";
+import { logTransaction } from "../utils/transactions";
 import {
   saveJoinedMatches,
   saveJoinedTournaments,
@@ -34,6 +36,38 @@ import {
   addCoinsToWallet,
   deductCoinsFromWallet,
 } from "../gameplayConfig";
+
+/** Ticking pill for a tournament the admin has pushed live. */
+const LiveCountdown: React.FC<{ liveAt: number; windowMs?: number }> = ({
+  liveAt,
+  windowMs = 5 * 60 * 1000,
+}) => {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const remaining = liveAt + windowMs - now;
+  if (remaining <= 0) {
+    return (
+      <div className="flex items-center gap-1.5 mt-1.5 bg-red-600 px-2 py-0.5 rounded-full w-fit">
+        <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+        <span className="text-white text-[10px] font-bold tracking-wide">LIVE NOW</span>
+      </div>
+    );
+  }
+  const m = Math.floor(remaining / 60000);
+  const s = Math.floor((remaining % 60000) / 1000);
+  return (
+    <div className="flex items-center gap-1.5 mt-1.5 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full w-fit">
+      <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+      <span className="text-red-600 text-[10px] font-bold tracking-wide">
+        Starts in {m}:{s < 10 ? "0" : ""}{s}
+      </span>
+    </div>
+  );
+};
 
 const GAMES_LIST = [
   {
@@ -141,6 +175,11 @@ export const PlayScreen: React.FC = () => {
       // Save details locally and remote
       await saveTournamentDetails(room.id, { gameUid: inGameUid, inGameName: inGameName });
       await saveJoinedTournaments([...joinedTournaments, room.id]);
+      await logTransaction(auth.currentUser?.uid, {
+        type: "game-entry",
+        amount: fee,
+        description: `${room.title || room.game || "Tournament"} entry`,
+      });
       alert("Successfully joined the match!");
       setJoinModal({ show: false, room: null });
       setInGameUid("");
@@ -161,6 +200,11 @@ export const PlayScreen: React.FC = () => {
       const reward = QUIZ_CONFIG.entryFee * multiplier;
       if (reward > 0) {
         addCoinsToWallet(reward, coins);
+        logTransaction(auth.currentUser?.uid, {
+          type: "winnings",
+          amount: reward,
+          description: `Quiz reward (${correctAnswers} correct)`,
+        });
       }
       setQuizRewarded(true);
     }
@@ -317,6 +361,9 @@ export const PlayScreen: React.FC = () => {
                             <Calendar className="w-[14px] h-[14px] text-[#666]" />
                             <span>{room.date} {room.time}</span>
                           </div>
+                          {room.status === "live" && room.liveAt && (
+                            <LiveCountdown liveAt={room.liveAt} />
+                          )}
                         </div>
                       </div>
                       <button
@@ -847,24 +894,28 @@ export const PlayScreen: React.FC = () => {
 
                     <button
                       disabled={!selectedTeam}
-                      onClick={() => {
-                        if (selectedTeam) {
-                          const fee = selectedCricketMatch.entryFee || 0;
-                          if (fee > 0) {
-                            if (coins < fee) {
-                              setShowInsufficientCoinsModal(true);
-                              setShowTeamSelectModal(false);
-                              return;
-                            }
-                            deductCoinsFromWallet(fee, coins); // We can just call it asynchronously here since onClick is not async? Wait, we can make onClick async
+                      onClick={async () => {
+                        if (!selectedTeam) return;
+                        const fee = selectedCricketMatch.entryFee || 0;
+                        if (fee > 0) {
+                          if (coins < fee) {
+                            setShowInsufficientCoinsModal(true);
+                            setShowTeamSelectModal(false);
+                            return;
                           }
-                          saveJoinedMatches({
-                            ...joinedMatches,
-                            [selectedCricketMatch.id]: selectedTeam,
-                          });
-                          alert(`Successfully joined with ${fee} Coins!`);
-                          setShowTeamSelectModal(false);
+                          await deductCoinsFromWallet(fee, coins);
                         }
+                        await saveJoinedMatches({
+                          ...joinedMatches,
+                          [selectedCricketMatch.id]: selectedTeam,
+                        });
+                        await logTransaction(auth.currentUser?.uid, {
+                          type: "game-entry",
+                          amount: fee,
+                          description: `${selectedCricketMatch.title || "Cricket match"} — ${selectedTeam}`,
+                        });
+                        alert(`Successfully joined with ${fee} Coins!`);
+                        setShowTeamSelectModal(false);
                       }}
                       className={`w-full py-4 rounded-[16px] font-bold text-[16px] text-white transition-all shadow-sm ${selectedTeam ? "bg-[#333] hover:bg-[#111] active:scale-[0.98]" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}
                     >
@@ -982,6 +1033,11 @@ export const PlayScreen: React.FC = () => {
                     return;
                   }
                   await deductCoinsFromWallet(fee, coins);
+                  await logTransaction(auth.currentUser?.uid, {
+                    type: "game-entry",
+                    amount: fee,
+                    description: "Quiz entry",
+                  });
                 }
                 setCurrentQuestionIdx(0);
                 setCorrectAnswers(0);

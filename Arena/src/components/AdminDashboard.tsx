@@ -27,6 +27,10 @@ import {
 } from "../hooks/useFirebaseData";
 import { saveEarnTasks } from "../gameplayConfig";
 import { rtdb } from "../firebase";
+import { logTransaction } from "../utils/transactions";
+
+/** Matches marked "ended" are kept this long before the dashboard sweeps them. */
+const FINISHED_RETENTION_MS = 24 * 60 * 60 * 1000;
 import { ref, update, get, set, onValue, increment, runTransaction } from "firebase/database";
 
 interface AdminDashboardProps {
@@ -58,17 +62,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   const handleDistributeCricketWinnings = async (matchId: string, winningTeam: string, entryFee: number) => {
     try {
       const updates: Record<string, any> = {};
+      const paidUids: string[] = [];
       let distributedCount = 0;
       allUsers.forEach(u => {
         if (u.joinedMatches && u.joinedMatches[matchId] === winningTeam && !u.joinedMatches[`${matchId}_paid`]) {
            const currentCoins = u.coins || 0;
            updates[`users/${u.uid}/coins`] = currentCoins + (entryFee * 2);
            updates[`users/${u.uid}/joinedMatches/${matchId}_paid`] = true;
+           paidUids.push(u.uid);
            distributedCount++;
         }
       });
       if (Object.keys(updates).length > 0) {
         await update(ref(rtdb), updates);
+        await Promise.all(
+          paidUids.map((uid) =>
+            logTransaction(uid, {
+              type: "winnings",
+              amount: entryFee * 2,
+              description: `Cricket winnings — ${winningTeam}`,
+            }),
+          ),
+        );
         notify(`Distributed ${entryFee * 2} coins to ${distributedCount} winners!`);
       } else {
         notify("Recorded winners. No users found to receive reward, or already distributed.");
@@ -108,6 +123,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         );
       }
       await update(requestRef, { status, handledAt: Date.now() });
+      await logTransaction(userId, {
+        type: status === "approved" ? "withdraw" : "refund",
+        amount: Number(amount),
+        description:
+          status === "approved" ? "Withdrawal approved" : "Withdrawal rejected — refunded",
+      });
       notify(
         status === "approved"
           ? `Withdrawal of \u20b9${Number(amount)} approved.`
@@ -145,6 +166,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         );
       }
       await update(requestRef, { status, handledAt: Date.now() });
+      if (status === "approved") {
+        await logTransaction(userId, {
+          type: "deposit",
+          amount: Number(amount),
+          description: "Wallet top-up approved",
+        });
+      }
       notify(
         status === "approved"
           ? `\u20b9${Number(amount)} added to the user's wallet.`
@@ -165,6 +193,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     questions: [],
   });
   const [tournaments, _setTournaments] = useState<any[]>([]);
+
+  // Result entry lives in React state. It used to be read straight out of the
+  // DOM with getElementById(`kills_input_...`), which quietly broke whenever the
+  // markup around those inputs changed.
+  const [resultDrafts, setResultDrafts] = useState<Record<string, { kills: number; isWinner: boolean }>>({});
+  const draftKey = (tournamentId: string, uid: string) => `${tournamentId}__${uid}`;
+  const draftFor = (tournamentId: string, uid: string, existing: any) =>
+    resultDrafts[draftKey(tournamentId, uid)] ?? {
+      kills: Number(existing?.kills) || 0,
+      isWinner: !!existing?.isWinner,
+    };
+  const setDraft = (
+    tournamentId: string,
+    uid: string,
+    patch: Partial<{ kills: number; isWinner: boolean }>,
+  ) =>
+    setResultDrafts((prev) => {
+      const key = draftKey(tournamentId, uid);
+      const base = prev[key] ?? { kills: 0, isWinner: false };
+      return { ...prev, [key]: { ...base, ...patch } };
+    });
 
   // Small inline toast, so admin feedback never blocks the UI thread the way
   // a browser alert does.
@@ -261,6 +310,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     banners[index] = { ...banners[index], ...patch };
     setSiteCfg((prev: any) => ({ ...prev, banners }));
   };
+
+  // Housekeeping: sweep matches that were marked "ended" more than a day ago.
+  // Only rows carrying an `endedAt` stamp are eligible, so matches ended before
+  // this shipped are never touched. Guarded to run once, otherwise a failed
+  // write would bounce against the Firebase sync effect forever.
+  const sweepRan = useRef(false);
+  useEffect(() => {
+    if (sweepRan.current || tournaments.length === 0) return;
+    sweepRan.current = true;
+    const cutoff = Date.now() - FINISHED_RETENTION_MS;
+    const stale = tournaments.filter(
+      (t: any) => t.status === "ended" && Number(t.endedAt) > 0 && Number(t.endedAt) < cutoff,
+    );
+    if (stale.length > 0) setTournaments(tournaments.filter((t: any) => !stale.includes(t)));
+  }, [tournaments]);
 
   useEffect(() => {
     if (firestoreEarnTasks) setEarnTasks(firestoreEarnTasks);
@@ -532,6 +596,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                 updates[`users/${u.uid}/weeklyWinnerRank`] = i + 1;
                                 
                                 winnersInfo.push({
+                                  uid: u.uid,
                                   name: u.displayName || u.bankDetails?.mobileNumber || u.email || `Player ${u.uid.slice(0,5)}`,
                                   prize,
                                   rank: i + 1,
@@ -556,6 +621,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             // Optional: Reset coins for next week, but we'll leave it as is so they don't lose them entirely unless requested
                             if (Object.keys(updates).length > 0) {
                               await update(ref(rtdb), updates);
+                              await Promise.all(
+                                winnersInfo.map((w: any) =>
+                                  logTransaction(w.uid, {
+                                    type: "prize",
+                                    amount: w.prize,
+                                    description: `Weekly leaderboard rank #${w.rank}`,
+                                  }),
+                                ),
+                              );
                               
                               let message = "Weekly Results Declared!\n\n";
                               winnersInfo.forEach(w => {
@@ -1260,7 +1334,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                           className={`text-xs font-bold px-2 py-1 rounded border ${t.status === "live" ? "bg-red-50 text-red-600 border-red-200" : t.status === "ended" ? "bg-gray-100 text-gray-600 border-gray-300" : "bg-purple-50 text-purple-600 border-purple-200"}`}
                           value={t.status}
                           onChange={(e) => {
-                            setTournaments(patchAt(tournaments, index, { status: e.target.value }));
+                            setTournaments(
+                              patchAt(tournaments, index, {
+                                status: e.target.value,
+                                ...(e.target.value === "live" ? { liveAt: Date.now() } : {}),
+                                ...(e.target.value === "ended" ? { endedAt: Date.now() } : {}),
+                              }),
+                            );
                             window.dispatchEvent(
                               new Event("admin_config_updated"),
                             );
@@ -1539,13 +1619,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                     <>
                                       <input
                                         type="number"
-                                        id={`kills_input_${t.id}_${u.uid}`}
                                         className="w-12 border border-gray-200 rounded p-1 text-xs text-center"
                                         placeholder="Kills"
-                                        defaultValue={existingResult.kills}
+                                        value={draftFor(t.id, u.uid, existingResult).kills}
+                                        onChange={(e) =>
+                                          setDraft(t.id, u.uid, { kills: Number(e.target.value) || 0 })
+                                        }
                                       />
                                       <label className="flex items-center gap-1 text-[10px] whitespace-nowrap bg-gray-50 p-1 border border-gray-200 rounded cursor-pointer">
-                                        <input type="checkbox" id={`won_input_${t.id}_${u.uid}`} defaultChecked={existingResult.isWinner} />
+                                        <input
+                                          type="checkbox"
+                                          checked={draftFor(t.id, u.uid, existingResult).isWinner}
+                                          onChange={(e) => setDraft(t.id, u.uid, { isWinner: e.target.checked })}
+                                        />
                                         Win?
                                       </label>
                                     </>
@@ -1570,12 +1656,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                 const existingResult = newResults.find((r: any) => r.uid === u.uid);
                                 if (existingResult?.distributed) continue;
 
-                                const killsInput = document.getElementById(`kills_input_${t.id}_${u.uid}`) as HTMLInputElement;
-                                const wonInput = document.getElementById(`won_input_${t.id}_${u.uid}`) as HTMLInputElement;
-                                if (!killsInput) continue;
-
-                                const kills = Number(killsInput.value) || 0;
-                                const isWinner = wonInput?.checked || false;
+                                const draft = draftFor(t.id, u.uid, existingResult);
+                                const kills = Number(draft.kills) || 0;
+                                const isWinner = !!draft.isWinner;
                                 const reward = kills * (t.perKill || 0) + (isWinner ? t.prizePool || 0 : 0);
 
                                 if (reward > 0) {
@@ -1584,6 +1667,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                   // threw "require is not defined" in the browser.
                                   await update(ref(rtdb, `users/${u.uid}`), {
                                     coins: increment(reward),
+                                  });
+                                  await logTransaction(u.uid, {
+                                    type: "winnings",
+                                    amount: reward,
+                                    description: `${t.game || t.title || "Tournament"} result — ${kills} kills`,
                                   });
                                 }
 
@@ -1605,6 +1693,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                               }
 
                               setTournaments(patchAt(tournaments, index, { results: newResults }));
+                              setResultDrafts({});
                               window.dispatchEvent(new Event("admin_config_updated"));
                               notify(`Distributed ${totalDistributed} coins to players.`, "success");
                             }}
