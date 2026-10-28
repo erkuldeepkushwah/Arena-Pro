@@ -20,23 +20,18 @@ export const SalesRecord: React.FC<SalesRecordProps> = ({ onBack }) => {
     const fetchSales = async () => {
       if (!auth.currentUser) return;
       const myId = auth.currentUser.uid;
-      const shortCode = myId.slice(0, 8).toUpperCase();
-      const myRefCode = profile?.referralCode || shortCode;
 
       try {
-        const usersRef = ref(rtdb, 'users');
-        const snap = await get(usersRef);
+        // Reads the small referrals node written at sign-up instead of pulling
+        // every user record and filtering in the browser.
+        const snap = await get(ref(rtdb, `referrals/${myId}`));
         if (snap.exists()) {
-          const allUsers = snap.val();
-          const referredUsers = Object.entries(allUsers)
-            .map(([uid, data]: [string, any]) => ({ uid, ...data }))
-            .filter((u) => typeof u.referredBy === 'string' && (
-               u.referredBy === myRefCode || 
-               u.referredBy === myId || 
-               u.referredBy === shortCode ||
-               u.referredBy.toLowerCase() === shortCode.toLowerCase()
-            ));
-          setSales(referredUsers);
+          const referred = snap.val();
+          setSales(
+            Object.entries(referred || {})
+              .map(([uid, data]: [string, any]) => ({ uid, ...data }))
+              .sort((a, b) => (b.joinedAt || 0) - (a.joinedAt || 0)),
+          );
         }
       } catch (err) {
         console.error(err);
@@ -119,8 +114,6 @@ export const SalesRecord: React.FC<SalesRecordProps> = ({ onBack }) => {
               </div>
             </div>
             {sales.map((user, idx) => {
-              const userCoins = user.coins || 0;
-              const bonus = Math.floor(userCoins * 0.05);
 
               return (
                 <div key={user.uid || idx} className="bg-white rounded-xl p-4 flex items-center justify-between shadow-sm border border-gray-100">
@@ -136,7 +129,9 @@ export const SalesRecord: React.FC<SalesRecordProps> = ({ onBack }) => {
                   <div className="flex flex-col items-end gap-1">
                     <div className="flex items-center gap-1.5 bg-green-50 px-2.5 py-1 rounded-full border border-green-100">
                       <Gift className="w-3.5 h-3.5 text-green-600" />
-                      <span className="text-xs font-bold text-green-700">5% Bonus: {bonus}</span>
+                      <span className="text-xs font-bold text-green-700">
+                        {user.joinedAt ? new Date(user.joinedAt).toLocaleDateString() : "Joined"}
+                      </span>
                     </div>
                   </div>
                 </div>

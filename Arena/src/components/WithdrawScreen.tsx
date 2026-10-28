@@ -46,7 +46,7 @@ export const WithdrawScreen: React.FC<WithdrawScreenProps> = ({ onBack }) => {
         balance: currentBalance - withdrawAmount,
       });
 
-      const requestRef = push(ref(rtdb, "withdrawalRequests"));
+      const requestRef = push(ref(rtdb, `withdrawalRequests/${auth.currentUser.uid}`));
       await update(requestRef, {
         uid: auth.currentUser.uid,
         amount: withdrawAmount,

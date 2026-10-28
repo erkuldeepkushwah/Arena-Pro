@@ -1,15 +1,15 @@
 import React from "react";
 import { ChevronLeft, Clock, CheckCircle2, XCircle } from "lucide-react";
-import { useWithdrawalRequests } from "../hooks/useFirebaseData";
-import { auth } from "../firebase";
+import { useMyWithdrawalRequests } from "../hooks/useFirebaseData";
 
 interface WithdrawRecordScreenProps {
   onBack: () => void;
 }
 
 export const WithdrawRecordScreen: React.FC<WithdrawRecordScreenProps> = ({ onBack }) => {
-  const requests = useWithdrawalRequests();
-  const myRequests = requests.filter((r) => r.uid === auth.currentUser?.uid);
+  // Reads only this user's subtree, so no other player's bank details are
+  // downloaded (they used to arrive here and get filtered in the browser).
+  const myRequests = useMyWithdrawalRequests();
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] pb-10">

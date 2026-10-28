@@ -99,7 +99,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
       notify("User ID is missing for this withdrawal request.", "error");
       return;
     }
-    const requestRef = ref(rtdb, `withdrawalRequests/${requestId}`);
+    const requestRef = ref(rtdb, `withdrawalRequests/${userId}/${requestId}`);
     try {
       // Only act while the request is still pending. Without this check a
       // double-click (or two admins working at once) refunds/approves twice.
@@ -146,7 +146,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
       notify("User ID is missing for this recharge request.", "error");
       return;
     }
-    const requestRef = ref(rtdb, `rechargeRequests/${requestId}`);
+    const requestRef = ref(rtdb, `rechargeRequests/${userId}/${requestId}`);
     try {
       const snap = await get(requestRef);
       if (!snap.exists()) {

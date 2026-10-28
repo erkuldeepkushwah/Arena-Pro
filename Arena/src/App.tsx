@@ -57,6 +57,11 @@ export default function App() {
              updateData.displayName = user.displayName;
           }
           await update(userRef, updateData);
+
+          // Publish this player's own shareable code so a friend's sign-up can
+          // resolve it to a uid. Codes are meant to be shared, so this node is
+          // readable by any signed-in user — the users node is not.
+          await update(ref(rtdb, `referralIndex/${user.uid.slice(0, 8).toUpperCase()}`), user.uid);
         } catch (err) {
           console.error("Failed to sync user data", err);
         }

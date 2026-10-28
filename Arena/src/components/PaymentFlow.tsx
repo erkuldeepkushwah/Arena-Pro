@@ -41,7 +41,7 @@ export const PaymentFlow: React.FC<PaymentFlowProps> = ({ onBack, onComplete }) 
       const uid = auth.currentUser?.uid;
       if (!uid) throw new Error('Not authenticated');
       
-      const requestRef = push(ref(rtdb, 'rechargeRequests'));
+      const requestRef = push(ref(rtdb, `rechargeRequests/${uid}`));
       const timestamp = serverTimestamp();
       
       await update(requestRef, {

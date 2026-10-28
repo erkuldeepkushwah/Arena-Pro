@@ -1,0 +1,143 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "users": {
+      ".read": "auth != null && auth.token.email === '125607@clorigo.com'",
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || auth.token.email === '125607@clorigo.com')",
+        ".write": "auth != null && (auth.uid === $uid || auth.token.email === '125607@clorigo.com')",
+        "balance": {
+          ".validate": "!newData.exists() || newData.isNumber()"
+        },
+        "coins": {
+          ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0)"
+        },
+        "email": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 200)"
+        },
+        "phone": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 20)"
+        },
+        "displayName": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 120)"
+        },
+        "referralCode": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 32)"
+        },
+        "referredBy": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 32)"
+        },
+        "bankDetails": {
+          ".validate": "!newData.exists() || newData.hasChildren()",
+          "name": {
+            ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 120)"
+          },
+          "ac": {
+            ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 40)"
+          },
+          "ifsc": {
+            ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 20)"
+          },
+          "mobileNumber": {
+            ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 20)"
+          }
+        },
+        "weeklyWinnerAt": {
+          ".validate": "!newData.exists() || (auth != null && auth.token.email === '125607@clorigo.com')"
+        },
+        "weeklyWinnerPrize": {
+          ".validate": "!newData.exists() || (auth != null && auth.token.email === '125607@clorigo.com')"
+        },
+        "weeklyWinnerRank": {
+          ".validate": "!newData.exists() || (auth != null && auth.token.email === '125607@clorigo.com')"
+        }
+      }
+    },
+    "products": {
+      ".read": "auth != null",
+      ".write": "auth != null && auth.token.email === '125607@clorigo.com'"
+    },
+    "welfareProducts": {
+      ".read": "auth != null",
+      ".write": "auth != null && auth.token.email === '125607@clorigo.com'"
+    },
+    "cricketMatches": {
+      ".read": "auth != null",
+      ".write": "auth != null && auth.token.email === '125607@clorigo.com'"
+    },
+    "tournaments": {
+      ".read": "auth != null",
+      ".write": "auth != null && auth.token.email === '125607@clorigo.com'"
+    },
+    "earnTasks": {
+      ".read": "auth != null",
+      ".write": "auth != null && auth.token.email === '125607@clorigo.com'"
+    },
+    "topPromotions": {
+      ".read": "auth != null",
+      ".write": "auth != null && auth.token.email === '125607@clorigo.com'"
+    },
+    "global": {
+      ".read": "auth != null",
+      "quizConfig": {
+        ".write": "auth != null && auth.token.email === '125607@clorigo.com'"
+      },
+      "siteConfig": {
+        ".write": "auth != null && auth.token.email === '125607@clorigo.com'"
+      }
+    },
+    "withdrawalRequests": {
+      ".read": "auth != null && auth.token.email === '125607@clorigo.com'",
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$requestId": {
+          ".write": "auth != null && ((auth != null && auth.token.email === '125607@clorigo.com') || (auth.uid === $uid && !data.exists()))",
+          ".validate": "newData.hasChildren(['uid', 'amount', 'status'])",
+          "uid": {
+            ".validate": "newData.val() === $uid"
+          },
+          "amount": {
+            ".validate": "newData.isNumber() && newData.val() > 0"
+          },
+          "status": {
+            ".validate": "newData.val() === 'pending' || newData.val() === 'approved' || newData.val() === 'rejected'"
+          }
+        }
+      }
+    },
+    "rechargeRequests": {
+      ".read": "auth != null && auth.token.email === '125607@clorigo.com'",
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$requestId": {
+          ".write": "auth != null && ((auth != null && auth.token.email === '125607@clorigo.com') || (auth.uid === $uid && !data.exists()))",
+          ".validate": "newData.hasChildren(['uid', 'amount', 'status'])",
+          "uid": {
+            ".validate": "newData.val() === $uid"
+          },
+          "amount": {
+            ".validate": "newData.isNumber() && newData.val() > 0"
+          },
+          "status": {
+            ".validate": "newData.val() === 'pending' || newData.val() === 'approved' || newData.val() === 'rejected'"
+          }
+        }
+      }
+    },
+    "referralIndex": {
+      ".read": "auth != null",
+      "$code": {
+        ".write": "auth != null && (!data.exists() || data.val() === auth.uid)"
+      }
+    },
+    "referrals": {
+      "$referrerUid": {
+        ".read": "auth != null && (auth.uid === $referrerUid || auth.token.email === '125607@clorigo.com')",
+        "$newUid": {
+          ".write": "auth != null && newData.child('uid').val() === auth.uid"
+        }
+      }
+    }
+  }
+}
