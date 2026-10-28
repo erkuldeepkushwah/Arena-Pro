@@ -69,6 +69,14 @@ const LiveCountdown: React.FC<{ liveAt: number; windowMs?: number }> = ({
   );
 };
 
+/** Progress-bar width that never produces NaN% or an out-of-range value. */
+const pct = (value: number, total: number): number => {
+  const t = Number(total) || 0;
+  if (t <= 0) return 0;
+  const v = Number(value) || 0;
+  return Math.min(100, Math.max(0, (v / t) * 100));
+};
+
 const GAMES_LIST = [
   {
     gameName: "Free Fire Max",
@@ -332,20 +340,29 @@ export const PlayScreen: React.FC = () => {
                 return (
                   <div
                     key={room.id}
-                    className="bg-white rounded-[28px] p-5 shadow-[0_3px_12px_rgba(0,0,0,0.05)] border border-gray-50 flex flex-col relative font-['Inter']"
+                    className="bg-white rounded-[20px] sm:rounded-[28px] p-4 sm:p-5 shadow-[0_3px_12px_rgba(0,0,0,0.06)] border border-gray-100 flex flex-col relative font-['Inter']"
                   >
                     {/* Header */}
                     <div className="flex justify-between items-start gap-2 mb-5">
                        <div className="flex gap-3.5 items-center">
                         <div className="relative shrink-0">
-                          <img
-                            src={selectedGameObj?.imageUrl || ""}
-                            alt="Game"
-                            className="w-[54px] h-[54px] rounded-full object-cover border-[2px] border-yellow-400 p-[2px]"
-                          />
+                          {selectedGameObj?.imageUrl ? (
+                            <img
+                              src={selectedGameObj.imageUrl}
+                              alt={selectedGameObj.gameName || "Game"}
+                              className="w-[54px] h-[54px] rounded-full object-cover border-[2px] border-yellow-400 p-[2px]"
+                            />
+                          ) : (
+                            // An empty src makes the browser draw its broken-image icon.
+                            <div className="w-[54px] h-[54px] rounded-full border-[2px] border-yellow-400 p-[2px]">
+                              <div className="w-full h-full rounded-full bg-gradient-to-br from-[#6D28D9] to-[#8B5CF6] flex items-center justify-center text-white font-black text-[15px] uppercase">
+                                {(room.game || room.title || "?").slice(0, 2)}
+                              </div>
+                            </div>
+                          )}
                         </div>
-                        <div className="flex flex-col">
-                          <h3 className="font-bold text-[#111] text-[17px] mb-1.5 leading-tight flex items-center gap-2">
+                        <div className="flex flex-col min-w-0">
+                          <h3 className="font-bold text-[#111] text-[17px] mb-1.5 leading-tight truncate">
                             {room.title}
                           </h3>
                           {/* Tags above time */}
@@ -403,7 +420,7 @@ export const PlayScreen: React.FC = () => {
                            <div
                              className="bg-gradient-to-r from-[#6D28D9] to-[#8B5CF6] h-full rounded-full transition-all"
                              style={{
-                               width: `${(joinedCount / total) * 100}%`,
+                               width: `${pct(joinedCount, total)}%`,
                              }}
                            ></div>
                         </div>
@@ -426,7 +443,7 @@ export const PlayScreen: React.FC = () => {
                           <div className="bg-gray-100 text-gray-500 font-bold text-[14px] px-8 py-2.5 rounded-[12px] border border-gray-200">
                             Ended
                           </div>
-                        ) : joinedCount >= total ? (
+                        ) : total > 0 && joinedCount >= total ? (
                           <div className="bg-[#6D28D9] text-white opacity-50 font-bold text-[14px] px-8 py-2.5 rounded-[12px]">
                             Full
                           </div>
@@ -585,13 +602,17 @@ export const PlayScreen: React.FC = () => {
               {/* Progress */}
               <div className="pt-5 border-t border-gray-100">
                 <p className="text-[14px] font-bold text-gray-600 mb-3 text-left">
-                  Participants ({(selectedRoom?.joinedPlayers?.length || 0) + (joinedTournaments.includes(selectedRoom?.id) ? 1 : 0)}/{selectedRoom?.totalSlots})
+                  Participants ({(selectedRoom?.joinedPlayers?.length || 0) + (joinedTournaments.includes(selectedRoom?.id) ? 1 : 0)}/{selectedRoom?.totalSlots || 0})
                 </p>
                 <div className="w-full bg-purple-50 h-[8px] rounded-full overflow-hidden border border-purple-100">
                   <div
                     className="bg-[#5e35b1] h-full rounded-full transition-all"
                     style={{
-                      width: `${(((selectedRoom?.joinedPlayers?.length || 0) + (joinedTournaments.includes(selectedRoom?.id) ? 1 : 0)) / selectedRoom?.totalSlots) * 100}%`,
+                      width: `${pct(
+                        (selectedRoom?.joinedPlayers?.length || 0) +
+                          (joinedTournaments.includes(selectedRoom?.id) ? 1 : 0),
+                        selectedRoom?.totalSlots,
+                      )}%`,
                     }}
                   ></div>
                 </div>
@@ -687,10 +708,10 @@ export const PlayScreen: React.FC = () => {
             </div>
 
             {/* Tabs */}
-            <div className="flex bg-white rounded-full p-1 border border-gray-100 shadow-sm">
+            <div className="flex bg-white rounded-full p-1.5 border border-gray-100 shadow-[0_4px_12px_rgba(0,0,0,0.05)]">
               <button
                 onClick={() => setCricketView("live")}
-                className={`flex-1 py-3 text-sm font-bold rounded-full capitalize transition-all ${
+                className={`flex-1 py-3 text-[14px] font-bold rounded-full capitalize transition-all ${
                   cricketView === "live"
                     ? "bg-[#5e35b1] text-white shadow-md shadow-purple-200"
                     : "text-gray-600 hover:bg-gray-50"
@@ -700,7 +721,7 @@ export const PlayScreen: React.FC = () => {
               </button>
               <button
                 onClick={() => setCricketView("upcoming")}
-                className={`flex-1 py-3 text-sm font-bold rounded-full capitalize transition-all ${
+                className={`flex-1 py-3 text-[14px] font-bold rounded-full capitalize transition-all ${
                   cricketView === "upcoming"
                     ? "bg-[#5e35b1] text-white shadow-md shadow-purple-200"
                     : "text-gray-600 hover:bg-gray-50"
@@ -710,7 +731,7 @@ export const PlayScreen: React.FC = () => {
               </button>
               <button
                 onClick={() => setCricketView("ended")}
-                className={`flex-1 py-3 text-sm font-bold rounded-full capitalize transition-all ${
+                className={`flex-1 py-3 text-[14px] font-bold rounded-full capitalize transition-all ${
                   cricketView === "ended"
                     ? "bg-[#5e35b1] text-white shadow-md shadow-purple-200"
                     : "text-gray-600 hover:bg-gray-50"
@@ -741,14 +762,14 @@ export const PlayScreen: React.FC = () => {
 
                     <div className="flex justify-between items-center relative mb-4 sm:mb-6 mt-1 sm:mt-2">
                        <div className="flex flex-col items-center shrink-0 w-[50px] sm:w-[80px]">
-                          {match.team1.logoUrl ? (
+                          {match.team1?.logoUrl ? (
                              <img src={match.team1.logoUrl} alt={match.team1.short} className="w-[45px] h-[45px] sm:w-[80px] sm:h-[80px] object-contain mb-1 sm:mb-2" />
                           ) : (
                              <div className="w-[45px] h-[45px] sm:w-[80px] sm:h-[80px] bg-blue-50 border border-blue-100 rounded-full flex items-center justify-center font-bold text-blue-700 text-[14px] sm:text-2xl mb-1 sm:mb-2 shadow-sm object-contain">
-                                {match.team1.short}
+                                {match.team1?.short || "T1"}
                              </div>
                           )}
-                          <span className="text-[12px] sm:text-[20px] font-bold text-[#111] text-center uppercase tracking-wide">{match.team1.short}</span>
+                          <span className="text-[12px] sm:text-[20px] font-bold text-[#111] text-center uppercase tracking-wide">{match.team1?.short || "T1"}</span>
                        </div>
 
                        <div className="flex flex-col items-center flex-1 px-1 sm:px-4 text-center">
@@ -756,7 +777,7 @@ export const PlayScreen: React.FC = () => {
                              {match.title}
                           </span>
                           <h3 className="font-bold text-[#111] text-[18px] sm:text-[48px] leading-tight mb-1 tracking-tight">
-                             {match.team1.short} vs {match.team2.short}
+                             {match.team1?.short || "T1"} vs {match.team2?.short || "T2"}
                           </h3>
                           {match.status === "upcoming" && (
                              <span className="text-gray-500 font-medium text-[12px] sm:text-[20px] mt-0.5 sm:mt-1">{match.time}</span>
@@ -764,14 +785,14 @@ export const PlayScreen: React.FC = () => {
                        </div>
 
                        <div className="flex flex-col items-center shrink-0 w-[50px] sm:w-[80px]">
-                          {match.team2.logoUrl ? (
+                          {match.team2?.logoUrl ? (
                              <img src={match.team2.logoUrl} alt={match.team2.short} className="w-[45px] h-[45px] sm:w-[80px] sm:h-[80px] object-contain mb-1 sm:mb-2" />
                           ) : (
                              <div className="w-[45px] h-[45px] sm:w-[80px] sm:h-[80px] bg-green-50 border border-green-100 rounded-full flex items-center justify-center font-bold text-green-700 text-[14px] sm:text-2xl mb-1 sm:mb-2 shadow-sm object-contain">
-                                {match.team2.short}
+                                {match.team2?.short || "T2"}
                              </div>
                           )}
-                          <span className="text-[12px] sm:text-[20px] font-bold text-[#111] text-center uppercase tracking-wide">{match.team2.short}</span>
+                          <span className="text-[12px] sm:text-[20px] font-bold text-[#111] text-center uppercase tracking-wide">{match.team2?.short || "T2"}</span>
                        </div>
                     </div>
 
@@ -936,7 +957,7 @@ export const PlayScreen: React.FC = () => {
     if (quizView === "start") {
       return (
         <div className="p-4 flex flex-col space-y-4">
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100/50 p-5 flex flex-col items-center relative overflow-hidden">
+          <div className="bg-white rounded-[20px] sm:rounded-[28px] shadow-[0_3px_12px_rgba(0,0,0,0.06)] border border-gray-100 p-5 flex flex-col items-center relative overflow-hidden">
             {/* Background elements */}
             <div className="absolute top-8 left-8">
               <Sparkles
@@ -1021,7 +1042,7 @@ export const PlayScreen: React.FC = () => {
                 <StarIcon className="w-3 h-3 text-yellow-100 fill-white" />
               </div>
               <span className="text-gray-500">Entry Fee:</span>
-              <span className="font-black text-[#111]">10 Coins</span>
+              <span className="font-black text-[#111]">{QUIZ_CONFIG.entryFee || 0} Coins</span>
             </div>
 
             <button
@@ -1056,6 +1077,19 @@ export const PlayScreen: React.FC = () => {
 
     if (quizView === "playing") {
       const q = QUIZ_CONFIG.questions[currentQuestionIdx];
+
+      if (!q) {
+        return (
+          <div className="p-4">
+            <div className="bg-white rounded-[20px] sm:rounded-[28px] p-6 text-center border border-gray-100 shadow-[0_3px_12px_rgba(0,0,0,0.06)]">
+              <HelpCircle className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+              <p className="text-gray-600 font-bold">No questions available right now.</p>
+              <p className="text-gray-400 text-[13px] mt-1">Please check back later.</p>
+            </div>
+          </div>
+        );
+      }
+
       return (
         <div className="p-4 space-y-6">
           <div className="flex justify-between items-center px-2">
@@ -1067,12 +1101,12 @@ export const PlayScreen: React.FC = () => {
             </span>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mt-4 relative overflow-hidden">
+          <div className="bg-white p-5 sm:p-6 rounded-[20px] sm:rounded-[28px] shadow-[0_3px_12px_rgba(0,0,0,0.06)] border border-gray-100 mt-4 relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-gray-100">
               <div
                 className="h-full bg-purple-500 transition-all"
                 style={{
-                  width: `${(currentQuestionIdx / QUIZ_CONFIG.questions.length) * 100}%`,
+                  width: `${pct(currentQuestionIdx, QUIZ_CONFIG.questions.length)}%`,
                 }}
               ></div>
             </div>
@@ -1092,9 +1126,11 @@ export const PlayScreen: React.FC = () => {
                     if (currentQuestionIdx < QUIZ_CONFIG.questions.length - 1) {
                       setCurrentQuestionIdx((prev) => prev + 1);
                     } else {
-                      // Finished
-                      if (isCorrect) setCorrectAnswers((prev) => prev + 1); // need to update immediately for result logic
-                      setTimeout(() => setQuizView("result"), 300); // slight delay for visual processing
+                      // Finished. Do NOT bump the score again here — the branch
+                      // above already counted this answer, so answering the last
+                      // question correctly used to score twice and inflate the
+                      // multiplier (and therefore the payout).
+                      setTimeout(() => setQuizView("result"), 300);
                     }
                   }}
                   className="w-full text-left bg-gray-50 p-4 rounded-xl border-2 border-transparent font-medium text-gray-700 hover:bg-purple-50 hover:border-purple-200 transition-all active:scale-[0.98]"
