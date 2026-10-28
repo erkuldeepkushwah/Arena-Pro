@@ -385,3 +385,16 @@ export const useTransactions = () => {
   }, []);
   return transactions;
 };
+
+/** Global app settings saved by the admin (logo, coin icon, QR, banners...). */
+export const useSiteConfig = () => {
+  const [config, setConfig] = useState<any>(null);
+  useEffect(() => {
+    return onValue(
+      ref(rtdb, "global/siteConfig"),
+      (snap) => setConfig(snap.exists() ? snap.val() : null),
+      console.error,
+    );
+  }, []);
+  return config;
+};

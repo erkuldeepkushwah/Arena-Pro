@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ChevronLeft, Users, Gift, Coins } from 'lucide-react';
 import { ref, get } from 'firebase/database';
 import { rtdb, auth } from '../firebase';
-import { useUserProfile } from '../hooks/useFirebaseData';
+import { useUserProfile, useSiteConfig } from '../hooks/useFirebaseData';
 import coinIcon from '../assets/coin.png';
 
 interface SalesRecordProps {
@@ -16,6 +16,8 @@ export const SalesRecord: React.FC<SalesRecordProps> = ({ onBack }) => {
   // We identify the user's reference code (referral code). 
   // Let's assume user.uid is their referral code or they have a 'referralCode' field.
   const profile = useUserProfile();
+  const siteCfg = useSiteConfig();
+  const coinSrc = siteCfg?.coinIcon || coinIcon;
 
   useEffect(() => {
     const fetchSales = async () => {
@@ -89,7 +91,7 @@ export const SalesRecord: React.FC<SalesRecordProps> = ({ onBack }) => {
           {/* Right Image */}
           <div className="absolute -right-6 top-1/2 -translate-y-1/2 w-[180px] drop-shadow-[0_10px_20px_rgba(0,0,0,0.6)] z-0 transform hover:scale-105 transition-transform duration-500">
              <img 
-               src={coinIcon} 
+               src={coinSrc} 
                alt="Coins" 
                className="w-full object-contain drop-shadow-2xl"
                onError={(e) => {

@@ -11,7 +11,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { auth, rtdb } from "../firebase";
 import { ref, onValue } from "firebase/database";
-import { useUserProfile, useTopPromotions } from "../hooks/useFirebaseData";
+import { useUserProfile, useTopPromotions, useSiteConfig } from "../hooks/useFirebaseData";
 import { useNotifications } from "../hooks/useNotifications";
 import { playCoinSound, playNotificationSound } from "../utils/sounds";
 import coinIcon from "../assets/coin.png";
@@ -184,6 +184,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
 
   const coins = userProfile?.coins || 0;
+  const siteCfg = useSiteConfig();
+  const coinSrc = siteCfg?.coinIcon || coinIcon;
 
   // Read the small, purpose-built `topPromotions` node instead of pulling the
   // entire users collection into every client (privacy + bandwidth + cost).
@@ -307,7 +309,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               <span className="text-sm font-medium">Total Balance</span>
             </div>
             <div className="bg-white/20 px-3 py-1.5 rounded-full flex items-center gap-1.5 backdrop-blur-sm">
-              <img src={coinIcon} alt="" aria-hidden="true" className="w-4 h-4 object-contain" />
+              <img src={coinSrc} alt="" aria-hidden="true" className="w-4 h-4 object-contain" />
               <span className="text-sm font-semibold">{coins} Coins</span>
             </div>
           </div>

@@ -4,6 +4,7 @@ import { auth } from '../firebase';
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { emailForNumber, friendlyAuthError } from '../utils/authErrors';
 import { SignUpScreen } from './SignUpScreen';
+import { useSiteConfig } from '../hooks/useFirebaseData';
 
 interface AuthProps {
   onLogin: () => void;
@@ -16,6 +17,7 @@ export const AuthScreen: React.FC<AuthProps> = ({ onLogin }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const siteCfg = useSiteConfig();
 
   const handleGoogleSignIn = async () => {
     try {
@@ -60,9 +62,13 @@ export const AuthScreen: React.FC<AuthProps> = ({ onLogin }) => {
   return (
     <div className="min-h-screen bg-[#f8f9fa] flex flex-col items-center px-6 pt-32 pb-10 font-sans">
       <div className="flex flex-col items-center mb-10 text-center">
-        <div className="bg-[#6D28D9] rounded-[1.7rem] px-8 py-3 mb-4 shadow-sm">
-          <span className="text-white text-[28px] font-bold tracking-wide">Arena Pro</span>
-        </div>
+        {siteCfg?.logoUrl ? (
+          <img src={siteCfg.logoUrl} alt="Arena Pro" className="h-16 mb-4 object-contain" />
+        ) : (
+          <div className="bg-[#6D28D9] rounded-[1.7rem] px-8 py-3 mb-4 shadow-sm">
+            <span className="text-white text-[28px] font-bold tracking-wide">Arena Pro</span>
+          </div>
+        )}
         <p className="text-gray-500 text-sm">Your Ultimate Gaming App</p>
       </div>
 

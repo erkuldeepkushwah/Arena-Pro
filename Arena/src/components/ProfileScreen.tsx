@@ -11,7 +11,7 @@ import {
   Users,
   Receipt,
 } from "lucide-react";
-import { useUserProfile } from "../hooks/useFirebaseData";
+import { useUserProfile, useSiteConfig } from "../hooks/useFirebaseData";
 import coinIcon from "../assets/coin.png";
 import { fileToAvatarDataUrl, saveAvatar } from "../utils/avatar";
 
@@ -26,6 +26,8 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
 }) => {
   const userProfile = useUserProfile();
   const coins = userProfile?.coins || 0;
+  const siteCfg = useSiteConfig();
+  const coinSrc = siteCfg?.coinIcon || coinIcon;
 
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
@@ -145,7 +147,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               COINS
             </p>
             <div className="flex items-center justify-center gap-1.5 font-bold text-2xl text-[#222]">
-              <img src={coinIcon} alt="" aria-hidden="true" className="w-5 h-5 object-contain" />
+              <img src={coinSrc} alt="" aria-hidden="true" className="w-5 h-5 object-contain" />
               <span>{coins}</span>
             </div>
           </div>

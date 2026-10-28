@@ -28,6 +28,7 @@ import {
 import { saveEarnTasks } from "../gameplayConfig";
 import { rtdb } from "../firebase";
 import { logTransaction } from "../utils/transactions";
+import { fileToImageDataUrl } from "../utils/imageUpload";
 
 /** Matches marked "ended" are kept this long before the dashboard sweeps them. */
 const FINISHED_RETENTION_MS = 24 * 60 * 60 * 1000;
@@ -42,6 +43,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   const [manageExpanded, setManageExpanded] = useState<number | null>(null);
   const [usersExpanded, setUsersExpanded] = useState(true);
   const [uiExpanded, setUiExpanded] = useState(false);
+  const [logoExpanded, setLogoExpanded] = useState(false);
+  const [coinExpanded, setCoinExpanded] = useState(false);
   const [cricketExpanded, setCricketExpanded] = useState(false);
   const [esportsExpanded, setEsportsExpanded] = useState(false);
   const [esportsTab, setEsportsTab] = useState<'upcoming' | 'live' | 'result' | 'ended'>('upcoming');
@@ -279,6 +282,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     redeemCode: "",
     redeemAmount: "",
     paymentQr: "",
+    logoUrl: "",
+    coinIcon: "",
     banners: [],
   });
   useEffect(() => {
@@ -301,6 +306,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     } catch (error) {
       console.error(error);
       notify("Could not save.", "error");
+    }
+  };
+
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const coinInputRef = useRef<HTMLInputElement>(null);
+
+  const handleSettingImage = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    key: "logoUrl" | "coinIcon",
+  ) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    try {
+      const dataUrl = await fileToImageDataUrl(file, 256);
+      await saveSiteConfig({ [key]: dataUrl });
+    } catch (err: any) {
+      alert(err?.message || "Could not upload that image.");
     }
   };
 
@@ -1991,6 +2014,110 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             <h2 className="font-bold text-[17px]">General</h2>
           </div>
           <div className="p-4 space-y-4">
+            <div
+              className={`border border-gray-200 rounded-lg ${logoExpanded ? "shadow-sm" : ""}`}
+            >
+              <button
+                onClick={() => setLogoExpanded(!logoExpanded)}
+                className={`w-full p-4 flex justify-between items-center font-bold text-[15px] text-[#374151] ${logoExpanded ? "bg-[#f8f9fa] border-b border-gray-200 rounded-t-lg" : "bg-white rounded-lg"}`}
+              >
+                App Logo
+                {logoExpanded ? (
+                  <ChevronUp className="text-gray-500 w-5 h-5" />
+                ) : (
+                  <ChevronDown className="text-gray-500 w-5 h-5" />
+                )}
+              </button>
+
+              {logoExpanded && (
+                <div className="p-4 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => logoInputRef.current?.click()}
+                      className="w-16 h-16 rounded-lg border border-dashed border-gray-300 bg-gray-50 flex items-center justify-center overflow-hidden shrink-0"
+                    >
+                      {siteCfg.logoUrl ? (
+                        <img src={siteCfg.logoUrl} alt="App Logo" className="w-full h-full object-contain" />
+                      ) : (
+                        <span className="text-[10px] font-bold text-gray-400">Upload</span>
+                      )}
+                    </button>
+                    <div className="text-[12px] text-gray-500 leading-snug">
+                      Tap the box to pick an image.
+                      {siteCfg.logoUrl && (
+                        <button
+                          onClick={() => saveSiteConfig({ logoUrl: "" })}
+                          className="block text-red-600 font-bold mt-1"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <input
+                    ref={logoInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleSettingImage(e, "logoUrl")}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div
+              className={`border border-gray-200 rounded-lg ${coinExpanded ? "shadow-sm" : ""}`}
+            >
+              <button
+                onClick={() => setCoinExpanded(!coinExpanded)}
+                className={`w-full p-4 flex justify-between items-center font-bold text-[15px] text-[#374151] ${coinExpanded ? "bg-[#f8f9fa] border-b border-gray-200 rounded-t-lg" : "bg-white rounded-lg"}`}
+              >
+                Coin Icon
+                {coinExpanded ? (
+                  <ChevronUp className="text-gray-500 w-5 h-5" />
+                ) : (
+                  <ChevronDown className="text-gray-500 w-5 h-5" />
+                )}
+              </button>
+
+              {coinExpanded && (
+                <div className="p-4 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => coinInputRef.current?.click()}
+                      className="w-16 h-16 rounded-lg border border-dashed border-gray-300 bg-gray-50 flex items-center justify-center overflow-hidden shrink-0"
+                    >
+                      {siteCfg.coinIcon ? (
+                        <img src={siteCfg.coinIcon} alt="Coin Icon" className="w-full h-full object-contain" />
+                      ) : (
+                        <span className="text-[10px] font-bold text-gray-400">Upload</span>
+                      )}
+                    </button>
+                    <div className="text-[12px] text-gray-500 leading-snug">
+                      Tap the box to pick an image.
+                      {siteCfg.coinIcon && (
+                        <button
+                          onClick={() => saveSiteConfig({ coinIcon: "" })}
+                          className="block text-red-600 font-bold mt-1"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <input
+                    ref={coinInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleSettingImage(e, "coinIcon")}
+                  />
+                </div>
+              )}
+            </div>
+
             <div
               className={`border border-gray-200 rounded-lg ${uiExpanded ? "shadow-sm" : ""}`}
             >

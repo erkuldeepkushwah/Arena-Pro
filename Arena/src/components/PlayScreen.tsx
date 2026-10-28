@@ -26,6 +26,7 @@ import {
   useTournaments,
   useQuizConfig,
   useUserProfile,
+  useSiteConfig,
 } from "../hooks/useFirebaseData";
 
 import { auth } from "../firebase";
@@ -121,6 +122,8 @@ export const PlayScreen: React.FC = () => {
   // Dynamic Game Configs
   const QUIZ_CONFIG = useQuizConfig();
   const CRICKET_MATCHES = useCricketMatches();
+  const siteCfg = useSiteConfig();
+  const coinSrc = siteCfg?.coinIcon || coinIcon;
   const ROOMS = useTournaments();
   const userProfile = useUserProfile();
 
@@ -528,7 +531,7 @@ export const PlayScreen: React.FC = () => {
               <div className="flex justify-between items-center text-sm">
                 <span className="text-gray-500 font-medium">Entry Fee :</span>
                 <span className="font-bold text-gray-800 flex items-center gap-1">
-                  <img src={coinIcon} alt="" aria-hidden="true" className="w-3.5 h-3.5 object-contain" />
+                  <img src={coinSrc} alt="" aria-hidden="true" className="w-3.5 h-3.5 object-contain" />
                   <span>{selectedRoom?.entryFee}</span>
                 </span>
               </div>
@@ -584,21 +587,7 @@ export const PlayScreen: React.FC = () => {
                     <p className="text-[14px] font-bold text-red-500 mb-6 bg-red-50 py-3 rounded-xl border border-red-100">
                       Match is Full
                     </p>
-                ) : (
-                   <>
-                     <p className="text-[14px] font-bold text-[#111] mb-6">
-                       Join the match to check room Id
-                     </p>
-                     <div className="flex justify-center mb-6">
-                       <button
-                         onClick={() => setJoinModal({ show: true, room: selectedRoom })}
-                         className="bg-[#5e35b1] hover:bg-[#4b2a8d] text-white font-bold py-3 px-12 rounded-[25px] transition-colors shadow-md shadow-purple-200"
-                       >
-                         Join
-                       </button>
-                     </div>
-                   </>
-                )}
+                ) : null}
 
               {/* Progress */}
               <div className="pt-5 border-t border-gray-100">
@@ -910,7 +899,7 @@ export const PlayScreen: React.FC = () => {
                     <div className="flex justify-between items-center p-4 bg-[#f8f5ff] rounded-xl border border-purple-100 mb-6">
                       <span className="text-sm font-bold text-gray-600">Entry Fee</span>
                       <div className="flex items-center gap-1 font-black text-[#5e35b1] text-lg">
-                        <img src={coinIcon} alt="" aria-hidden="true" className="w-4 h-4 object-contain" /> {selectedCricketMatch.entryFee}
+                        <img src={coinSrc} alt="" aria-hidden="true" className="w-4 h-4 object-contain" /> {selectedCricketMatch.entryFee}
                       </div>
                     </div>
 
@@ -1266,11 +1255,7 @@ export const PlayScreen: React.FC = () => {
                 : "text-gray-500 hover:bg-gray-50"
             }`}
           >
-            <img
-              src="https://uploads.onecompiler.io/44pbfr3gy/44pbfr8db/cricket-ball.png"
-              alt="Cricket"
-              className={`w-4 h-4 object-contain ${activeTab === "cricket" ? "brightness-0 invert" : ""}`}
-            />
+            <span className="text-[15px] leading-none">🏏</span>
             <span
               className={`text-[10px] font-bold uppercase tracking-wide ${activeTab === "cricket" ? "" : "text-gray-500"}`}
             >

@@ -15,6 +15,7 @@ import { auth, rtdb } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { ref, update, get } from 'firebase/database';
 import { emailForNumber, friendlyAuthError } from '../utils/authErrors';
+import { useSiteConfig } from '../hooks/useFirebaseData';
 
 interface SignUpScreenProps {
   onBack: () => void;
@@ -35,6 +36,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({ onBack, onSignedUp }
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const siteCfg = useSiteConfig();
 
   // Mirrors what the submit button validates, so the fields can show it inline.
   const problems = {
@@ -116,9 +118,13 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({ onBack, onSignedUp }
       </button>
 
       <div className="flex flex-col items-center mt-6 mb-8 text-center">
-        <div className="bg-[#6D28D9] rounded-[1.7rem] px-8 py-3 mb-4 shadow-sm">
-          <span className="text-white text-[26px] font-bold tracking-wide">Arena Pro</span>
-        </div>
+        {siteCfg?.logoUrl ? (
+          <img src={siteCfg.logoUrl} alt="Arena Pro" className="h-14 mb-4 object-contain" />
+        ) : (
+          <div className="bg-[#6D28D9] rounded-[1.7rem] px-8 py-3 mb-4 shadow-sm">
+            <span className="text-white text-[26px] font-bold tracking-wide">Arena Pro</span>
+          </div>
+        )}
         <h1 className="text-[22px] font-bold text-[#14122C]">Create your account</h1>
         <p className="text-gray-500 text-sm mt-1">Join, play and win coins</p>
       </div>
