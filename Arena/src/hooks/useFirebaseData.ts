@@ -210,51 +210,76 @@ export const useTopPromotions = () => {
   return promotions;
 };
 
-export const useWithdrawalRequests = () => {
+/**
+ * Requests now live under the requesting user — `withdrawalRequests/{uid}/{id}`
+ * — so a player can only read their own and the admin can still read the lot.
+ * The flat shape this hook returns is unchanged, so the dashboard didn't need
+ * rewriting.
+ */
+const flattenRequests = (val: any): any[] => {
+  if (!val || typeof val !== "object") return [];
+  const rows: any[] = [];
+  Object.entries(val).forEach(([uid, byId]: [string, any]) => {
+    if (!byId || typeof byId !== "object") return;
+    Object.entries(byId).forEach(([id, value]: [string, any]) => {
+      rows.push({ id, uid: value?.uid || uid, ...value });
+    });
+  });
+  return rows.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+};
+
+const useRequestCollection = (node: string) => {
   const [requests, setRequests] = useState<any[]>([]);
   useEffect(() => {
     return onValue(
-      ref(rtdb, "withdrawalRequests"),
-      (snap) => {
-        const val = snap.val();
-        if (val && typeof val === "object") {
-          const reqs = Object.entries(val).map(([key, value]: [string, any]) => ({
-            id: key,
-            ...value,
-          }));
-          setRequests(reqs.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)));
-        } else {
-          setRequests([]);
-        }
-      },
+      ref(rtdb, node),
+      (snap) => setRequests(flattenRequests(snap.val())),
       console.error,
     );
-  }, []);
+  }, [node]);
   return requests;
 };
 
-export const useRechargeRequests = () => {
+/** The signed-in player's own requests — no other user's data is fetched. */
+const useMyRequests = (node: string) => {
   const [requests, setRequests] = useState<any[]>([]);
   useEffect(() => {
-    return onValue(
-      ref(rtdb, "rechargeRequests"),
-      (snap) => {
-        const val = snap.val();
-        if (val && typeof val === "object") {
-          const reqs = Object.entries(val).map(([key, value]: [string, any]) => ({
-            id: key,
-            ...value,
-          }));
-          setRequests(reqs.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)));
-        } else {
-          setRequests([]);
-        }
-      },
-      console.error,
-    );
-  }, []);
+    let unsub = () => {};
+    const authUnsub = onAuthStateChanged(auth, (user) => {
+      unsub();
+      if (!user) {
+        setRequests([]);
+        return;
+      }
+      unsub = onValue(
+        ref(rtdb, `${node}/${user.uid}`),
+        (snap) => {
+          const val = snap.val();
+          if (!val || typeof val !== "object") {
+            setRequests([]);
+            return;
+          }
+          setRequests(
+            Object.entries(val)
+              .map(([id, value]: [string, any]) => ({ id, uid: user.uid, ...value }))
+              .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)),
+          );
+        },
+        console.error,
+      );
+    });
+    return () => {
+      authUnsub();
+      unsub();
+    };
+  }, [node]);
   return requests;
 };
+
+export const useWithdrawalRequests = () => useRequestCollection("withdrawalRequests");
+export const useRechargeRequests = () => useRequestCollection("rechargeRequests");
+export const useMyWithdrawalRequests = () => useMyRequests("withdrawalRequests");
+export const useMyRechargeRequests = () => useMyRequests("rechargeRequests");
 
 export const useAllUsers = () => {
   const [users, setUsers] = useState<any[]>([]);

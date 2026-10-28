@@ -1,15 +1,14 @@
 import React from 'react';
 import { ChevronLeft, Clock, CheckCircle2, XCircle } from 'lucide-react';
-import { useRechargeRequests } from '../hooks/useFirebaseData';
-import { auth } from '../firebase';
+import { useMyRechargeRequests } from '../hooks/useFirebaseData';
 
 interface RechargeRecordProps {
   onBack: () => void;
 }
 
 export const RechargeRecord: React.FC<RechargeRecordProps> = ({ onBack }) => {
-  const requests = useRechargeRequests();
-  const myRequests = requests.filter((r) => r.uid === auth.currentUser?.uid);
+  // Reads only this user's subtree; the rest of the collection is admin-only now.
+  const myRequests = useMyRechargeRequests();
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] pb-10">

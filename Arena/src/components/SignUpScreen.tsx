@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { auth, rtdb } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { ref, update } from 'firebase/database';
+import { ref, update, get } from 'firebase/database';
 import { emailForNumber, friendlyAuthError } from '../utils/authErrors';
 
 interface SignUpScreenProps {
@@ -73,6 +73,26 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({ onBack, onSignedUp }
       }
 
       await update(ref(rtdb, `users/${uid}`), record);
+
+      // Resolve the friend's code and record the link on their node, so their
+      // Sales screen can read it without access to the users collection.
+      if (record.referredBy) {
+        try {
+          const codeSnap = await get(ref(rtdb, `referralIndex/${record.referredBy}`));
+          const referrerUid = codeSnap.val();
+          if (referrerUid && referrerUid !== uid) {
+            await update(ref(rtdb, `referrals/${referrerUid}/${uid}`), {
+              uid,
+              displayName: fullName.trim(),
+              joinedAt: Date.now(),
+            });
+          }
+        } catch (linkError) {
+          // A missing referral link must not fail the sign-up itself.
+          console.error("Could not record referral", linkError);
+        }
+      }
+
       onSignedUp();
     } catch (err: any) {
       setError(friendlyAuthError(err));
