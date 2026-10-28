@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
-import { ArrowRight, Plus } from 'lucide-react';
-import { auth, rtdb } from '../firebase';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile } from 'firebase/auth';
-import { ref, update } from 'firebase/database';
+import { ArrowRight, Plus, Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react';
+import { auth } from '../firebase';
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { emailForNumber, friendlyAuthError } from '../utils/authErrors';
+import { SignUpScreen } from './SignUpScreen';
 
 interface AuthProps {
   onLogin: () => void;
 }
 
 export const AuthScreen: React.FC<AuthProps> = ({ onLogin }) => {
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState('');
+  const [mode, setMode] = useState<'login' | 'signup'>('login');
+  const [number, setNumber] = useState('');
   const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
-  const [referralCode, setReferralCode] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -25,58 +25,26 @@ export const AuthScreen: React.FC<AuthProps> = ({ onLogin }) => {
       await signInWithPopup(auth, provider);
       onLogin();
     } catch (err: any) {
-      setError(err.message || 'Google Sign-In failed');
+      setError(friendlyAuthError(err));
     } finally {
       setLoading(false);
     }
   };
 
-/** Turn Firebase's codes into something a user can act on. */
-const friendlyAuthError = (err: any): string => {
-  switch (err?.code) {
-    case 'auth/invalid-credential':
-    case 'auth/wrong-password':
-    case 'auth/user-not-found':
-      return 'Wrong number or password. New here? Tap "Don\'t have an account?" first.';
-    case 'auth/email-already-in-use':
-      return 'This number is already registered. Please log in instead.';
-    case 'auth/weak-password':
-      return 'Password must be at least 6 characters.';
-    case 'auth/operation-not-allowed':
-      return 'Email/Password sign-in is not enabled for this Firebase project.';
-    case 'auth/too-many-requests':
-      return 'Too many attempts. Please wait a minute and try again.';
-    case 'auth/network-request-failed':
-      return 'Network error. Check your connection and try again.';
-    default:
-      return err?.message || 'Authentication failed';
-  }
-};
-
   const handleSubmit = async () => {
     setError('');
-    
-    // Admin override check just in case, but regular flow works since we append @clorigo.com
-    const emailToUse = email.includes('@') ? email : `${email}@clorigo.com`; 
+    if (!number.trim() || !password) {
+      setError('Enter your number and password.');
+      return;
+    }
 
     setLoading(true);
     try {
-      if (isLogin) {
-        // No createUser fallback here. It used to register a brand-new account
-        // whenever sign-in failed, so a typo in the number silently created a
-        // user, and a wrong password reported "email already in use" instead of
-        // "wrong password".
-        await signInWithEmailAndPassword(auth, emailToUse, password);
-      } else {
-        const userCred = await createUserWithEmailAndPassword(auth, emailToUse, password);
-        const updates: any = {
-           displayName: fullName || emailToUse,
-        };
-        if (referralCode) {
-           updates.referredBy = referralCode;
-        }
-        await update(ref(rtdb, `users/${userCred.user.uid}`), updates);
-      }
+      // No createUser fallback here. It used to register a brand-new account
+      // whenever sign-in failed, so a typo in the number silently created a
+      // user, and a wrong password reported "email already in use" instead of
+      // "wrong password". Registration lives on its own screen now.
+      await signInWithEmailAndPassword(auth, emailForNumber(number), password);
       onLogin();
     } catch (err: any) {
       setError(friendlyAuthError(err));
@@ -84,6 +52,10 @@ const friendlyAuthError = (err: any): string => {
       setLoading(false);
     }
   };
+
+  if (mode === 'signup') {
+    return <SignUpScreen onBack={() => setMode('login')} onSignedUp={onLogin} />;
+  }
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] flex flex-col items-center px-6 pt-32 pb-10 font-sans">
@@ -96,51 +68,64 @@ const friendlyAuthError = (err: any): string => {
 
       <div className="w-full max-w-sm bg-white rounded-2xl p-5 shadow-sm border border-gray-100 mb-8">
         <div className="space-y-4">
-          {error && <p className="text-red-500 text-xs text-center">{error}</p>}
-          
-          {!isLogin && (
-            <input 
-              type="text" 
-              placeholder="Full Name"
-              value={fullName}
-              onChange={e => setFullName(e.target.value)}
-              className="w-full bg-white border border-gray-200 text-gray-800 rounded-xl py-3.5 px-4 focus:outline-none focus:border-[#6D28D9] focus:ring-1 focus:ring-[#6D28D9] transition-colors"
-            />
+          {error && (
+            <div
+              role="alert"
+              className="flex items-start gap-2 bg-red-50 border border-red-100 text-red-600 text-[13px] font-medium rounded-xl p-3"
+            >
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+              <span>{error}</span>
+            </div>
           )}
-          
-          <input 
-            type="text" 
-            placeholder="Enter Number" 
-            value={email}
-            onChange={e => setEmail(e.target.value)}
+
+          <input
+            type="tel"
+            inputMode="tel"
+            placeholder="Enter Number"
+            value={number}
+            onChange={(e) => setNumber(e.target.value)}
+            autoComplete="username"
             className="w-full bg-white border border-gray-200 text-gray-800 rounded-xl py-3.5 px-4 focus:outline-none focus:border-[#6D28D9] focus:ring-1 focus:ring-[#6D28D9] transition-colors"
           />
 
-          <input 
-            type="password" 
-            placeholder="Password" 
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            className="w-full bg-white border border-gray-200 text-gray-800 rounded-xl py-3.5 px-4 focus:outline-none focus:border-[#6D28D9] focus:ring-1 focus:ring-[#6D28D9] transition-colors"
-          />
-
-          {!isLogin && (
-            <input 
-              type="text" 
-              placeholder="Referral Code (optional)"
-              value={referralCode}
-              onChange={e => setReferralCode(e.target.value)}
-              className="w-full bg-white border border-gray-200 text-gray-800 rounded-xl py-3.5 px-4 focus:outline-none focus:border-[#6D28D9] focus:ring-1 focus:ring-[#6D28D9] transition-colors"
+          <div className="relative">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleSubmit();
+              }}
+              autoComplete="current-password"
+              className="w-full bg-white border border-gray-200 text-gray-800 rounded-xl py-3.5 pl-4 pr-11 focus:outline-none focus:border-[#6D28D9] focus:ring-1 focus:ring-[#6D28D9] transition-colors"
             />
-          )}
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
 
-          <button 
+          <button
             onClick={handleSubmit}
             disabled={loading}
             className="w-full bg-[#6D28D9] text-white font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-1.5 mt-2 disabled:opacity-70"
           >
-            {loading ? 'Processing...' : (isLogin ? 'Login' : 'Register')}
-            {!loading && isLogin && <ArrowRight className="w-4 h-4 ml-1" strokeWidth={3} />}
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Processing…
+              </>
+            ) : (
+              <>
+                Login
+                <ArrowRight className="w-4 h-4 ml-1" strokeWidth={3} />
+              </>
+            )}
           </button>
 
           <div className="flex items-center my-4">
@@ -165,21 +150,12 @@ const friendlyAuthError = (err: any): string => {
         </div>
       </div>
 
-      <button 
-        onClick={() => setIsLogin(!isLogin)}
+      <button
+        onClick={() => setMode('signup')}
         className="flex items-center justify-center gap-1.5 text-[#6D28D9] font-bold text-[15px]"
       >
-        {isLogin ? (
-          <>
-            <Plus className="w-4 h-4" strokeWidth={4} />
-            Don't have an account?
-          </>
-        ) : (
-          <>
-            <ArrowRight className="w-4 h-4" strokeWidth={3} />
-            Already have an account?
-          </>
-        )}
+        <Plus className="w-4 h-4" strokeWidth={4} />
+        Don't have an account? Sign up
       </button>
     </div>
   );
