@@ -18,6 +18,7 @@ import {
   Wallet,
   Calendar,
   X,
+  Lightbulb,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -340,33 +341,33 @@ export const PlayScreen: React.FC = () => {
                 return (
                   <div
                     key={room.id}
-                    className="bg-white rounded-[20px] sm:rounded-[28px] p-4 sm:p-5 shadow-[0_3px_12px_rgba(0,0,0,0.06)] border border-gray-100 flex flex-col relative font-['Inter']"
+                    className="bg-white rounded-[16px] sm:rounded-[20px] p-3.5 sm:p-4 shadow-[0_3px_12px_rgba(0,0,0,0.06)] border border-gray-100 flex flex-col relative font-['Inter']"
                   >
                     {/* Header */}
-                    <div className="flex justify-between items-start gap-2 mb-5">
+                    <div className="flex justify-between items-start gap-2 mb-3">
                        <div className="flex gap-3.5 items-center">
                         <div className="relative shrink-0">
                           {selectedGameObj?.imageUrl ? (
                             <img
                               src={selectedGameObj.imageUrl}
                               alt={selectedGameObj.gameName || "Game"}
-                              className="w-[54px] h-[54px] rounded-full object-cover border-[2px] border-yellow-400 p-[2px]"
+                              className="w-[44px] h-[44px] rounded-full object-cover border-[2px] border-yellow-400 p-[2px]"
                             />
                           ) : (
                             // An empty src makes the browser draw its broken-image icon.
-                            <div className="w-[54px] h-[54px] rounded-full border-[2px] border-yellow-400 p-[2px]">
-                              <div className="w-full h-full rounded-full bg-gradient-to-br from-[#6D28D9] to-[#8B5CF6] flex items-center justify-center text-white font-black text-[15px] uppercase">
+                            <div className="w-[44px] h-[44px] rounded-full border-[2px] border-yellow-400 p-[2px]">
+                              <div className="w-full h-full rounded-full bg-gradient-to-br from-[#6D28D9] to-[#8B5CF6] flex items-center justify-center text-white font-black text-[13px] uppercase">
                                 {(room.game || room.title || "?").slice(0, 2)}
                               </div>
                             </div>
                           )}
                         </div>
                         <div className="flex flex-col min-w-0">
-                          <h3 className="font-bold text-[#111] text-[17px] mb-1.5 leading-tight truncate">
+                          <h3 className="font-bold text-[#111] text-[15px] mb-1 leading-tight truncate">
                             {room.title}
                           </h3>
                           {/* Tags above time */}
-                          <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
+                          <div className="flex flex-wrap items-center gap-1.5 mb-1">
                               <span className="text-[9px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 px-1.5 py-0.5 rounded-[4px] uppercase tracking-wider">
                                 {room.matchType || "SQUAD"}
                               </span>
@@ -374,8 +375,8 @@ export const PlayScreen: React.FC = () => {
                                 {room.map || "BERMUDA"}
                               </span>
                           </div>
-                          <div className="flex items-center gap-1 text-[#666] font-medium text-[13px]">
-                            <Calendar className="w-[14px] h-[14px] text-[#666]" />
+                          <div className="flex items-center gap-1 text-[#666] font-medium text-[12px]">
+                            <Calendar className="w-[12px] h-[12px] text-[#666]" />
                             <span>{room.date} {room.time}</span>
                           </div>
                           {room.status === "live" && room.liveAt && (
@@ -388,35 +389,35 @@ export const PlayScreen: React.FC = () => {
                           setSelectedRoom({...room, calculatedPrizePool: mathWinnerPool, calculatedPerKill: mathPerKill});
                           setMatchView("roomDetail");
                         }}
-                        className="text-[#6D28D9] font-bold text-[14px] underline decoration-[#c4b5fd] underline-offset-4 flex-shrink-0 pt-1"
+                        className="text-[#6D28D9] font-bold text-[13px] underline decoration-[#c4b5fd] underline-offset-4 flex-shrink-0 pt-1"
                       >
                         View
                       </button>
                     </div>
 
                     {/* Stats Box */}
-                    <div className="flex items-center justify-between border border-gray-100 rounded-[14px] py-4 mb-6 relative bg-white shadow-[0_2px_8px_rgba(0,0,0,0.015)]">
+                    <div className="flex items-center justify-between border border-gray-100 rounded-[12px] py-2.5 mb-3 relative bg-white shadow-[0_2px_8px_rgba(0,0,0,0.015)]">
                       <div className="flex flex-col items-center flex-1 px-1">
-                        <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 flex items-center gap-1">Entry Fee:</span>
-                        <div className="font-black text-[#111] text-[18px] sm:text-[20px] tracking-tight">{room.entryFee} Coins</div>
+                        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 flex items-center gap-1">Entry Fee:</span>
+                        <div className="font-black text-[#111] text-[14px] sm:text-[15px] tracking-tight">{room.entryFee} Coins</div>
                       </div>
-                      <div className="w-[1px] h-[40px] bg-gray-100 shrink-0"></div>
+                      <div className="w-[1px] h-[26px] bg-gray-100 shrink-0"></div>
                       <div className="flex flex-col items-center flex-1 px-1">
-                        <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 flex items-center gap-1">Per Kill:</span>
-                        <div className="font-black text-[#111] text-[18px] sm:text-[20px] tracking-tight">{Math.floor(mathPerKill)} Coins</div>
+                        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 flex items-center gap-1">Per Kill:</span>
+                        <div className="font-black text-[#111] text-[14px] sm:text-[15px] tracking-tight">{Math.floor(mathPerKill)} Coins</div>
                       </div>
-                      <div className="w-[1px] h-[40px] bg-gray-100 shrink-0"></div>
+                      <div className="w-[1px] h-[26px] bg-gray-100 shrink-0"></div>
                       <div className="flex flex-col items-center flex-1 px-1">
-                        <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 flex items-center gap-1">Winner Prize:</span>
-                        <div className="font-black text-[#111] text-[18px] sm:text-[20px] tracking-tight">{Math.floor(mathWinnerPool)} Coins</div>
+                        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 flex items-center gap-1">Winner Prize:</span>
+                        <div className="font-black text-[#111] text-[14px] sm:text-[15px] tracking-tight">{Math.floor(mathWinnerPool)} Coins</div>
                       </div>
                     </div>
 
                     {/* Progress and Join on same line */}
-                    <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center justify-between gap-3">
                       {/* Left side: Progress bar */}
                       <div className="flex-1 flex flex-col">
-                        <div className="w-full bg-[#f3f4f6] h-[10px] rounded-full overflow-hidden mb-2 relative">
+                        <div className="w-full bg-[#f3f4f6] h-[7px] rounded-full overflow-hidden mb-1.5 relative">
                            <div
                              className="bg-gradient-to-r from-[#6D28D9] to-[#8B5CF6] h-full rounded-full transition-all"
                              style={{
@@ -424,7 +425,7 @@ export const PlayScreen: React.FC = () => {
                              }}
                            ></div>
                         </div>
-                        <div className="text-center font-bold text-[13px] text-[#111]">
+                        <div className="text-center font-bold text-[12px] text-[#111]">
                            {joinedCount}/{total}
                         </div>
                       </div>
@@ -432,19 +433,19 @@ export const PlayScreen: React.FC = () => {
                       {/* Right side: Join button */}
                       <div className="flex-shrink-0">
                         {isJoined ? (
-                          <div className="bg-green-50 text-green-700 font-bold text-[14px] px-8 py-2.5 rounded-[12px] border border-green-200">
+                          <div className="bg-green-50 text-green-700 font-bold text-[13px] px-5 py-2 rounded-[12px] border border-green-200">
                             Joined
                           </div>
                         ) : room.status === "live" ? (
-                          <div className="bg-red-50 text-red-600 font-bold text-[14px] px-8 py-2.5 rounded-[12px] border border-red-200 animate-pulse">
+                          <div className="bg-red-50 text-red-600 font-bold text-[13px] px-5 py-2 rounded-[12px] border border-red-200 animate-pulse">
                             Live
                           </div>
                         ) : room.status === "ended" ? (
-                          <div className="bg-gray-100 text-gray-500 font-bold text-[14px] px-8 py-2.5 rounded-[12px] border border-gray-200">
+                          <div className="bg-gray-100 text-gray-500 font-bold text-[13px] px-5 py-2 rounded-[12px] border border-gray-200">
                             Ended
                           </div>
                         ) : total > 0 && joinedCount >= total ? (
-                          <div className="bg-[#6D28D9] text-white opacity-50 font-bold text-[14px] px-8 py-2.5 rounded-[12px]">
+                          <div className="bg-[#6D28D9] text-white opacity-50 font-bold text-[13px] px-5 py-2 rounded-[12px]">
                             Full
                           </div>
                         ) : (
@@ -452,7 +453,7 @@ export const PlayScreen: React.FC = () => {
                             onClick={() => {
                               setJoinModal({ show: true, room });
                             }}
-                            className="font-bold text-[14px] px-8 py-2.5 rounded-[12px] transition-transform active:scale-95 tracking-wide shadow-sm"
+                            className="font-bold text-[13px] px-5 py-2 rounded-[12px] transition-transform active:scale-95 tracking-wide shadow-sm"
                             style={{
                                  backgroundColor: "#f5f3ff",
                                  color: "#6D28D9",
@@ -752,66 +753,66 @@ export const PlayScreen: React.FC = () => {
               {displayMatches.map((match) => (
                 <div
                    key={match.id}
-                   className="bg-white rounded-[20px] sm:rounded-[28px] p-[16px] sm:p-[28px] shadow-[0_3px_12px_rgba(0,0,0,0.08)] flex flex-col mb-4 sm:mb-5 relative font-['Inter']"
+                   className="bg-white rounded-[16px] sm:rounded-[20px] p-3.5 sm:p-4 shadow-[0_3px_12px_rgba(0,0,0,0.08)] flex flex-col mb-3 relative font-['Inter']"
                  >
                     {match.status === "live" && (
-                       <div className="absolute top-4 right-4 sm:top-6 sm:right-6 text-[12px] sm:text-[14px] font-bold px-3 py-1.5 rounded-lg whitespace-nowrap z-10 bg-red-100 text-red-600 animate-pulse">
+                       <div className="absolute top-3 right-3 text-[10px] sm:text-[11px] font-bold px-2 py-1 rounded-lg whitespace-nowrap z-10 bg-red-100 text-red-600 animate-pulse">
                           LIVE
                        </div>
                     )}
 
-                    <div className="flex justify-between items-center relative mb-4 sm:mb-6 mt-1 sm:mt-2">
-                       <div className="flex flex-col items-center shrink-0 w-[50px] sm:w-[80px]">
+                    <div className="flex justify-between items-center relative mb-3 mt-0.5">
+                       <div className="flex flex-col items-center shrink-0 w-[42px] sm:w-[46px]">
                           {match.team1?.logoUrl ? (
-                             <img src={match.team1.logoUrl} alt={match.team1.short} className="w-[45px] h-[45px] sm:w-[80px] sm:h-[80px] object-contain mb-1 sm:mb-2" />
+                             <img src={match.team1.logoUrl} alt={match.team1.short} className="w-[38px] h-[38px] sm:w-[42px] sm:h-[42px] object-contain mb-1" />
                           ) : (
-                             <div className="w-[45px] h-[45px] sm:w-[80px] sm:h-[80px] bg-blue-50 border border-blue-100 rounded-full flex items-center justify-center font-bold text-blue-700 text-[14px] sm:text-2xl mb-1 sm:mb-2 shadow-sm object-contain">
+                             <div className="w-[38px] h-[38px] sm:w-[42px] sm:h-[42px] bg-blue-50 border border-blue-100 rounded-full flex items-center justify-center font-bold text-blue-700 text-[12px] sm:text-sm mb-1 shadow-sm object-contain">
                                 {match.team1?.short || "T1"}
                              </div>
                           )}
-                          <span className="text-[12px] sm:text-[20px] font-bold text-[#111] text-center uppercase tracking-wide">{match.team1?.short || "T1"}</span>
+                          <span className="text-[10px] sm:text-[11px] font-bold text-[#111] text-center uppercase tracking-wide">{match.team1?.short || "T1"}</span>
                        </div>
 
-                       <div className="flex flex-col items-center flex-1 px-1 sm:px-4 text-center">
-                          <span className="text-gray-500 font-medium text-[13px] sm:text-[32px] mb-1 sm:mb-2 leading-none whitespace-nowrap overflow-hidden text-ellipsis w-full">
+                       <div className="flex flex-col items-center flex-1 px-1 sm:px-2 text-center">
+                          <span className="text-gray-500 font-medium text-[11px] sm:text-[12px] mb-0.5 leading-none whitespace-nowrap overflow-hidden text-ellipsis w-full">
                              {match.title}
                           </span>
-                          <h3 className="font-bold text-[#111] text-[18px] sm:text-[48px] leading-tight mb-1 tracking-tight">
+                          <h3 className="font-bold text-[#111] text-[15px] sm:text-[16px] leading-tight mb-0.5 tracking-tight">
                              {match.team1?.short || "T1"} vs {match.team2?.short || "T2"}
                           </h3>
                           {match.status === "upcoming" && (
-                             <span className="text-gray-500 font-medium text-[12px] sm:text-[20px] mt-0.5 sm:mt-1">{match.time}</span>
+                             <span className="text-gray-500 font-medium text-[10px] sm:text-[11px] mt-0.5">{match.time}</span>
                           )}
                        </div>
 
-                       <div className="flex flex-col items-center shrink-0 w-[50px] sm:w-[80px]">
+                       <div className="flex flex-col items-center shrink-0 w-[42px] sm:w-[46px]">
                           {match.team2?.logoUrl ? (
-                             <img src={match.team2.logoUrl} alt={match.team2.short} className="w-[45px] h-[45px] sm:w-[80px] sm:h-[80px] object-contain mb-1 sm:mb-2" />
+                             <img src={match.team2.logoUrl} alt={match.team2.short} className="w-[38px] h-[38px] sm:w-[42px] sm:h-[42px] object-contain mb-1" />
                           ) : (
-                             <div className="w-[45px] h-[45px] sm:w-[80px] sm:h-[80px] bg-green-50 border border-green-100 rounded-full flex items-center justify-center font-bold text-green-700 text-[14px] sm:text-2xl mb-1 sm:mb-2 shadow-sm object-contain">
+                             <div className="w-[38px] h-[38px] sm:w-[42px] sm:h-[42px] bg-green-50 border border-green-100 rounded-full flex items-center justify-center font-bold text-green-700 text-[12px] sm:text-sm mb-1 shadow-sm object-contain">
                                 {match.team2?.short || "T2"}
                              </div>
                           )}
-                          <span className="text-[12px] sm:text-[20px] font-bold text-[#111] text-center uppercase tracking-wide">{match.team2?.short || "T2"}</span>
+                          <span className="text-[10px] sm:text-[11px] font-bold text-[#111] text-center uppercase tracking-wide">{match.team2?.short || "T2"}</span>
                        </div>
                     </div>
 
                     <div className="flex items-center w-full justify-between">
-                       <div className="flex items-center gap-6 sm:gap-12">
+                       <div className="flex items-center gap-4 sm:gap-6">
                            <div className="flex flex-col items-start gap-0.5 sm:gap-1">
-                              <span className="text-[11px] sm:text-[14px] font-bold text-gray-500 uppercase tracking-wide">
+                              <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wide">
                                  ENTRY FEE:
                               </span>
-                              <span className="font-bold text-black text-[15px] sm:text-[20px] leading-none">
+                              <span className="font-bold text-black text-[13px] sm:text-[14px] leading-none">
                                  {match.entryFee} Coins
                               </span>
                            </div>
                            
                            <div className="flex flex-col items-start gap-0.5 sm:gap-1">
-                              <span className="text-[11px] sm:text-[14px] font-bold text-gray-500 uppercase tracking-wide">
+                              <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wide">
                                 {match.status === 'ended' ? 'WINNER POINT:' : 'WINNINGS:'}
                               </span>
-                              <span className="font-bold text-black text-[15px] sm:text-[20px] leading-none">
+                              <span className="font-bold text-black text-[13px] sm:text-[14px] leading-none">
                                  {match.entryFee * 2} Coins
                               </span>
                            </div>
@@ -826,7 +827,7 @@ export const PlayScreen: React.FC = () => {
                                   setSelectedTeam(null);
                                   setShowTeamSelectModal(true);
                                 }}
-                                className="font-bold text-[14px] px-8 py-2.5 rounded-[12px] transition-transform active:scale-95 tracking-wide shadow-sm"
+                                className="font-bold text-[13px] px-5 py-2 rounded-[12px] transition-transform active:scale-95 tracking-wide shadow-sm"
                                 style={{ backgroundColor: "#f5f3ff", color: "#6D28D9", border: "none" }}
                              >
                                Join
@@ -837,12 +838,12 @@ export const PlayScreen: React.FC = () => {
 
                     {(joinedMatches[match.id] || match.status === "ended") && (
                        <>
-                          <hr className="border-gray-200 w-full mt-4 sm:mt-6 mb-3 sm:mb-5" />
+                          <hr className="border-gray-200 w-full mt-3 mb-2" />
                           <div className="flex flex-row items-center justify-between gap-2 overflow-hidden">
-                             <span className="font-bold text-[#111] text-[14px] sm:text-[22px] shrink-0">
+                             <span className="font-bold text-[#111] text-[12px] sm:text-[13px] shrink-0">
                                 {match.status === 'ended' ? 'Winner' : 'Joined'}
                              </span>
-                             <div className="bg-[#d8f2d8] text-[#1c6426] text-[11px] sm:text-[18px] font-bold px-3 sm:px-5 py-1.5 sm:py-2 rounded-[8px] sm:rounded-[18px] truncate max-w-[70%] sm:max-w-full text-right ml-auto">
+                             <div className="bg-[#d8f2d8] text-[#1c6426] text-[10px] sm:text-[11px] font-bold px-2 sm:px-3 py-1 rounded-[8px] truncate max-w-[70%] sm:max-w-full text-right ml-auto">
                                 {joinedMatches[match.id] === match.team1.short ? match.team1.name : joinedMatches[match.id] === match.team2.short ? match.team2.name : (joinedMatches[match.id] ? `${joinedMatches[match.id]} Team` : (match.winningTeam === match.team1.short ? match.team1.name : match.winningTeam === match.team2.short ? match.team2.name : match.winningTeam || 'Winner Team'))}
                              </div>
                           </div>
@@ -1285,11 +1286,7 @@ export const PlayScreen: React.FC = () => {
                 : "text-gray-500 hover:bg-gray-50"
             }`}
           >
-            <img
-              src="https://uploads.onecompiler.io/44pbfr3gy/44pbfr8db/ideas.png"
-              alt="Quiz"
-              className={`w-4 h-4 object-contain ${activeTab === "quiz" ? "brightness-0 invert" : ""}`}
-            />
+            <Lightbulb className="w-4 h-4" strokeWidth={2.5} />
             <span
               className={`text-[10px] font-bold uppercase tracking-wide ${activeTab === "quiz" ? "" : "text-gray-500"}`}
             >
