@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { rtdb, auth } from "../firebase";
 import { ref, onValue, set } from "firebase/database";
+import { Transaction } from "../utils/transactions";
 import { onAuthStateChanged } from "firebase/auth";
 
 export const useCricketMatches = () => {
@@ -319,4 +320,43 @@ export const useUserProfile = () => {
     };
   }, []);
   return profile;
+};
+
+
+/**
+ * The signed-in user's ledger, newest first.
+ *
+ * Every wallet movement is also appended to `users/{uid}/transactions` by
+ * `logTransaction()`, so this is the single place the history screen reads.
+ */
+export const useTransactions = () => {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  useEffect(() => {
+    let unsub = () => {};
+    const authUnsub = onAuthStateChanged(auth, (user) => {
+      unsub();
+      if (!user) {
+        setTransactions([]);
+        return;
+      }
+      unsub = onValue(
+        ref(rtdb, `users/${user.uid}/transactions`),
+        (snap) => {
+          const val = snap.val();
+          if (!val) {
+            setTransactions([]);
+            return;
+          }
+          const rows = Object.values(val) as Transaction[];
+          setTransactions(rows.sort((a, b) => (b.date || 0) - (a.date || 0)));
+        },
+        console.error,
+      );
+    });
+    return () => {
+      authUnsub();
+      unsub();
+    };
+  }, []);
+  return transactions;
 };

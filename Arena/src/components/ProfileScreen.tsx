@@ -9,6 +9,7 @@ import {
   PieChart,
   Gift,
   Users,
+  Receipt,
 } from "lucide-react";
 import { useUserProfile } from "../hooks/useFirebaseData";
 
@@ -60,6 +61,12 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
       label: "Redeem Code",
       color: "text-[#ec4899]",
       path: "redeemCode",
+    },
+    {
+      icon: Receipt,
+      label: "Transaction History",
+      color: "text-[#0ea5e9]",
+      path: "transactions",
     },
     {
       icon: Users,
