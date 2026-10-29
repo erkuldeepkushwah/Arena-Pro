@@ -1071,8 +1071,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                     <ChevronDown className="text-gray-500 w-5 h-5 ml-2" />
                   )}
                 </button>
-                {cricketExpanded && (
-                  <div className="flex items-center">
+              </div>
+
+              {cricketExpanded && (
+                <div className="p-4 space-y-4">
+                  <div className="bg-white border border-gray-200 rounded-xl p-3 flex items-center gap-3 shadow-sm">
+                    <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
+                      <Plus className="w-5 h-5 text-[#2563eb]" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-bold text-[16px] text-[#111]">Add Match</p>
+                      <p className="text-[12px] text-gray-500">Create and manage your matches</p>
+                    </div>
                     <button
                       onClick={() => {
                         const newMatch = {
@@ -1090,18 +1100,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         setExpandedMatch(newMatch.id);
                         window.dispatchEvent(new Event("admin_config_updated"));
                       }}
-                      className="bg-[#8b5cf6] hover:bg-purple-600 text-white px-2 py-1 flex items-center gap-1 rounded text-xs transition-colors shadow-sm ml-4"
-                      title="Add Match"
+                      className="shrink-0 bg-[#2563eb] text-white font-bold text-[13px] px-4 py-2 rounded-lg flex items-center gap-1"
                     >
-                      <Plus className="w-3 h-3" /> Add Match
+                      <Plus className="w-4 h-4" /> Add Match
                     </button>
-
                   </div>
-                )}
-              </div>
-
-              {cricketExpanded && (
-                <div className="p-4 space-y-4">
                   {cricketMatches.map((match: any, index: number) => (
                     <div
                       key={match.id}
@@ -1508,8 +1511,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                     <ChevronDown className="text-gray-500 w-5 h-5 ml-2" />
                   )}
                 </button>
-                {esportsExpanded && (
-                  <div className="flex items-center">
+              </div>
+
+              {esportsExpanded && (
+                <div className="p-4 space-y-4">
+                  <div className="bg-white border border-gray-200 rounded-xl p-3 flex items-center gap-3 shadow-sm">
+                    <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
+                      <Plus className="w-5 h-5 text-[#2563eb]" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-bold text-[16px] text-[#111]">Add Match</p>
+                      <p className="text-[12px] text-gray-500">Create and manage your matches</p>
+                    </div>
                     <button
                       onClick={() => {
                         const newTournament = {
@@ -1536,17 +1549,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         setExpandedMatch(newTournament.id);
                         window.dispatchEvent(new Event("admin_config_updated"));
                       }}
-                      className="bg-[#8b5cf6] hover:bg-purple-600 text-white px-2 py-1 flex items-center gap-1 rounded text-xs transition-colors shadow-sm ml-4"
+                      className="shrink-0 bg-[#2563eb] text-white font-bold text-[13px] px-4 py-2 rounded-lg flex items-center gap-1"
                     >
-                      <Plus className="w-3 h-3" /> Add Match
+                      <Plus className="w-4 h-4" /> Add Match
                     </button>
-
                   </div>
-                )}
-              </div>
-
-              {esportsExpanded && (
-                <div className="p-4 space-y-4">
                   <div className="flex bg-gray-100 p-1 rounded-lg">
                     <button
                       onClick={() => setEsportsTab('upcoming')}
