@@ -53,10 +53,10 @@ export const MyInvestments: React.FC<MyInvestmentsProps> = ({ onBack }) => {
   return (
     <div className="min-h-screen bg-[#f8f9fa] pb-24">
       <div className="bg-white px-4 py-3 flex items-center justify-center relative shadow-sm z-10 border-b border-gray-100">
-        <button onClick={onBack} className="absolute left-4 p-2 -ml-2 text-[#311A89]">
-          <ChevronLeft className="w-7 h-7 text-[#311A89]" strokeWidth={2.5} />
+        <button onClick={onBack} className="absolute left-4 p-2 -ml-2 text-[#1e3a8a]">
+          <ChevronLeft className="w-7 h-7 text-[#1e3a8a]" strokeWidth={2.5} />
         </button>
-        <h1 className="text-[19px] font-bold text-[#14122C] tracking-wide text-center w-full">
+        <h1 className="text-[19px] font-bold text-[#1f2937] tracking-wide text-center w-full">
           My Investments
         </h1>
       </div>
@@ -79,7 +79,7 @@ export const MyInvestments: React.FC<MyInvestmentsProps> = ({ onBack }) => {
                 </p>
                 <div className="h-2.5 bg-[#f3f4f6] rounded-full overflow-hidden">
                   <div 
-                    className="h-full bg-[#6D28D9] rounded-full" 
+                    className="h-full bg-[#2563eb] rounded-full" 
                     style={{ width: `${((inv.progress || 0) / (inv.totalDays || 1)) * 100}%` }}
                   />
                 </div>

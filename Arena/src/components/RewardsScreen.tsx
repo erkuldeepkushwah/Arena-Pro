@@ -11,7 +11,7 @@ export const RewardsScreen: React.FC = () => {
     .slice(0, 50);
 
   return (
-    <div className="pb-28 bg-[#f8f9fe] min-h-screen font-sans">
+    <div className="pb-28 bg-[#f4f5f7] min-h-screen font-sans">
       <div className="bg-white px-5 py-5 mb-5 shadow-sm border-b border-gray-100 flex items-center justify-between h-16">
         <h1 className="text-[19px] font-bold text-[#111]">Leaderboard</h1>
       </div>
@@ -43,7 +43,7 @@ export const RewardsScreen: React.FC = () => {
                       </span>
                     )}
                     <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-tr from-purple-100 to-blue-50 flex items-center justify-center text-lg sm:text-xl overflow-hidden border border-gray-100 shrink-0">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-tr from-blue-100 to-blue-50 flex items-center justify-center text-lg sm:text-xl overflow-hidden border border-gray-100 shrink-0">
                         👨🏻
                       </div>
                       <div className="flex flex-col min-w-0">

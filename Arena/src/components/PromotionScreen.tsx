@@ -21,14 +21,14 @@ export const PromotionScreen: React.FC<PromotionScreenProps> = ({ onBack }) => {
       </div>
 
       <div className="px-5 space-y-5">
-        <div className="bg-white rounded-[1.25rem] p-7 border border-[#a855f7] text-center shadow-sm">
+        <div className="bg-white rounded-[1.25rem] p-7 border border-[#3b82f6] text-center shadow-sm">
            <p className="text-gray-500 font-medium text-[15px] mb-5">Your Referral Code</p>
-           <div className="border border-dashed border-[#a855f7] bg-[#fdfcff] py-3.5 px-8 rounded-xl inline-block mb-3 w-4/5 border-[1.5px]">
-             <span className="text-[#6D28D9] font-medium text-[27px] tracking-[0.1em]">{userProfile?.referralCode || auth.currentUser?.uid?.slice(0, 8).toUpperCase() || "N/A"}</span>
+           <div className="border border-dashed border-[#3b82f6] bg-[#fdfcff] py-3.5 px-8 rounded-xl inline-block mb-3 w-4/5 border-[1.5px]">
+             <span className="text-[#2563eb] font-medium text-[27px] tracking-[0.1em]">{userProfile?.referralCode || auth.currentUser?.uid?.slice(0, 8).toUpperCase() || "N/A"}</span>
            </div>
 
            <button 
-              className="flex items-center justify-center gap-2 text-[#6D28D9] font-bold text-[15px] mx-auto mt-2 mb-1"
+              className="flex items-center justify-center gap-2 text-[#2563eb] font-bold text-[15px] mx-auto mt-2 mb-1"
               onClick={() => {
                 const code = userProfile?.referralCode || auth.currentUser?.uid?.slice(0, 8).toUpperCase() || "N/A";
                 navigator.clipboard.writeText(code);

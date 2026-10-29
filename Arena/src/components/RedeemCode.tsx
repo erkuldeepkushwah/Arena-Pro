@@ -81,10 +81,10 @@ export const RedeemCode: React.FC<RedeemCodeProps> = ({ onBack }) => {
     <div className="min-h-screen bg-[#f8f9fa] pb-10">
       {/* Header — the title used to be #f0f0f0 on a #f8f9fa background, i.e. invisible. */}
       <div className="bg-white px-4 py-3 flex items-center justify-center relative border-b border-gray-100 sticky top-0 z-10">
-        <button onClick={onBack} className="absolute left-4 p-2 -ml-2 text-[#311A89]" aria-label="Back">
+        <button onClick={onBack} className="absolute left-4 p-2 -ml-2 text-[#1e3a8a]" aria-label="Back">
           <ChevronLeft className="w-6 h-6" strokeWidth={2.5} />
         </button>
-        <h1 className="text-[19px] font-bold text-[#14122C] tracking-wide text-center w-full">
+        <h1 className="text-[19px] font-bold text-[#1f2937] tracking-wide text-center w-full">
           Redeem Code
         </h1>
       </div>
@@ -105,13 +105,13 @@ export const RedeemCode: React.FC<RedeemCodeProps> = ({ onBack }) => {
             }}
             placeholder="ENTER CODE HERE"
             autoCapitalize="characters"
-            className="w-full bg-[#f8f9fa] border border-gray-100 rounded-xl py-3.5 px-4 text-center text-[#14122C] font-bold tracking-widest placeholder:font-medium placeholder:tracking-wide placeholder:text-gray-400 focus:outline-none focus:border-[#6D28D9] focus:ring-1 focus:ring-[#6D28D9] mb-4"
+            className="w-full bg-[#f8f9fa] border border-gray-100 rounded-xl py-3.5 px-4 text-center text-[#1f2937] font-bold tracking-widest placeholder:font-medium placeholder:tracking-wide placeholder:text-gray-400 focus:outline-none focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb] mb-4"
           />
 
           <button
             onClick={handleRedeem}
             disabled={loading}
-            className="w-full bg-[#6D28D9] text-white font-bold py-3.5 rounded-xl shadow-sm text-[16px] flex items-center justify-center gap-2 disabled:opacity-60"
+            className="w-full bg-[#2563eb] text-white font-bold py-3.5 rounded-xl shadow-sm text-[16px] flex items-center justify-center gap-2 disabled:opacity-60"
           >
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
             {loading ? 'Checking…' : 'Get Balance'}

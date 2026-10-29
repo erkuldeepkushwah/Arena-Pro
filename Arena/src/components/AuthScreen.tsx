@@ -65,7 +65,7 @@ export const AuthScreen: React.FC<AuthProps> = ({ onLogin }) => {
         {siteCfg?.logoUrl ? (
           <img src={siteCfg.logoUrl} alt="Arena Pro" className="h-16 mb-4 object-contain" />
         ) : (
-          <div className="bg-[#6D28D9] rounded-[1.7rem] px-8 py-3 mb-4 shadow-sm">
+          <div className="bg-[#2563eb] rounded-[1.7rem] px-8 py-3 mb-4 shadow-sm">
             <span className="text-white text-[28px] font-bold tracking-wide">Arena Pro</span>
           </div>
         )}
@@ -91,7 +91,7 @@ export const AuthScreen: React.FC<AuthProps> = ({ onLogin }) => {
             value={number}
             onChange={(e) => setNumber(e.target.value)}
             autoComplete="username"
-            className="w-full bg-white border border-gray-200 text-gray-800 rounded-xl py-3.5 px-4 focus:outline-none focus:border-[#6D28D9] focus:ring-1 focus:ring-[#6D28D9] transition-colors"
+            className="w-full bg-white border border-gray-200 text-gray-800 rounded-xl py-3.5 px-4 focus:outline-none focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb] transition-colors"
           />
 
           <div className="relative">
@@ -104,7 +104,7 @@ export const AuthScreen: React.FC<AuthProps> = ({ onLogin }) => {
                 if (e.key === 'Enter') handleSubmit();
               }}
               autoComplete="current-password"
-              className="w-full bg-white border border-gray-200 text-gray-800 rounded-xl py-3.5 pl-4 pr-11 focus:outline-none focus:border-[#6D28D9] focus:ring-1 focus:ring-[#6D28D9] transition-colors"
+              className="w-full bg-white border border-gray-200 text-gray-800 rounded-xl py-3.5 pl-4 pr-11 focus:outline-none focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb] transition-colors"
             />
             <button
               type="button"
@@ -119,7 +119,7 @@ export const AuthScreen: React.FC<AuthProps> = ({ onLogin }) => {
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="w-full bg-[#6D28D9] text-white font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-1.5 mt-2 disabled:opacity-70"
+            className="w-full bg-[#2563eb] text-white font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-1.5 mt-2 disabled:opacity-70"
           >
             {loading ? (
               <>
@@ -158,7 +158,7 @@ export const AuthScreen: React.FC<AuthProps> = ({ onLogin }) => {
 
       <button
         onClick={() => setMode('signup')}
-        className="flex items-center justify-center gap-1.5 text-[#6D28D9] font-bold text-[15px]"
+        className="flex items-center justify-center gap-1.5 text-[#2563eb] font-bold text-[15px]"
       >
         <Plus className="w-4 h-4" strokeWidth={4} />
         Don't have an account? Sign up

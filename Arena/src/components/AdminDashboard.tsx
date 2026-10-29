@@ -1087,6 +1087,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         const newM = [newMatch, ...cricketMatches];
                         setCricketMatches(newM);
                         saveCricketMatches(newM);
+                        setExpandedMatch(newMatch.id);
                         window.dispatchEvent(new Event("admin_config_updated"));
                       }}
                       className="bg-[#8b5cf6] hover:bg-purple-600 text-white px-2 py-1 flex items-center gap-1 rounded text-xs transition-colors shadow-sm ml-4"
@@ -1128,10 +1129,30 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                           </div>
                         </div>
                         <button
-                          onClick={() => setExpandedMatch(expandedMatch === match.id ? null : match.id)}
-                          className="shrink-0 text-[12px] font-bold text-[#5e35b1] border border-purple-200 bg-white px-3 py-1.5 rounded-lg"
+                          onClick={() => {
+                            if (expandedMatch === match.id) {
+                              setExpandedMatch(null);
+                              return;
+                            }
+                            setExpandedMatch(match.id);
+                            const next =
+                              match.status === "upcoming"
+                                ? "live"
+                                : match.status === "live"
+                                  ? "ended"
+                                  : "upcoming";
+                            setCricketMatches(patchAt(cricketMatches, index, { status: next }));
+                            window.dispatchEvent(new Event("admin_config_updated"));
+                          }}
+                          className="shrink-0 text-[12px] font-bold text-white bg-[#2563eb] px-3 py-1.5 rounded-lg"
                         >
-                          {expandedMatch === match.id ? "Close" : "Live"}
+                          {expandedMatch === match.id
+                            ? "Close"
+                            : match.status === "upcoming"
+                              ? "Live"
+                              : match.status === "live"
+                                ? "Result"
+                                : "Open"}
                         </button>
                       </div>
 
@@ -1512,6 +1533,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         const n = [newTournament, ...tournaments];
                         setTournaments(n);
                         saveMatchRooms(n);
+                        setExpandedMatch(newTournament.id);
                         window.dispatchEvent(new Event("admin_config_updated"));
                       }}
                       className="bg-[#8b5cf6] hover:bg-purple-600 text-white px-2 py-1 flex items-center gap-1 rounded text-xs transition-colors shadow-sm ml-4"
@@ -1587,10 +1609,36 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                           </div>
                         </div>
                         <button
-                          onClick={() => setExpandedMatch(expandedMatch === t.id ? null : t.id)}
-                          className="shrink-0 text-[12px] font-bold text-[#5e35b1] border border-purple-200 bg-white px-3 py-1.5 rounded-lg"
+                          onClick={() => {
+                            if (expandedMatch === t.id) {
+                              setExpandedMatch(null);
+                              return;
+                            }
+                            setExpandedMatch(t.id);
+                            const next =
+                              t.status === "upcoming"
+                                ? "live"
+                                : t.status === "live"
+                                  ? "ended"
+                                  : "upcoming";
+                            setTournaments(
+                              patchAt(tournaments, index, {
+                                status: next,
+                                ...(next === "live" ? { liveAt: Date.now() } : {}),
+                                ...(next === "ended" ? { endedAt: Date.now() } : {}),
+                              }),
+                            );
+                            window.dispatchEvent(new Event("admin_config_updated"));
+                          }}
+                          className="shrink-0 text-[12px] font-bold text-white bg-[#2563eb] px-3 py-1.5 rounded-lg"
                         >
-                          {expandedMatch === t.id ? "Close" : "Live"}
+                          {expandedMatch === t.id
+                            ? "Close"
+                            : t.status === "upcoming"
+                              ? "Live"
+                              : t.status === "live"
+                                ? "Result"
+                                : "Open"}
                         </button>
                       </div>
 

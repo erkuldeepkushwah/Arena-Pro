@@ -75,7 +75,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
     {
       icon: PieChart,
       label: "My Investments",
-      color: "text-[#a855f7]",
+      color: "text-[#3b82f6]",
       path: "myInvestments",
     },
     {
@@ -93,14 +93,14 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
     {
       icon: Users,
       label: "Sales",
-      color: "text-[#a855f7]",
+      color: "text-[#3b82f6]",
       path: "sales",
     },
   ];
 
   return (
     <div className="pb-28 bg-[#f8f9fa] min-h-screen">
-      <div className="bg-[#6D28D9] pt-10 pb-16 px-6 rounded-b-[2.5rem] relative mb-16">
+      <div className="bg-[#2563eb] pt-10 pb-16 px-6 rounded-b-[2.5rem] relative mb-16">
         <div className="flex items-center gap-4">
           <button
             type="button"
@@ -138,7 +138,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
             <p className="text-gray-500 text-[11px] font-bold uppercase mb-2">
               BALANCE
             </p>
-            <p className="text-[#6D28D9] font-bold text-2xl">
+            <p className="text-[#2563eb] font-bold text-2xl">
               ₹{Number(userProfile?.balance || 0).toFixed(2)}
             </p>
           </div>

@@ -273,10 +273,10 @@ export const PlayScreen: React.FC = () => {
           {/* Top Header */}
           <div className="flex items-center justify-between p-4 bg-white sticky top-0 z-20 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
             <button
-              className="w-10 h-10 bg-[#f8f5ff] rounded-full flex flex-shrink-0 items-center justify-center cursor-pointer active:scale-95 transition-all"
+              className="w-10 h-10 bg-[#eff6ff] rounded-full flex flex-shrink-0 items-center justify-center cursor-pointer active:scale-95 transition-all"
               onClick={() => setMatchView("games")}
             >
-              <ChevronLeft className="w-5 h-5 text-[#5e35b1] ml-[-2px]" />
+              <ChevronLeft className="w-5 h-5 text-[#1e40af] ml-[-2px]" />
             </button>
             <div className="flex-1"></div>
             <div className="w-10"></div>
@@ -286,7 +286,7 @@ export const PlayScreen: React.FC = () => {
             {/* Banner */}
             <div className="border border-gray-100 rounded-[12px] p-4 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.02)] flex items-center justify-start gap-1.5 mb-5">
               <span className="text-gray-500 font-medium text-[15px]">Showing:</span>
-              <span className="font-bold text-[#5e35b1] text-[15px] uppercase mx-1">{selectedGame}</span>
+              <span className="font-bold text-[#1e40af] text-[15px] uppercase mx-1">{selectedGame}</span>
               <span className="text-gray-500 font-medium text-[15px]">matches</span>
             </div>
 
@@ -298,7 +298,7 @@ export const PlayScreen: React.FC = () => {
                   onClick={() => setRoomViewFilter(filter)}
                   className={`flex-1 py-3 text-[14px] font-bold rounded-full capitalize transition-all ${
                     roomViewFilter === filter
-                      ? "bg-[#5e35b1] text-white shadow-md shadow-purple-200"
+                      ? "bg-[#1e40af] text-white shadow-md shadow-blue-200"
                       : "text-gray-600 hover:bg-gray-50"
                   }`}
                 >
@@ -360,7 +360,7 @@ export const PlayScreen: React.FC = () => {
                           ) : (
                             // An empty src makes the browser draw its broken-image icon.
                             <div className="w-[44px] h-[44px] rounded-full border-[2px] border-yellow-400 p-[2px]">
-                              <div className="w-full h-full rounded-full bg-gradient-to-br from-[#6D28D9] to-[#8B5CF6] flex items-center justify-center text-white font-black text-[13px] uppercase">
+                              <div className="w-full h-full rounded-full bg-gradient-to-br from-[#2563eb] to-[#3b82f6] flex items-center justify-center text-white font-black text-[13px] uppercase">
                                 {(room.game || room.title || "?").slice(0, 2)}
                               </div>
                             </div>
@@ -393,7 +393,7 @@ export const PlayScreen: React.FC = () => {
                           setSelectedRoom({...room, calculatedPrizePool: mathWinnerPool, calculatedPerKill: mathPerKill});
                           setMatchView("roomDetail");
                         }}
-                        className="text-[#6D28D9] font-bold text-[13px] underline decoration-[#c4b5fd] underline-offset-4 flex-shrink-0 pt-1"
+                        className="text-[#2563eb] font-bold text-[13px] underline decoration-[#c4b5fd] underline-offset-4 flex-shrink-0 pt-1"
                       >
                         View
                       </button>
@@ -423,7 +423,7 @@ export const PlayScreen: React.FC = () => {
                       <div className="flex-1 flex flex-col">
                         <div className="w-full bg-[#f3f4f6] h-[7px] rounded-full overflow-hidden mb-1.5 relative">
                            <div
-                             className="bg-gradient-to-r from-[#6D28D9] to-[#8B5CF6] h-full rounded-full transition-all"
+                             className="bg-gradient-to-r from-[#2563eb] to-[#3b82f6] h-full rounded-full transition-all"
                              style={{
                                width: `${pct(joinedCount, total)}%`,
                              }}
@@ -449,7 +449,7 @@ export const PlayScreen: React.FC = () => {
                             Ended
                           </div>
                         ) : total > 0 && joinedCount >= total ? (
-                          <div className="bg-[#6D28D9] text-white opacity-50 font-bold text-[13px] px-5 py-2 rounded-[12px]">
+                          <div className="bg-[#2563eb] text-white opacity-50 font-bold text-[13px] px-5 py-2 rounded-[12px]">
                             Full
                           </div>
                         ) : (
@@ -459,8 +459,8 @@ export const PlayScreen: React.FC = () => {
                             }}
                             className="font-bold text-[13px] px-5 py-2 rounded-[12px] transition-transform active:scale-95 tracking-wide shadow-sm"
                             style={{
-                                 backgroundColor: "#f5f3ff",
-                                 color: "#6D28D9",
+                                 backgroundColor: "#eff6ff",
+                                 color: "#2563eb",
                                  border: "none"
                              }}
                           >
@@ -496,9 +496,9 @@ export const PlayScreen: React.FC = () => {
           <div className="flex items-center justify-between p-4 sticky top-0 bg-white shadow-sm z-20">
             <button
               onClick={() => setMatchView("rooms")}
-              className="w-10 h-10 bg-purple-50 rounded-full flex items-center justify-center cursor-pointer transition-colors hover:bg-purple-100"
+              className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center cursor-pointer transition-colors hover:bg-blue-100"
             >
-              <ChevronLeft className="w-5 h-5 text-[#5e35b1]" />
+              <ChevronLeft className="w-5 h-5 text-[#1e40af]" />
             </button>
             <div className="flex-1"></div>
             <div className="w-10"></div>
@@ -594,9 +594,9 @@ export const PlayScreen: React.FC = () => {
                 <p className="text-[14px] font-bold text-gray-600 mb-3 text-left">
                   Participants ({(selectedRoom?.joinedPlayers?.length || 0) + (joinedTournaments.includes(selectedRoom?.id) ? 1 : 0)}/{selectedRoom?.totalSlots || 0})
                 </p>
-                <div className="w-full bg-purple-50 h-[8px] rounded-full overflow-hidden border border-purple-100">
+                <div className="w-full bg-blue-50 h-[8px] rounded-full overflow-hidden border border-blue-100">
                   <div
-                    className="bg-[#5e35b1] h-full rounded-full transition-all"
+                    className="bg-[#1e40af] h-full rounded-full transition-all"
                     style={{
                       width: `${pct(
                         (selectedRoom?.joinedPlayers?.length || 0) +
@@ -612,7 +612,7 @@ export const PlayScreen: React.FC = () => {
             {/* Tournament Rules Section */}
             <div>
               <div className="flex items-center gap-3 mb-5 pl-1">
-                <div className="w-1 h-5 bg-[#5e35b1] rounded-full"></div>
+                <div className="w-1 h-5 bg-[#1e40af] rounded-full"></div>
                 <h3 className="text-lg font-black text-[#111] uppercase tracking-wide">Tournament Rules</h3>
               </div>
 
@@ -629,7 +629,7 @@ export const PlayScreen: React.FC = () => {
                     "PC & Emulators are not allowed. / पीसी और एमुलेटर की अनुमति नहीं है"
                 ].map((rule, idx) => (
                   <div key={idx} className="bg-white rounded-[16px] p-4 flex gap-4 items-start border border-gray-200 shadow-sm transition-all hover:shadow-md">
-                    <div className="bg-purple-100 text-[#5e35b1] w-7 h-7 rounded-full flex items-center justify-center font-bold text-[13px] flex-shrink-0 mt-0.5">
+                    <div className="bg-blue-100 text-[#1e40af] w-7 h-7 rounded-full flex items-center justify-center font-bold text-[13px] flex-shrink-0 mt-0.5">
                       {idx + 1}
                     </div>
                     <p className="text-gray-700 text-[13px] font-semibold leading-[1.5]">
@@ -655,7 +655,7 @@ export const PlayScreen: React.FC = () => {
           </p>
           <button
             onClick={() => setMatchView("games")}
-            className="w-full bg-[#6D28D9] text-white py-3 rounded-xl font-bold"
+            className="w-full bg-[#2563eb] text-white py-3 rounded-xl font-bold"
           >
             Back to Games
           </button>
@@ -680,10 +680,10 @@ export const PlayScreen: React.FC = () => {
           {/* Top Header */}
           <div className="flex items-center justify-between p-4 bg-white shadow-sm sticky top-0 z-10">
             <div
-              className="w-10 h-10 bg-purple-50 rounded-full flex flex-shrink-0 items-center justify-center cursor-pointer active:scale-95 transition-all"
+              className="w-10 h-10 bg-blue-50 rounded-full flex flex-shrink-0 items-center justify-center cursor-pointer active:scale-95 transition-all"
               onClick={() => setActiveTab("match")}
             >
-              <ChevronLeft className="w-5 h-5 text-[#5e35b1]" />
+              <ChevronLeft className="w-5 h-5 text-[#1e40af]" />
             </div>
             <div className="flex-1"></div>
             <div className="w-10"></div>
@@ -691,9 +691,9 @@ export const PlayScreen: React.FC = () => {
 
           <div className="p-4 space-y-5">
             {/* Banner */}
-            <div className="border border-purple-100 rounded-[12px] px-4 py-3.5 bg-white flex flex-wrap items-center gap-1.5">
+            <div className="border border-blue-100 rounded-[12px] px-4 py-3.5 bg-white flex flex-wrap items-center gap-1.5">
               <span className="text-gray-500 font-medium text-sm">Showing: </span>
-              <span className="font-bold text-[#5e35b1] text-sm tracking-wide uppercase">CRICKET</span>
+              <span className="font-bold text-[#1e40af] text-sm tracking-wide uppercase">CRICKET</span>
               <span className="text-gray-500 font-medium text-sm">matches</span>
             </div>
 
@@ -703,7 +703,7 @@ export const PlayScreen: React.FC = () => {
                 onClick={() => setCricketView("live")}
                 className={`flex-1 py-3 text-[14px] font-bold rounded-full capitalize transition-all ${
                   cricketView === "live"
-                    ? "bg-[#5e35b1] text-white shadow-md shadow-purple-200"
+                    ? "bg-[#1e40af] text-white shadow-md shadow-blue-200"
                     : "text-gray-600 hover:bg-gray-50"
                 }`}
               >
@@ -713,7 +713,7 @@ export const PlayScreen: React.FC = () => {
                 onClick={() => setCricketView("upcoming")}
                 className={`flex-1 py-3 text-[14px] font-bold rounded-full capitalize transition-all ${
                   cricketView === "upcoming"
-                    ? "bg-[#5e35b1] text-white shadow-md shadow-purple-200"
+                    ? "bg-[#1e40af] text-white shadow-md shadow-blue-200"
                     : "text-gray-600 hover:bg-gray-50"
                 }`}
               >
@@ -723,7 +723,7 @@ export const PlayScreen: React.FC = () => {
                 onClick={() => setCricketView("ended")}
                 className={`flex-1 py-3 text-[14px] font-bold rounded-full capitalize transition-all ${
                   cricketView === "ended"
-                    ? "bg-[#5e35b1] text-white shadow-md shadow-purple-200"
+                    ? "bg-[#1e40af] text-white shadow-md shadow-blue-200"
                     : "text-gray-600 hover:bg-gray-50"
                 }`}
               >
@@ -817,7 +817,7 @@ export const PlayScreen: React.FC = () => {
                                   setShowTeamSelectModal(true);
                                 }}
                                 className="font-bold text-[13px] px-5 py-2 rounded-[12px] transition-transform active:scale-95 tracking-wide shadow-sm"
-                                style={{ backgroundColor: "#f5f3ff", color: "#6D28D9", border: "none" }}
+                                style={{ backgroundColor: "#eff6ff", color: "#2563eb", border: "none" }}
                              >
                                Join
                              </button>
@@ -866,7 +866,7 @@ export const PlayScreen: React.FC = () => {
                       {/* Team 1 */}
                       <div className="flex flex-col items-center gap-2 relative bg-white px-2">
                         <div
-                          className={`w-16 h-16 ${selectedTeam === selectedCricketMatch.team1.short ? "bg-purple-100 border-[3px] border-purple-500 shadow-md shadow-purple-500/20 scale-110" : "bg-blue-50 border border-blue-100 hover:bg-blue-100"} rounded-full flex items-center justify-center font-bold text-blue-700 transition-all cursor-pointer`}
+                          className={`w-16 h-16 ${selectedTeam === selectedCricketMatch.team1.short ? "bg-blue-100 border-[3px] border-blue-500 shadow-md shadow-blue-500/20 scale-110" : "bg-blue-50 border border-blue-100 hover:bg-blue-100"} rounded-full flex items-center justify-center font-bold text-blue-700 transition-all cursor-pointer`}
                           onClick={() => setSelectedTeam(selectedCricketMatch.team1.short)}
                         >
                           {selectedCricketMatch.team1.logoUrl ? (
@@ -883,7 +883,7 @@ export const PlayScreen: React.FC = () => {
                       {/* Team 2 */}
                       <div className="flex flex-col items-center gap-2 relative bg-white px-2">
                         <div
-                          className={`w-16 h-16 ${selectedTeam === selectedCricketMatch.team2.short ? "bg-purple-100 border-[3px] border-purple-500 shadow-md shadow-purple-500/20 scale-110" : "bg-green-50 border border-green-100 hover:bg-green-100"} rounded-full flex items-center justify-center font-bold text-green-700 transition-all cursor-pointer`}
+                          className={`w-16 h-16 ${selectedTeam === selectedCricketMatch.team2.short ? "bg-blue-100 border-[3px] border-blue-500 shadow-md shadow-blue-500/20 scale-110" : "bg-green-50 border border-green-100 hover:bg-green-100"} rounded-full flex items-center justify-center font-bold text-green-700 transition-all cursor-pointer`}
                           onClick={() => setSelectedTeam(selectedCricketMatch.team2.short)}
                         >
                           {selectedCricketMatch.team2.logoUrl ? (
@@ -896,9 +896,9 @@ export const PlayScreen: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="flex justify-between items-center p-4 bg-[#f8f5ff] rounded-xl border border-purple-100 mb-6">
+                    <div className="flex justify-between items-center p-4 bg-[#eff6ff] rounded-xl border border-blue-100 mb-6">
                       <span className="text-sm font-bold text-gray-600">Entry Fee</span>
-                      <div className="flex items-center gap-1 font-black text-[#5e35b1] text-lg">
+                      <div className="flex items-center gap-1 font-black text-[#1e40af] text-lg">
                         <img src={coinSrc} alt="" aria-hidden="true" className="w-4 h-4 object-contain" /> {selectedCricketMatch.entryFee}
                       </div>
                     </div>
@@ -957,7 +957,7 @@ export const PlayScreen: React.FC = () => {
             </div>
             <div className="absolute bottom-24 right-8">
               <Sparkles
-                className="w-3 h-3 text-purple-300 opacity-60"
+                className="w-3 h-3 text-blue-300 opacity-60"
                 fill="currentColor"
               />
             </div>
@@ -974,9 +974,9 @@ export const PlayScreen: React.FC = () => {
               />
             </div>
 
-            <div className="relative inline-flex items-center justify-center w-28 h-28 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full shadow-md shadow-purple-500/20 mb-6 border-[4px] border-purple-50 z-10 mt-2">
+            <div className="relative inline-flex items-center justify-center w-28 h-28 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full shadow-md shadow-blue-500/20 mb-6 border-[4px] border-blue-50 z-10 mt-2">
               <div className="w-[96px] h-[96px] bg-white rounded-full flex items-center justify-center">
-                <span className="text-[#6D28D9] text-[56px] font-black drop-shadow-sm leading-none pt-1">
+                <span className="text-[#2563eb] text-[56px] font-black drop-shadow-sm leading-none pt-1">
                   ?
                 </span>
               </div>
@@ -1000,7 +1000,7 @@ export const PlayScreen: React.FC = () => {
               </h2>
               <p className="text-gray-500 text-sm">
                 Answer correctly to{" "}
-                <span className="font-bold text-[#6D28D9]">multiply</span> your
+                <span className="font-bold text-[#2563eb]">multiply</span> your
                 coins!
               </p>
             </div>
@@ -1019,11 +1019,11 @@ export const PlayScreen: React.FC = () => {
                 </div>
                 <div className="text-blue-500 font-black text-xl">1.5x</div>
               </div>
-              <div className="bg-white border border-purple-100 rounded-xl p-2.5 flex flex-col items-center shadow-sm shadow-purple-500/5">
-                <div className="flex items-center gap-1 text-purple-600 font-bold text-xs mb-1">
+              <div className="bg-white border border-blue-100 rounded-xl p-2.5 flex flex-col items-center shadow-sm shadow-blue-500/5">
+                <div className="flex items-center gap-1 text-blue-600 font-bold text-xs mb-1">
                   <StarIcon className="w-3 h-3 fill-current" />5 Right
                 </div>
-                <div className="text-purple-600 font-black text-xl">2x</div>
+                <div className="text-blue-600 font-black text-xl">2x</div>
               </div>
             </div>
 
@@ -1055,9 +1055,9 @@ export const PlayScreen: React.FC = () => {
                 setQuizRewarded(false);
                 setQuizView("playing");
               }}
-              className="w-[200px] bg-gradient-to-r from-[#8b5cf6] to-[#6d28d9] text-white py-3.5 rounded-[18px] font-bold shadow-md shadow-purple-500/25 flex items-center justify-center gap-2 text-base transition-transform active:scale-[0.98] mx-auto"
+              className="w-[200px] bg-gradient-to-r from-[#3b82f6] to-[#2563eb] text-white py-3.5 rounded-[18px] font-bold shadow-md shadow-blue-500/25 flex items-center justify-center gap-2 text-base transition-transform active:scale-[0.98] mx-auto"
             >
-              <PlayCircle className="w-5 h-5 fill-white text-purple-600" />
+              <PlayCircle className="w-5 h-5 fill-white text-blue-600" />
               Play
             </button>
           </div>
@@ -1086,7 +1086,7 @@ export const PlayScreen: React.FC = () => {
             <span className="font-bold text-gray-500 bg-gray-100 px-3 py-1 rounded-full text-sm">
               Question {currentQuestionIdx + 1}/{QUIZ_CONFIG.questions.length}
             </span>
-            <span className="font-bold text-[#6D28D9] bg-purple-50 px-3 py-1 rounded-full text-sm">
+            <span className="font-bold text-[#2563eb] bg-blue-50 px-3 py-1 rounded-full text-sm">
               Correct: {correctAnswers}
             </span>
           </div>
@@ -1094,7 +1094,7 @@ export const PlayScreen: React.FC = () => {
           <div className="bg-white p-5 sm:p-6 rounded-[20px] sm:rounded-[28px] shadow-[0_3px_12px_rgba(0,0,0,0.06)] border border-gray-100 mt-4 relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-gray-100">
               <div
-                className="h-full bg-purple-500 transition-all"
+                className="h-full bg-blue-500 transition-all"
                 style={{
                   width: `${pct(currentQuestionIdx, QUIZ_CONFIG.questions.length)}%`,
                 }}
@@ -1123,7 +1123,7 @@ export const PlayScreen: React.FC = () => {
                       setTimeout(() => setQuizView("result"), 300);
                     }
                   }}
-                  className="w-full text-left bg-gray-50 p-4 rounded-xl border-2 border-transparent font-medium text-gray-700 hover:bg-purple-50 hover:border-purple-200 transition-all active:scale-[0.98]"
+                  className="w-full text-left bg-gray-50 p-4 rounded-xl border-2 border-transparent font-medium text-gray-700 hover:bg-blue-50 hover:border-blue-200 transition-all active:scale-[0.98]"
                 >
                   {opt}
                 </button>
@@ -1179,7 +1179,7 @@ export const PlayScreen: React.FC = () => {
               setCorrectAnswers(0);
               setQuizRewarded(false);
             }}
-            className="w-full bg-[#6D28D9] text-white py-3.5 rounded-xl font-bold shadow-md shadow-purple-500/20 active:scale-[0.98] transition-transform"
+            className="w-full bg-[#2563eb] text-white py-3.5 rounded-xl font-bold shadow-md shadow-blue-500/20 active:scale-[0.98] transition-transform"
           >
             Back to Quiz Base
           </button>
@@ -1231,7 +1231,7 @@ export const PlayScreen: React.FC = () => {
             onClick={() => setActiveTab("match")}
             className={`flex-1 flex items-center justify-center gap-1.5 transition-all rounded-lg ${
               activeTab === "match"
-                ? "bg-gradient-to-b from-[#8042f6] to-[#6d28d9] text-white shadow-sm shadow-purple-500/20"
+                ? "bg-gradient-to-b from-[#2563eb] to-[#2563eb] text-white shadow-sm shadow-blue-500/20"
                 : "text-gray-500 hover:bg-gray-50"
             }`}
           >
@@ -1251,7 +1251,7 @@ export const PlayScreen: React.FC = () => {
             onClick={() => setActiveTab("cricket")}
             className={`flex-1 flex items-center justify-center gap-1.5 transition-all rounded-lg ${
               activeTab === "cricket"
-                ? "bg-gradient-to-b from-[#8042f6] to-[#6d28d9] text-white shadow-sm shadow-purple-500/20"
+                ? "bg-gradient-to-b from-[#2563eb] to-[#2563eb] text-white shadow-sm shadow-blue-500/20"
                 : "text-gray-500 hover:bg-gray-50"
             }`}
           >
@@ -1267,7 +1267,7 @@ export const PlayScreen: React.FC = () => {
             onClick={() => setActiveTab("quiz")}
             className={`flex-1 flex items-center justify-center gap-1.5 transition-all rounded-lg ${
               activeTab === "quiz"
-                ? "bg-gradient-to-b from-[#8042f6] to-[#6d28d9] text-white shadow-sm shadow-purple-500/20"
+                ? "bg-gradient-to-b from-[#2563eb] to-[#2563eb] text-white shadow-sm shadow-blue-500/20"
                 : "text-gray-500 hover:bg-gray-50"
             }`}
           >
@@ -1299,7 +1299,7 @@ export const PlayScreen: React.FC = () => {
                   value={inGameUid}
                   onChange={(e) => setInGameUid(e.target.value)}
                   placeholder="e.g. 1957483829" 
-                  className="w-full border-2 border-gray-100 rounded-xl px-4 py-3.5 text-[15px] outline-none focus:border-purple-500 focus:bg-purple-50/30 transition-colors"
+                  className="w-full border-2 border-gray-100 rounded-xl px-4 py-3.5 text-[15px] outline-none focus:border-blue-500 focus:bg-blue-50/30 transition-colors"
                 />
               </div>
               <div>
@@ -1309,7 +1309,7 @@ export const PlayScreen: React.FC = () => {
                   value={inGameName}
                   onChange={(e) => setInGameName(e.target.value)}
                   placeholder="e.g. OP_Killer_99" 
-                  className="w-full border-2 border-gray-100 rounded-xl px-4 py-3.5 text-[15px] outline-none focus:border-purple-500 focus:bg-purple-50/30 transition-colors"
+                  className="w-full border-2 border-gray-100 rounded-xl px-4 py-3.5 text-[15px] outline-none focus:border-blue-500 focus:bg-blue-50/30 transition-colors"
                 />
               </div>
             </div>
@@ -1323,7 +1323,7 @@ export const PlayScreen: React.FC = () => {
               </button>
               <button 
                 onClick={handleJoinTournamentSubmit}
-                className="flex-1 py-3.5 rounded-xl font-bold bg-[#6D28D9] text-white active:scale-95 transition-transform shadow-md shadow-purple-500/20"
+                className="flex-1 py-3.5 rounded-xl font-bold bg-[#2563eb] text-white active:scale-95 transition-transform shadow-md shadow-blue-500/20"
               >
                 Confirm Join
               </button>

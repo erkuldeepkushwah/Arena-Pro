@@ -86,7 +86,7 @@ export const OffersScreen: React.FC<OffersScreenProps> = ({ onBack }) => {
           onClick={onBack}
           className="absolute left-4 p-2 hover:bg-gray-100 rounded-full transition-colors"
         >
-          <ChevronLeft className="w-7 h-7 text-[#5e35b1] stroke-[2.5]" />
+          <ChevronLeft className="w-7 h-7 text-[#1e40af] stroke-[2.5]" />
         </button>
         <h1 className="text-[20px] font-bold text-[#111] mx-auto text-center">
           Coin Offers
@@ -132,9 +132,9 @@ export const OffersScreen: React.FC<OffersScreenProps> = ({ onBack }) => {
 
         <div className="w-full shrink-0">
           <h3 className="font-bold text-[#111] text-[16px] sm:text-[17px] mb-3 flex items-center gap-1.5 px-1">
-            <Star className="w-4 h-4 text-[#5e35b1] stroke-[2.5]" />
+            <Star className="w-4 h-4 text-[#1e40af] stroke-[2.5]" />
             Available Packs
-            <Sparkles className="w-4 h-4 text-[#5e35b1] stroke-[2.5] translate-y-[-4px]" />
+            <Sparkles className="w-4 h-4 text-[#1e40af] stroke-[2.5] translate-y-[-4px]" />
           </h3>
           
           <div className="grid grid-cols-2 gap-3 sm:gap-4">
@@ -143,7 +143,7 @@ export const OffersScreen: React.FC<OffersScreenProps> = ({ onBack }) => {
                 key={offer.id}
                 className="bg-white p-3 pb-3 px-3 pt-6 rounded-[20px] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-50 flex flex-col items-center relative hover:-translate-y-1 transition-transform"
               >
-                <div className="absolute top-0 right-0 bg-[#5e35b1] text-white text-[9px] sm:text-[10px] font-bold px-2 py-1 sm:px-3 sm:py-1.5 rounded-bl-xl rounded-tr-[20px]">
+                <div className="absolute top-0 right-0 bg-[#1e40af] text-white text-[9px] sm:text-[10px] font-bold px-2 py-1 sm:px-3 sm:py-1.5 rounded-bl-xl rounded-tr-[20px]">
                   {offer.bonus}
                 </div>
                 
@@ -160,7 +160,7 @@ export const OffersScreen: React.FC<OffersScreenProps> = ({ onBack }) => {
                 <button 
                   onClick={() => handleBuy(offer)}
                   disabled={loadingOffer === offer.id}
-                  className="w-full bg-[#5e35b1] text-white py-2 sm:py-3 rounded-xl font-bold text-[14px] sm:text-[15px] hover:bg-purple-800 transition-colors disabled:opacity-70 disabled:cursor-not-allowed">
+                  className="w-full bg-[#1e40af] text-white py-2 sm:py-3 rounded-xl font-bold text-[14px] sm:text-[15px] hover:bg-blue-800 transition-colors disabled:opacity-70 disabled:cursor-not-allowed">
                   {loadingOffer === offer.id ? "Processing..." : `₹${offer.money}`}
                 </button>
               </div>

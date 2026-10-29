@@ -24,7 +24,7 @@ interface SignUpScreenProps {
 
 const inputBase =
   'w-full bg-white border text-gray-800 rounded-xl py-3.5 pl-11 pr-4 focus:outline-none focus:ring-1 transition-colors placeholder:text-gray-400';
-const inputIdle = 'border-gray-200 focus:border-[#6D28D9] focus:ring-[#6D28D9]';
+const inputIdle = 'border-gray-200 focus:border-[#2563eb] focus:ring-[#2563eb]';
 const inputBad = 'border-red-300 focus:border-red-400 focus:ring-red-400';
 
 export const SignUpScreen: React.FC<SignUpScreenProps> = ({ onBack, onSignedUp }) => {
@@ -111,7 +111,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({ onBack, onSignedUp }
       {/* Back to login */}
       <button
         onClick={onBack}
-        className="flex items-center gap-1 text-[#6D28D9] font-bold text-[14px] self-start -ml-1 p-1"
+        className="flex items-center gap-1 text-[#2563eb] font-bold text-[14px] self-start -ml-1 p-1"
       >
         <ChevronLeft className="w-5 h-5" strokeWidth={2.5} />
         Back to login
@@ -121,11 +121,11 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({ onBack, onSignedUp }
         {siteCfg?.logoUrl ? (
           <img src={siteCfg.logoUrl} alt="Arena Pro" className="h-14 mb-4 object-contain" />
         ) : (
-          <div className="bg-[#6D28D9] rounded-[1.7rem] px-8 py-3 mb-4 shadow-sm">
+          <div className="bg-[#2563eb] rounded-[1.7rem] px-8 py-3 mb-4 shadow-sm">
             <span className="text-white text-[26px] font-bold tracking-wide">Arena Pro</span>
           </div>
         )}
-        <h1 className="text-[22px] font-bold text-[#14122C]">Create your account</h1>
+        <h1 className="text-[22px] font-bold text-[#1f2937]">Create your account</h1>
         <p className="text-gray-500 text-sm mt-1">Join, play and win coins</p>
       </div>
 
@@ -231,7 +231,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({ onBack, onSignedUp }
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="w-full bg-[#6D28D9] text-white font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 mt-2 disabled:opacity-60 active:scale-[0.99]"
+            className="w-full bg-[#2563eb] text-white font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 mt-2 disabled:opacity-60 active:scale-[0.99]"
           >
             {loading ? (
               <>
@@ -254,7 +254,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({ onBack, onSignedUp }
 
       <button
         onClick={onBack}
-        className="mt-6 self-center text-[#6D28D9] font-bold text-[15px]"
+        className="mt-6 self-center text-[#2563eb] font-bold text-[15px]"
       >
         Already have an account? Log in
       </button>

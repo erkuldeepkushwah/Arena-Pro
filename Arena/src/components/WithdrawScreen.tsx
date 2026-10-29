@@ -123,7 +123,7 @@ export const WithdrawScreen: React.FC<WithdrawScreenProps> = ({ onBack }) => {
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
-                className="w-full bg-white border border-gray-200 rounded-lg p-3 text-[15px] focus:outline-none focus:border-[#6D28D9] focus:ring-1 focus:ring-[#6D28D9]"
+                className="w-full bg-white border border-gray-200 rounded-lg p-3 text-[15px] focus:outline-none focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb]"
                 placeholder="Enter full name"
               />
             </div>
@@ -137,7 +137,7 @@ export const WithdrawScreen: React.FC<WithdrawScreenProps> = ({ onBack }) => {
                 onChange={(e) =>
                   setFormData({ ...formData, ac: e.target.value })
                 }
-                className="w-full bg-white border border-gray-200 rounded-lg p-3 text-[15px] focus:outline-none focus:border-[#6D28D9] focus:ring-1 focus:ring-[#6D28D9]"
+                className="w-full bg-white border border-gray-200 rounded-lg p-3 text-[15px] focus:outline-none focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb]"
                 placeholder="Enter account no."
               />
             </div>
@@ -151,13 +151,13 @@ export const WithdrawScreen: React.FC<WithdrawScreenProps> = ({ onBack }) => {
                 onChange={(e) =>
                   setFormData({ ...formData, ifsc: e.target.value })
                 }
-                className="w-full bg-white border border-gray-200 rounded-lg p-3 text-[15px] focus:outline-none focus:border-[#6D28D9] focus:ring-1 focus:ring-[#6D28D9] uppercase"
+                className="w-full bg-white border border-gray-200 rounded-lg p-3 text-[15px] focus:outline-none focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb] uppercase"
                 placeholder="Enter IFSC code"
               />
             </div>
             <button
               onClick={handleSaveBankDetails}
-              className="w-full bg-[#6D28D9] text-white font-bold py-3.5 rounded-xl shadow-sm text-[16px] mt-2"
+              className="w-full bg-[#2563eb] text-white font-bold py-3.5 rounded-xl shadow-sm text-[16px] mt-2"
             >
               Save Bank Details
             </button>
@@ -219,7 +219,7 @@ export const WithdrawScreen: React.FC<WithdrawScreenProps> = ({ onBack }) => {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="Withdrawal Amount (Min ₹180)"
-                className="w-full bg-white border border-gray-200 rounded-xl py-3.5 px-4 text-gray-800 focus:outline-none focus:border-[#6D28D9] focus:ring-1 focus:ring-[#6D28D9] mb-5 shadow-sm"
+                className="w-full bg-white border border-gray-200 rounded-xl py-3.5 px-4 text-gray-800 focus:outline-none focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb] mb-5 shadow-sm"
               />
 
               <div className="text-center mb-5">
@@ -231,7 +231,7 @@ export const WithdrawScreen: React.FC<WithdrawScreenProps> = ({ onBack }) => {
               <button 
                 onClick={handleWithdraw}
                 disabled={isSubmitting}
-                className="w-full bg-[#6D28D9] text-white font-bold py-3.5 rounded-xl shadow-sm text-[16px] disabled:opacity-70 disabled:cursor-not-allowed">
+                className="w-full bg-[#2563eb] text-white font-bold py-3.5 rounded-xl shadow-sm text-[16px] disabled:opacity-70 disabled:cursor-not-allowed">
                 {isSubmitting ? "Processing..." : "Submit Request"}
               </button>
             </div>

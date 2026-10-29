@@ -90,7 +90,7 @@ export default function App() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center">
-        <div className="w-8 h-8 rounded-full border-4 border-gray-200 border-t-[#6D28D9] animate-spin" />
+        <div className="w-8 h-8 rounded-full border-4 border-gray-200 border-t-[#2563eb] animate-spin" />
       </div>
     );
   }
@@ -104,7 +104,7 @@ export default function App() {
           </h1>
           <button
             onClick={() => setIsOutdated(false)}
-            className="bg-[#f5f3ff] text-[#6D28D9] font-medium py-3 px-6 rounded-full text-[15px]"
+            className="bg-[#eff6ff] text-[#2563eb] font-medium py-3 px-6 rounded-full text-[15px]"
           >
             Continue Anyway
           </button>

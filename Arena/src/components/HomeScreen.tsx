@@ -31,8 +31,8 @@ const BANNERS = [
     buttonText: "Invite Now",
     action: "promotion",
     bgClass: "bg-[#f0eaff]",
-    textColor: "text-[#6D28D9]",
-    buttonClass: "bg-[#6D28D9] text-white",
+    textColor: "text-[#2563eb]",
+    buttonClass: "bg-[#2563eb] text-white",
     emoji: "🎁",
     imageUrl: "", // Admin: Add image URL here (e.g., "https://example.com/banner.jpg")
   },
@@ -200,7 +200,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   }, []);
 
   return (
-    <div className="pb-28 bg-[#f8f9fe] min-h-screen font-sans relative">
+    <div className="pb-28 bg-[#f4f5f7] min-h-screen font-sans relative">
       <AnimatePresence>
         {showCongratsPopup?.show && (
           <motion.div 
@@ -255,7 +255,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             type="button"
             onClick={() => avatarInputRef.current?.click()}
             title="Change photo"
-            className="relative w-[46px] h-[46px] rounded-full bg-[#5b21b6] flex items-center justify-center text-white font-semibold text-lg shadow-sm overflow-hidden active:scale-95 transition-transform"
+            className="relative w-[46px] h-[46px] rounded-full bg-[#1e40af] flex items-center justify-center text-white font-semibold text-lg shadow-sm overflow-hidden active:scale-95 transition-transform"
           >
             {userProfile?.photoURL ? (
               <img src={userProfile.photoURL} alt="" className="w-full h-full object-cover" />
@@ -288,7 +288,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             playCoinSound();
             setShowNotifications(true);
           }}
-          className="w-[42px] h-[42px] bg-white rounded-full flex items-center justify-center shadow-sm relative text-[#5b21b6] hover:bg-gray-50 transition-colors cursor-pointer"
+          className="w-[42px] h-[42px] bg-white rounded-full flex items-center justify-center shadow-sm relative text-[#1e40af] hover:bg-gray-50 transition-colors cursor-pointer"
         >
           <Bell className="w-5 h-5" />
           {unreadCount > 0 && (
@@ -299,7 +299,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
       {/* Balance Card */}
       <div className="px-5 mb-6">
-        <div className="bg-gradient-to-br from-[#6D28D9] to-[#4c1d95] rounded-3xl p-6 text-white relative overflow-hidden shadow-lg shadow-purple-500/30">
+        <div className="bg-gradient-to-br from-[#2563eb] to-[#4c1d95] rounded-3xl p-6 text-white relative overflow-hidden shadow-lg shadow-blue-500/30">
           {/* Background decoration */}
           <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
           <div className="absolute right-10 top-0 w-32 h-32 bg-white/5 rounded-full blur-xl" />
@@ -348,7 +348,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             className="flex flex-col items-center gap-2"
           >
             <div className="w-full aspect-square bg-white rounded-2xl flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.03)] border border-gray-100">
-              <item.icon className="w-7 h-7 text-[#6D28D9]" strokeWidth={1.5} />
+              <item.icon className="w-7 h-7 text-[#2563eb]" strokeWidth={1.5} />
             </div>
             <span className="text-[12px] font-medium text-gray-700">
               {item.label}
@@ -454,7 +454,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           <h2 className="text-[#1f2937] font-bold text-[18px]">
             Top Promotion
           </h2>
-          <button className="text-[#6D28D9] font-bold text-[14px]">
+          <button className="text-[#2563eb] font-bold text-[14px]">
             View All
           </button>
         </div>
@@ -507,7 +507,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           />
           
           {/* Drawer */}
-          <div className="relative w-full max-w-sm h-full bg-[#f8f9fe] shadow-2xl flex flex-col transform transition-transform">
+          <div className="relative w-full max-w-sm h-full bg-[#f4f5f7] shadow-2xl flex flex-col transform transition-transform">
             <div className="bg-white px-5 py-4 flex items-center justify-between border-b border-gray-100 shadow-sm">
               <h2 className="text-[#1f2937] font-bold text-[18px]">Notifications</h2>
               <button 
@@ -547,7 +547,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                       className={`bg-white rounded-2xl p-4 shadow-sm border-l-4 touch-pan-y ${
                         notif.type === 'success' ? 'border-green-500' : 
                         notif.type === 'error' ? 'border-red-500' : 
-                        'border-purple-500'
+                        'border-blue-500'
                       }`}
                     >
                       <div className="flex items-start gap-3 pointer-events-none">

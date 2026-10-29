@@ -55,13 +55,13 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({ onBack }
   }, [transactions]);
 
   return (
-    <div className="min-h-screen bg-[#f8f9fe] pb-10">
+    <div className="min-h-screen bg-[#f4f5f7] pb-10">
       {/* Header */}
       <div className="bg-white px-4 pt-10 pb-4 flex items-center gap-3 border-b border-gray-100 sticky top-0 z-10">
-        <button onClick={onBack} className="p-2 -ml-2 text-[#311A89]" aria-label="Back">
+        <button onClick={onBack} className="p-2 -ml-2 text-[#1e3a8a]" aria-label="Back">
           <ChevronLeft className="w-6 h-6" strokeWidth={2.5} />
         </button>
-        <h1 className="text-[20px] font-bold text-[#14122C]">Transaction History</h1>
+        <h1 className="text-[20px] font-bold text-[#1f2937]">Transaction History</h1>
       </div>
 
       {/* Summary */}

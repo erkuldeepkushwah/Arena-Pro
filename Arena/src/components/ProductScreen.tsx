@@ -88,13 +88,13 @@ export const ProductScreen: React.FC = () => {
 
   return (
     <div className="pb-28 bg-[#f8f9fa] min-h-screen">
-      <div className="bg-[#a855f7] pt-10 pb-8 rounded-b-[2.5rem]">
+      <div className="bg-[#3b82f6] pt-10 pb-8 rounded-b-[2.5rem]">
         <div className="flex justify-between items-center px-4 mb-6">
           <div className="bg-[#ef4444] text-white px-2 py-0.5 rounded text-[11px] font-bold transform -rotate-12 outline outline-2 outline-white shadow-sm flex-shrink-0">
              NEW!
           </div>
           <h1 className="text-white text-xl font-bold translate-x-2">Products</h1>
-          <div className="bg-[#8b5cf6] px-3 py-1.5 rounded-full flex items-center gap-1.5">
+          <div className="bg-[#3b82f6] px-3 py-1.5 rounded-full flex items-center gap-1.5">
             <Coins className="w-4 h-4 text-yellow-400 fill-yellow-400" />
             <span className="text-white font-bold text-[13px]">{userProfile?.coins || 0}</span>
           </div>
@@ -105,7 +105,7 @@ export const ProductScreen: React.FC = () => {
             <button 
               onClick={() => setActivePlan('daily')}
               className={`flex-1 py-2.5 rounded-full font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 transition-all ${
-                activePlan === 'daily' ? 'bg-[#f8f9fa] text-[#6D28D9]' : 'text-white'
+                activePlan === 'daily' ? 'bg-[#f8f9fa] text-[#2563eb]' : 'text-white'
               }`}
             >
               <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current" /> Daily Plan
@@ -113,7 +113,7 @@ export const ProductScreen: React.FC = () => {
             <button 
               onClick={() => setActivePlan('welfare')}
               className={`flex-1 py-2.5 rounded-full font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 transition-all ${
-                activePlan === 'welfare' ? 'bg-[#f8f9fa] text-[#6D28D9]' : 'text-white'
+                activePlan === 'welfare' ? 'bg-[#f8f9fa] text-[#2563eb]' : 'text-white'
               }`}
             >
               <Smile className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Welfare Plan
@@ -129,7 +129,7 @@ export const ProductScreen: React.FC = () => {
           </div>
         ) : (
           displayProducts.map((product) => (
-            <div key={product.id} className="bg-white rounded-[1.25rem] p-3 border border-[#6D28D9] relative shadow-sm overflow-hidden pt-8 pb-3.5">
+            <div key={product.id} className="bg-white rounded-[1.25rem] p-3 border border-[#2563eb] relative shadow-sm overflow-hidden pt-8 pb-3.5">
                <div className="absolute top-0 right-0 bg-[#0ea5e9] text-white px-4 py-1 rounded-bl-[1rem] text-xs font-bold shadow-sm">
                  Days: {product.validDays}
                </div>
@@ -147,11 +147,11 @@ export const ProductScreen: React.FC = () => {
                 <div className="flex-1 flex flex-col justify-center">
                   <div className="grid grid-cols-3 gap-1 sm:gap-2 text-center mb-4 sm:mb-6">
                     <div>
-                      <p className="text-[#a855f7] font-bold text-[16px] sm:text-[19px] leading-none mb-1">₹{(product.validDays ? product.totalIncome / product.validDays : 0).toFixed(2).replace(/\.00$/, '')}</p>
+                      <p className="text-[#3b82f6] font-bold text-[16px] sm:text-[19px] leading-none mb-1">₹{(product.validDays ? product.totalIncome / product.validDays : 0).toFixed(2).replace(/\.00$/, '')}</p>
                       <p className="text-[9px] sm:text-[10px] font-bold uppercase text-[#111]">Daily</p>
                     </div>
                     <div>
-                      <p className="text-[#a855f7] font-bold text-[16px] sm:text-[19px] leading-none mb-1">₹{product.totalIncome}</p>
+                      <p className="text-[#3b82f6] font-bold text-[16px] sm:text-[19px] leading-none mb-1">₹{product.totalIncome}</p>
                       <p className="text-[9px] sm:text-[10px] font-bold uppercase text-[#111]">Total</p>
                     </div>
                     <div>

@@ -84,7 +84,7 @@ export const PaymentFlow: React.FC<PaymentFlowProps> = ({ onBack, onComplete }) 
           <div className="space-y-6">
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100/50 text-center">
               <p className="text-gray-500 font-medium text-sm mb-1.5">Current Balance</p>
-              <p className="text-[#6D28D9] font-bold text-4xl">₹{userProfile?.balance || 0}</p>
+              <p className="text-[#2563eb] font-bold text-4xl">₹{userProfile?.balance || 0}</p>
             </div>
 
             <div className="space-y-2 mt-8">
@@ -94,13 +94,13 @@ export const PaymentFlow: React.FC<PaymentFlowProps> = ({ onBack, onComplete }) 
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="Recharge Amount"
-                className="w-full bg-white border border-gray-200 rounded-xl py-3.5 px-4 focus:outline-none focus:border-[#6D28D9] focus:ring-1 focus:ring-[#6D28D9] text-gray-800 text-base shadow-sm"
+                className="w-full bg-white border border-gray-200 rounded-xl py-3.5 px-4 focus:outline-none focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb] text-gray-800 text-base shadow-sm"
               />
             </div>
 
             <button 
               onClick={() => amount && setStep('qr')}
-              className={`w-full text-white font-bold py-3.5 rounded-xl transition-all mt-4 ${amount ? 'bg-[#6D28D9] shadow-md' : 'bg-[#a78bfa]'}`}
+              className={`w-full text-white font-bold py-3.5 rounded-xl transition-all mt-4 ${amount ? 'bg-[#2563eb] shadow-md' : 'bg-[#a78bfa]'}`}
               disabled={!amount}
             >
               Proceed to Pay
@@ -110,7 +110,7 @@ export const PaymentFlow: React.FC<PaymentFlowProps> = ({ onBack, onComplete }) 
           <div className="space-y-4 max-w-sm mx-auto">
             <div className="text-center mt-2 mb-2">
               <p className="text-gray-500 font-medium text-[15px]">Payment Amount</p>
-              <p className="text-[#6D28D9] font-bold text-[56px] leading-[1.1]">₹{amount}</p>
+              <p className="text-[#2563eb] font-bold text-[56px] leading-[1.1]">₹{amount}</p>
             </div>
 
             <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-100 flex flex-col items-center mb-6">
@@ -134,13 +134,13 @@ export const PaymentFlow: React.FC<PaymentFlowProps> = ({ onBack, onComplete }) 
               placeholder="Enter UTR / Transaction ID"
               value={utr}
               onChange={(e) => setUtr(e.target.value)}
-              className="w-full bg-white border border-gray-200 rounded-xl py-3.5 px-4 text-center text-gray-400 font-medium focus:outline-none focus:border-[#6D28D9] focus:ring-1 focus:ring-[#6D28D9] shadow-sm mb-4"
+              className="w-full bg-white border border-gray-200 rounded-xl py-3.5 px-4 text-center text-gray-400 font-medium focus:outline-none focus:border-[#2563eb] focus:ring-1 focus:ring-[#2563eb] shadow-sm mb-4"
             />
             
             <button 
               onClick={handleComplete}
               disabled={isSubmitting}
-              className={`w-full text-white font-bold py-3.5 rounded-xl text-[15px] ${isSubmitting ? 'bg-[#a78bfa]' : 'bg-[#6D28D9]'}`}
+              className={`w-full text-white font-bold py-3.5 rounded-xl text-[15px] ${isSubmitting ? 'bg-[#a78bfa]' : 'bg-[#2563eb]'}`}
             >
               {isSubmitting ? 'Submitting...' : 'Submit'}
             </button>

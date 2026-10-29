@@ -48,17 +48,17 @@ export const SalesRecord: React.FC<SalesRecordProps> = ({ onBack }) => {
   return (
     <div className="min-h-screen bg-white pb-10">
       <div className="bg-white pt-10 pb-4 flex flex-col items-center relative text-center">
-        <button onClick={onBack} className="absolute left-4 top-10 p-2 -ml-2 text-[#311A89]">
-          <ChevronLeft className="w-7 h-7 text-[#311A89]" strokeWidth={2.5} />
+        <button onClick={onBack} className="absolute left-4 top-10 p-2 -ml-2 text-[#1e3a8a]">
+          <ChevronLeft className="w-7 h-7 text-[#1e3a8a]" strokeWidth={2.5} />
         </button>
-        <h1 className="text-[22px] font-bold text-[#14122C] tracking-tight text-center w-full">
+        <h1 className="text-[22px] font-bold text-[#1f2937] tracking-tight text-center w-full">
           Sales
         </h1>
       </div>
 
       <div className="px-4 mt-2 space-y-4">
         {/* Banner Card */}
-        <div className="bg-gradient-to-br from-[#350A86] via-[#24065D] to-[#150337] rounded-3xl flex items-center shadow-xl relative overflow-hidden h-[190px] border border-purple-900/40">
+        <div className="bg-gradient-to-br from-[#350A86] via-[#24065D] to-[#150337] rounded-3xl flex items-center shadow-xl relative overflow-hidden h-[190px] border border-blue-900/40">
           
           {/* Subtle Background Decorations */}
           <div className="absolute top-4 left-4 opacity-5 pointer-events-none">
@@ -107,8 +107,8 @@ export const SalesRecord: React.FC<SalesRecordProps> = ({ onBack }) => {
           <>
             <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="bg-purple-100 p-2.5 rounded-full">
-                  <Users className="w-5 h-5 text-purple-600" />
+                <div className="bg-blue-100 p-2.5 rounded-full">
+                  <Users className="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 font-medium">Total Referred</p>

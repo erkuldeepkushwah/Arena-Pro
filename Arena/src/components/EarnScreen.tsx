@@ -65,8 +65,8 @@ export const EarnScreen: React.FC<EarnScreenProps> = ({ onBack }) => {
       );
     }
     return (
-      <div className="w-12 h-12 bg-purple-50 rounded-full shadow-sm flex items-center justify-center border border-gray-50">
-        <LinkIcon className="w-6 h-6 text-[#6D28D9]" />
+      <div className="w-12 h-12 bg-blue-50 rounded-full shadow-sm flex items-center justify-center border border-gray-50">
+        <LinkIcon className="w-6 h-6 text-[#2563eb]" />
       </div>
     );
   };
@@ -127,7 +127,7 @@ export const EarnScreen: React.FC<EarnScreenProps> = ({ onBack }) => {
               <button
                 onClick={() => handleTaskAction(task)}
                 disabled={isProcessing || isClaimed}
-                className={`text-[13px] font-semibold px-4 pt-1.5 pb-2 rounded-lg shrink-0 mt-2 shadow-sm transition-transform ${isClaimed ? "bg-[#4B5563] text-white cursor-not-allowed" : isCompleted ? "bg-[#6D28D9] text-white active:scale-95" : "bg-white text-[#6D28D9] border border-gray-200 active:scale-95"} ${isProcessing ? "opacity-80" : ""}`}
+                className={`text-[13px] font-semibold px-4 pt-1.5 pb-2 rounded-lg shrink-0 mt-2 shadow-sm transition-transform ${isClaimed ? "bg-[#4B5563] text-white cursor-not-allowed" : isCompleted ? "bg-[#2563eb] text-white active:scale-95" : "bg-white text-[#2563eb] border border-gray-200 active:scale-95"} ${isProcessing ? "opacity-80" : ""}`}
               >
                 {isClaimed ? "Claimed" : isProcessing ? "Processing..." : "Claim"}
               </button>
@@ -139,10 +139,10 @@ export const EarnScreen: React.FC<EarnScreenProps> = ({ onBack }) => {
       {/* Info Banner at the bottom */}
       <div className="px-4 pb-6 mt-2">
         <div className="bg-[#f3f0fc] p-3.5 rounded-[12px] flex items-center gap-3">
-          <div className="w-6 h-6 rounded-full bg-[#6D28D9] flex items-center justify-center shrink-0">
+          <div className="w-6 h-6 rounded-full bg-[#2563eb] flex items-center justify-center shrink-0">
             <Info className="w-3.5 h-3.5 text-white" />
           </div>
-          <p className="text-[#6D28D9] text-[13px] font-medium leading-tight">
+          <p className="text-[#2563eb] text-[13px] font-medium leading-tight">
             Complete tasks and earn coins. Coins can be used to get exciting
             rewards!
           </p>
