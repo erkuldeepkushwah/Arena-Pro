@@ -57,7 +57,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     "dashboard" | "users" | "payment" | "create" | "task" | "settings"
   >("dashboard");
   const [createTab, setCreateTab] = useState<
-    "product" | "match" | "cricket" | "quiz"
+    "product" | "match" | "cricket" | "quiz" | "earn"
   >("product");
   const [expandedMatch, setExpandedMatch] = useState<any>(null);
   const [createMenuOpen, setCreateMenuOpen] = useState(false);
@@ -70,7 +70,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const goToCreateTab = (tab: "product" | "match" | "cricket" | "quiz") => {
+  const goToCreateTab = (tab: "product" | "match" | "cricket" | "quiz" | "earn") => {
     setCreateTab(tab);
     setActiveSection("create");
     setCreateMenuOpen(true);
@@ -495,7 +495,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
 
               {createMenuOpen && (
                 <div className="pb-1">
-                  {(["product", "match", "cricket", "quiz"] as const).map((tab) => (
+                  {(["product", "match", "cricket", "quiz", "earn"] as const).map((tab) => (
                     <button
                       key={tab}
                       onClick={() => goToCreateTab(tab)}
@@ -1006,7 +1006,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         </div>
 
         {/* Manage Play Games */}
-        <div id="admin-create" className={`bg-white border border-gray-200 rounded-lg shadow-sm ${activeSection === "create" && createTab !== "product" ? "" : "hidden"}`}>
+        <div id="admin-create" className={`bg-white border border-gray-200 rounded-lg shadow-sm ${activeSection === "create" && createTab !== "product" && createTab !== "earn" ? "" : "hidden"}`}>
           <div className="p-4 border-b border-gray-200">
             <h2 className="font-bold text-[17px]">Play</h2>
           </div>
@@ -2136,7 +2136,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         </div>
 
         {/* Earn Tasks */}
-        <div id="admin-task" className={`bg-white border border-gray-200 rounded-lg shadow-sm mb-6 ${activeSection === "task" ? "" : "hidden"}`}>
+        <div id="admin-task" className={`bg-white border border-gray-200 rounded-lg shadow-sm mb-6 ${activeSection === "create" && createTab === "earn" ? "" : "hidden"}`}>
           <div className="p-4 border-b border-gray-200">
             <h2 className="font-bold text-[17px]">Earn</h2>
           </div>
