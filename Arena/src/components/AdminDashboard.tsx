@@ -53,13 +53,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   const [logoExpanded, setLogoExpanded] = useState(false);
   const [coinExpanded, setCoinExpanded] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState<
+    "dashboard" | "users" | "payment" | "create" | "task" | "settings"
+  >("dashboard");
 
   const goToSection = (id: string) => {
     setSidebarOpen(false);
-    if (id === "admin-users") setUsersExpanded(true);
-    requestAnimationFrame(() => {
-      document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
+    setActiveSection(id as typeof activeSection);
+    if (id === "users") setUsersExpanded(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
   const [cricketExpanded, setCricketExpanded] = useState(false);
   const [esportsExpanded, setEsportsExpanded] = useState(false);
@@ -452,17 +454,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             </div>
             <nav className="flex-1 py-3 overflow-y-auto">
               {[
-                { id: "admin-top", label: "Dashboard", Icon: LayoutGrid },
-                { id: "admin-users", label: "Users", Icon: Users },
-                { id: "admin-payments", label: "Payment", Icon: Wallet },
-                { id: "admin-create", label: "Create", Icon: Plus },
-                { id: "admin-task", label: "Task", Icon: CheckCircle2 },
-                { id: "admin-settings", label: "Settings", Icon: Settings },
+                { id: "dashboard", label: "Dashboard", Icon: LayoutGrid },
+                { id: "users", label: "Users", Icon: Users },
+                { id: "payment", label: "Payment", Icon: Wallet },
+                { id: "create", label: "Create", Icon: Plus },
+                { id: "task", label: "Task", Icon: CheckCircle2 },
+                { id: "settings", label: "Settings", Icon: Settings },
               ].map((item) => (
                 <button
                   key={item.id}
                   onClick={() => goToSection(item.id)}
-                  className="w-full flex items-center gap-3 px-5 py-3.5 text-[15px] font-medium text-white/85 hover:bg-white/10 active:bg-white/15"
+                  className={`w-full flex items-center gap-3 px-5 py-3.5 text-[15px] font-medium ${activeSection === item.id ? "bg-white/15 text-white" : "text-white/85"} hover:bg-white/10`}
                 >
                   <item.Icon className="w-5 h-5" />
                   {item.label}
@@ -481,8 +483,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
       )}
 
       <div className="px-4 mt-6 space-y-6">
+        {activeSection === "dashboard" && (
+          <div className="bg-white border border-gray-200 rounded-lg p-6 text-center shadow-sm">
+            <p className="text-[16px] font-bold text-[#1f2937]">Welcome, admin</p>
+            <p className="text-[13px] text-gray-500 mt-1">Choose a section from the menu.</p>
+          </div>
+        )}
         {/* Requests */}
-        <div id="admin-payments" className="scroll-mt-24">
+        <div id="admin-payments" className={activeSection === "payment" ? "" : "hidden"}>
           <div className="bg-[#e5e7eb] px-4 py-3 rounded-t-lg">
             <h2 className="font-bold text-[#1f2937] text-[15px]">
               Recharge Requests
@@ -553,7 +561,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         </div>
 
         {/* Daily Operations */}
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+        <div className={`bg-white border border-gray-200 rounded-lg shadow-sm ${activeSection === "task" ? "" : "hidden"}`}>
           <div className="p-4 border-b border-gray-200">
             <h2 className="font-bold text-[17px]">Daily</h2>
           </div>
@@ -768,7 +776,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         </div>
 
         {/* Manage Products */}
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+        <div className={`bg-white border border-gray-200 rounded-lg shadow-sm ${activeSection === "create" ? "" : "hidden"}`}>
           <div className="p-4 border-b border-gray-200 flex justify-between items-center">
             <h2 className="font-bold text-[17px]">Product</h2>
             <button
@@ -948,7 +956,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         </div>
 
         {/* Manage Play Games */}
-        <div id="admin-create" className="scroll-mt-24 bg-white border border-gray-200 rounded-lg shadow-sm">
+        <div id="admin-create" className={`bg-white border border-gray-200 rounded-lg shadow-sm ${activeSection === "create" ? "" : "hidden"}`}>
           <div className="p-4 border-b border-gray-200">
             <h2 className="font-bold text-[17px]">Play</h2>
           </div>
@@ -1945,7 +1953,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         </div>
 
         {/* Earn Tasks */}
-        <div id="admin-task" className="scroll-mt-24 bg-white border border-gray-200 rounded-lg shadow-sm mb-6">
+        <div id="admin-task" className={`bg-white border border-gray-200 rounded-lg shadow-sm mb-6 ${activeSection === "task" ? "" : "hidden"}`}>
           <div className="p-4 border-b border-gray-200">
             <h2 className="font-bold text-[17px]">Earn</h2>
           </div>
@@ -2009,7 +2017,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         </div>
 
         {/* Banner Section */}
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm mb-6">
+        <div className={`bg-white border border-gray-200 rounded-lg shadow-sm mb-6 ${activeSection === "settings" ? "" : "hidden"}`}>
           <div className="p-4 border-b border-gray-200">
             <h2 className="font-bold text-[17px]">Banner</h2>
           </div>
@@ -2071,13 +2079,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         </div>
 
         {/* General Settings */}
-        <div id="admin-settings" className="scroll-mt-24 bg-white border border-gray-200 rounded-lg shadow-sm mb-6 pb-2">
-          <div className="p-4 border-b border-gray-100">
+        <div id="admin-settings" className={`bg-white border border-gray-200 rounded-lg shadow-sm mb-6 pb-2 ${activeSection === "settings" || activeSection === "users" ? "" : "hidden"}`}>
+          <div className={activeSection === "settings" ? "p-4 border-b border-gray-100" : "hidden"}>
             <h2 className="font-bold text-[17px]">General</h2>
           </div>
           <div className="p-4 space-y-4">
             <div
-              className={`border border-gray-200 rounded-lg ${logoExpanded ? "shadow-sm" : ""}`}
+              className={`border border-gray-200 rounded-lg ${logoExpanded ? "shadow-sm" : ""} ${activeSection === "settings" ? "" : "hidden"}`}
             >
               <button
                 onClick={() => setLogoExpanded(!logoExpanded)}
@@ -2129,7 +2137,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             </div>
 
             <div
-              className={`border border-gray-200 rounded-lg ${coinExpanded ? "shadow-sm" : ""}`}
+              className={`border border-gray-200 rounded-lg ${coinExpanded ? "shadow-sm" : ""} ${activeSection === "settings" ? "" : "hidden"}`}
             >
               <button
                 onClick={() => setCoinExpanded(!coinExpanded)}
@@ -2181,7 +2189,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             </div>
 
             <div
-              className={`border border-gray-200 rounded-lg ${uiExpanded ? "shadow-sm" : ""}`}
+              className={`border border-gray-200 rounded-lg ${uiExpanded ? "shadow-sm" : ""} ${activeSection === "settings" ? "" : "hidden"}`}
             >
               <button
                 onClick={() => setUiExpanded(!uiExpanded)}
@@ -2220,7 +2228,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
 
             <div
               id="admin-users"
-              className={`scroll-mt-24 border border-gray-200 rounded-lg ${usersExpanded ? "shadow-sm" : ""}`}
+              className={`border border-gray-200 rounded-lg ${usersExpanded ? "shadow-sm" : ""} ${activeSection === "users" ? "" : "hidden"}`}
             >
               <button
                 onClick={() => setUsersExpanded(!usersExpanded)}
