@@ -59,6 +59,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   const [createTab, setCreateTab] = useState<
     "product" | "match" | "cricket" | "quiz"
   >("product");
+  const [expandedMatch, setExpandedMatch] = useState<any>(null);
 
   const goToSection = (id: string) => {
     setSidebarOpen(false);
@@ -1028,8 +1029,40 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                   {cricketMatches.map((match: any, index: number) => (
                     <div
                       key={match.id}
-                      className="border border-gray-200 rounded-lg p-3 bg-gray-50 relative"
+                      className="bg-white border border-gray-200 rounded-xl p-3.5 shadow-sm relative mb-3"
                     >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="font-bold text-[15px] text-[#111] truncate">
+                            {match.title || "Untitled match"}
+                          </p>
+                          <p className="text-[12px] text-gray-500 font-medium mt-0.5">
+                            {match.team1?.short || "T1"} vs {match.team2?.short || "T2"}
+                            {match.time ? ` - ${match.time}` : ""}
+                          </p>
+                          <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${match.status === "live" ? "bg-red-50 text-red-600" : match.status === "ended" ? "bg-gray-100 text-gray-600" : "bg-purple-50 text-purple-600"}`}>
+                              {(match.status || "upcoming").toUpperCase()}
+                            </span>
+                            <span className="text-[10px] font-bold text-gray-500 bg-gray-50 border border-gray-200 px-1.5 py-0.5 rounded">
+                              Entry {match.entryFee || 0}
+                            </span>
+                            <span className="text-[10px] font-bold text-gray-500 bg-gray-50 border border-gray-200 px-1.5 py-0.5 rounded">
+                              {allUsers.filter((u) => u.joinedMatches && u.joinedMatches[match.id]).length} joined
+                            </span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => setExpandedMatch(expandedMatch === match.id ? null : match.id)}
+                          className="shrink-0 text-[12px] font-bold text-[#5e35b1] border border-purple-200 bg-white px-3 py-1.5 rounded-lg"
+                        >
+                          {expandedMatch === match.id ? "Close" : "Edit"}
+                        </button>
+                      </div>
+
+                      {expandedMatch === match.id && (
+                        <>
+                      <div className="mt-3 pt-3 border-t border-gray-100">
                       <div className="flex justify-between items-center mb-3">
                         <input
                           className="border border-gray-300 rounded p-1 text-sm font-bold w-1/2"
@@ -1334,6 +1367,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         </div>
                       )}
 
+                      </div>
+                        </>
+                      )}
+
                       <div className="flex justify-end pt-2 border-t border-gray-200">
                         <button
                           onClick={() => {
@@ -1450,8 +1487,41 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                     return (
                     <div
                       key={t.id}
-                      className="border border-gray-200 rounded-lg p-3 bg-gray-50 relative mb-3"
+                      className="bg-white border border-gray-200 rounded-xl p-3.5 shadow-sm relative mb-3"
                     >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="font-bold text-[15px] text-[#111] truncate">
+                            {t.title || "Untitled match"}
+                          </p>
+                          <p className="text-[12px] text-gray-500 font-medium mt-0.5">
+                            {t.game || "Game"}
+                            {t.matchType ? ` - ${t.matchType}` : ""}
+                            {t.map ? ` - ${t.map}` : ""}
+                          </p>
+                          <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${t.status === "live" ? "bg-red-50 text-red-600" : t.status === "ended" ? "bg-gray-100 text-gray-600" : "bg-purple-50 text-purple-600"}`}>
+                              {(t.status || "upcoming").toUpperCase()}
+                            </span>
+                            <span className="text-[10px] font-bold text-gray-500 bg-gray-50 border border-gray-200 px-1.5 py-0.5 rounded">
+                              Entry {t.entryFee || 0}
+                            </span>
+                            <span className="text-[10px] font-bold text-gray-500 bg-gray-50 border border-gray-200 px-1.5 py-0.5 rounded">
+                              {allUsers.filter((u: any) => u.joinedTournaments?.includes(t.id)).length} / {t.totalSlots || 0} joined
+                            </span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => setExpandedMatch(expandedMatch === t.id ? null : t.id)}
+                          className="shrink-0 text-[12px] font-bold text-[#5e35b1] border border-purple-200 bg-white px-3 py-1.5 rounded-lg"
+                        >
+                          {expandedMatch === t.id ? "Close" : "Edit"}
+                        </button>
+                      </div>
+
+                      {expandedMatch === t.id && (
+                        <>
+                      <div className="mt-3 pt-3 border-t border-gray-100">
                       <div className="flex justify-between items-center mb-3">
                         <select
                           className="border border-gray-300 rounded p-1 text-sm font-bold w-1/3"
@@ -1884,6 +1954,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             Add Results & Distribute Coins
                           </button>
                         </div>
+                      )}
+
+                      </div>
+                        </>
                       )}
 
                       <div className="flex justify-between items-center pt-2 border-t border-gray-200 mt-3">
