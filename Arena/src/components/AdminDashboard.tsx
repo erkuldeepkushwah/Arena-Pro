@@ -60,11 +60,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     "product" | "match" | "cricket" | "quiz"
   >("product");
   const [expandedMatch, setExpandedMatch] = useState<any>(null);
+  const [createMenuOpen, setCreateMenuOpen] = useState(false);
 
   const goToSection = (id: string) => {
     setSidebarOpen(false);
     setActiveSection(id as typeof activeSection);
     if (id === "users") setUsersExpanded(true);
+    if (id === "create") setCreateMenuOpen(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const goToCreateTab = (tab: "product" | "match" | "cricket" | "quiz") => {
+    setCreateTab(tab);
+    setActiveSection("create");
+    setCreateMenuOpen(true);
+    setSidebarOpen(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
   const [cricketExpanded, setCricketExpanded] = useState(false);
@@ -461,7 +471,43 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                 { id: "dashboard", label: "Dashboard", Icon: LayoutGrid },
                 { id: "users", label: "Users", Icon: Users },
                 { id: "payment", label: "Payment", Icon: Wallet },
-                { id: "create", label: "Create", Icon: Plus },
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => goToSection(item.id)}
+                  className={`w-full flex items-center gap-3 px-5 py-3.5 text-[15px] font-medium ${activeSection === item.id ? "bg-white/15 text-white" : "text-white/85"} hover:bg-white/10`}
+                >
+                  <item.Icon className="w-5 h-5" />
+                  {item.label}
+                </button>
+              ))}
+
+              <button
+                onClick={() => setCreateMenuOpen(!createMenuOpen)}
+                className={`w-full flex items-center gap-3 px-5 py-3.5 text-[15px] font-medium ${activeSection === "create" ? "bg-white/15 text-white" : "text-white/85"} hover:bg-white/10`}
+              >
+                <Plus className="w-5 h-5" />
+                Create
+                <ChevronDown
+                  className={`w-4 h-4 ml-auto transition-transform ${createMenuOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+
+              {createMenuOpen && (
+                <div className="pb-1">
+                  {(["product", "match", "cricket", "quiz"] as const).map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => goToCreateTab(tab)}
+                      className={`w-full flex items-center gap-3 pl-12 pr-5 py-2.5 text-[14px] font-medium capitalize ${activeSection === "create" && createTab === tab ? "bg-white/10 text-white" : "text-white/70"} hover:bg-white/10`}
+                    >
+                      {tab}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {[
                 { id: "task", label: "Task", Icon: CheckCircle2 },
                 { id: "settings", label: "Settings", Icon: Settings },
               ].map((item) => (
@@ -491,19 +537,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
           <div className="bg-white border border-gray-200 rounded-lg p-6 text-center shadow-sm">
             <p className="text-[16px] font-bold text-[#1f2937]">Welcome, admin</p>
             <p className="text-[13px] text-gray-500 mt-1">Choose a section from the menu.</p>
-          </div>
-        )}
-        {activeSection === "create" && (
-          <div className="flex bg-white rounded-xl p-1 border border-gray-200 shadow-sm">
-            {(["product", "match", "cricket", "quiz"] as const).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setCreateTab(tab)}
-                className={`flex-1 py-2.5 text-[13px] font-bold rounded-lg capitalize transition-all ${createTab === tab ? "bg-[#5e35b1] text-white shadow-sm" : "text-gray-600"}`}
-              >
-                {tab}
-              </button>
-            ))}
           </div>
         )}
         {/* Requests */}
