@@ -56,6 +56,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   const [activeSection, setActiveSection] = useState<
     "dashboard" | "users" | "payment" | "create" | "task" | "settings"
   >("dashboard");
+  const [createTab, setCreateTab] = useState<
+    "product" | "match" | "cricket" | "quiz"
+  >("product");
 
   const goToSection = (id: string) => {
     setSidebarOpen(false);
@@ -489,6 +492,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             <p className="text-[13px] text-gray-500 mt-1">Choose a section from the menu.</p>
           </div>
         )}
+        {activeSection === "create" && (
+          <div className="flex bg-white rounded-xl p-1 border border-gray-200 shadow-sm">
+            {(["product", "match", "cricket", "quiz"] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setCreateTab(tab)}
+                className={`flex-1 py-2.5 text-[13px] font-bold rounded-lg capitalize transition-all ${createTab === tab ? "bg-[#5e35b1] text-white shadow-sm" : "text-gray-600"}`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+        )}
         {/* Requests */}
         <div id="admin-payments" className={activeSection === "payment" ? "" : "hidden"}>
           <div className="bg-[#e5e7eb] px-4 py-3 rounded-t-lg">
@@ -524,7 +540,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
           </div>
         </div>
 
-        <div>
+        <div className={activeSection === "payment" ? "" : "hidden"}>
           <div className="bg-[#e5e7eb] px-4 py-3 rounded-t-lg">
             <h2 className="font-bold text-[#1f2937] text-[15px]">
               Withdrawal Requests
@@ -776,7 +792,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         </div>
 
         {/* Manage Products */}
-        <div className={`bg-white border border-gray-200 rounded-lg shadow-sm ${activeSection === "create" ? "" : "hidden"}`}>
+        <div className={`bg-white border border-gray-200 rounded-lg shadow-sm ${activeSection === "create" && createTab === "product" ? "" : "hidden"}`}>
           <div className="p-4 border-b border-gray-200 flex justify-between items-center">
             <h2 className="font-bold text-[17px]">Product</h2>
             <button
@@ -956,14 +972,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         </div>
 
         {/* Manage Play Games */}
-        <div id="admin-create" className={`bg-white border border-gray-200 rounded-lg shadow-sm ${activeSection === "create" ? "" : "hidden"}`}>
+        <div id="admin-create" className={`bg-white border border-gray-200 rounded-lg shadow-sm ${activeSection === "create" && createTab !== "product" ? "" : "hidden"}`}>
           <div className="p-4 border-b border-gray-200">
             <h2 className="font-bold text-[17px]">Play</h2>
           </div>
           <div className="p-4 space-y-4">
             {/* Cricket Matches Accordion */}
             <div
-              className={`border border-gray-200 rounded-lg ${cricketExpanded ? "shadow-sm" : ""}`}
+              className={`border border-gray-200 rounded-lg ${cricketExpanded ? "shadow-sm" : ""} ${createTab === "cricket" ? "" : "hidden"}`}
             >
               <div
                 className={`flex justify-between items-center w-full p-4 ${cricketExpanded ? "bg-[#f8f9fa] border-b border-gray-200 rounded-t-lg" : "bg-white rounded-lg"}`}
@@ -1042,6 +1058,36 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                           <option value="live">LIVE</option>
                           <option value="ended">ENDED</option>
                         </select>
+                      </div>
+
+                      <div className="flex gap-2 mb-3">
+                        {match.status !== "live" && match.status !== "ended" && (
+                          <button
+                            onClick={() => {
+                              setCricketMatches(patchAt(cricketMatches, index, { status: "live" }));
+                              window.dispatchEvent(new Event("admin_config_updated"));
+                            }}
+                            className="flex-1 bg-red-600 text-white font-bold py-1.5 rounded text-xs"
+                          >
+                            Go Live
+                          </button>
+                        )}
+                        {match.status === "live" && (
+                          <button
+                            onClick={() => {
+                              setCricketMatches(patchAt(cricketMatches, index, { status: "ended" }));
+                              window.dispatchEvent(new Event("admin_config_updated"));
+                            }}
+                            className="flex-1 bg-gray-800 text-white font-bold py-1.5 rounded text-xs"
+                          >
+                            End Match - enter score
+                          </button>
+                        )}
+                        {match.status === "ended" && (
+                          <p className="text-[11px] font-bold text-green-700 bg-green-50 border border-green-200 rounded px-2 py-1.5 w-full text-center">
+                            Match ended - pick the winning team below to pay out.
+                          </p>
+                        )}
                       </div>
 
                       <div className="grid grid-cols-2 gap-2 mb-3">
@@ -1202,7 +1248,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                       </div>
 
                       {/* Distribution (End Match) */}
-                      {match.status === "live" && (
+                      {(match.status === "live" || match.status === "ended") && (
                         <div className="bg-blue-50 border border-blue-200 p-2 rounded mb-3">
                           <label className="text-[10px] text-blue-700 font-bold block mb-1">
                             LIVE SCORE UPDATES
@@ -1313,7 +1359,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
 
             {/* eSports Tournaments Accordion */}
             <div
-              className={`border border-gray-200 rounded-lg ${esportsExpanded ? "shadow-sm" : ""}`}
+              className={`border border-gray-200 rounded-lg ${esportsExpanded ? "shadow-sm" : ""} ${createTab === "match" ? "" : "hidden"}`}
             >
               <div
                 className={`flex justify-between items-center w-full p-4 ${esportsExpanded ? "bg-[#f8f9fa] border-b border-gray-200 rounded-t-lg" : "bg-white rounded-lg"}`}
@@ -1443,6 +1489,36 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                           <option value="live">LIVE</option>
                           <option value="ended">ENDED</option>
                         </select>
+                      </div>
+
+                      <div className="flex gap-2 mb-3">
+                        {t.status !== "live" && t.status !== "ended" && (
+                          <button
+                            onClick={() => {
+                              setTournaments(patchAt(tournaments, index, { status: "live", liveAt: Date.now() }));
+                              window.dispatchEvent(new Event("admin_config_updated"));
+                            }}
+                            className="flex-1 bg-red-600 text-white font-bold py-1.5 rounded text-xs"
+                          >
+                            Go Live
+                          </button>
+                        )}
+                        {t.status === "live" && (
+                          <button
+                            onClick={() => {
+                              setTournaments(patchAt(tournaments, index, { status: "ended", endedAt: Date.now() }));
+                              window.dispatchEvent(new Event("admin_config_updated"));
+                            }}
+                            className="flex-1 bg-gray-800 text-white font-bold py-1.5 rounded text-xs"
+                          >
+                            End Match
+                          </button>
+                        )}
+                        {t.status === "ended" && (
+                          <p className="text-[11px] font-bold text-green-700 bg-green-50 border border-green-200 rounded px-2 py-1.5 w-full text-center">
+                            Match ended - open the Result tab to enter kills and pay out.
+                          </p>
+                        )}
                       </div>
 
                       {esportsTab === "upcoming" && (
@@ -1834,7 +1910,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
 
             {/* Quiz Settings Accordion */}
             <div
-              className={`border border-gray-200 rounded-lg ${quizExpanded ? "shadow-sm" : ""}`}
+              className={`border border-gray-200 rounded-lg ${quizExpanded ? "shadow-sm" : ""} ${createTab === "quiz" ? "" : "hidden"}`}
             >
               <div
                 className={`flex justify-between items-center w-full p-4 ${quizExpanded ? "bg-[#f8f9fa] border-b border-gray-200 rounded-t-lg" : "bg-white rounded-lg"}`}
