@@ -65,6 +65,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   const [taskTab, setTaskTab] = useState<
     "reward" | "promotion" | "target" | "redeem"
   >("reward");
+  const [expandedQuizQ, setExpandedQuizQ] = useState<number | null>(null);
+  const [expandedEarnTask, setExpandedEarnTask] = useState<number | null>(null);
 
   const goToSection = (id: string) => {
     setSidebarOpen(false);
@@ -1046,7 +1048,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         {/* Manage Play Games */}
         <div id="admin-create" className={`bg-white border border-gray-200 rounded-lg shadow-sm ${activeSection === "create" && createTab !== "product" && createTab !== "earn" ? "" : "hidden"}`}>
           <div className="p-4 border-b border-gray-200">
-            <h2 className="font-bold text-[17px]">Play</h2>
+            <h2 className="font-bold text-[17px] capitalize">
+              {createTab === "cricket" ? "Cricket" : createTab === "match" ? "Match" : "Quiz"}
+            </h2>
           </div>
           <div className="p-4 space-y-4">
             {/* Cricket Matches Accordion */}
@@ -1060,7 +1064,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                   onClick={() => setCricketExpanded(!cricketExpanded)}
                   className="flex-1 flex justify-between items-center font-bold text-[#374151] text-[15px]"
                 >
-                  Cricket
+                  Matches
                   {cricketExpanded ? (
                     <ChevronUp className="text-gray-500 w-5 h-5 ml-2" />
                   ) : (
@@ -1127,7 +1131,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                           onClick={() => setExpandedMatch(expandedMatch === match.id ? null : match.id)}
                           className="shrink-0 text-[12px] font-bold text-[#5e35b1] border border-purple-200 bg-white px-3 py-1.5 rounded-lg"
                         >
-                          {expandedMatch === match.id ? "Close" : "Edit"}
+                          {expandedMatch === match.id ? "Close" : "Live"}
                         </button>
                       </div>
 
@@ -1586,7 +1590,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                           onClick={() => setExpandedMatch(expandedMatch === t.id ? null : t.id)}
                           className="shrink-0 text-[12px] font-bold text-[#5e35b1] border border-purple-200 bg-white px-3 py-1.5 rounded-lg"
                         >
-                          {expandedMatch === t.id ? "Close" : "Edit"}
+                          {expandedMatch === t.id ? "Close" : "Live"}
                         </button>
                       </div>
 
@@ -2064,7 +2068,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                   onClick={() => setQuizExpanded(!quizExpanded)}
                   className="flex-1 flex justify-between items-center font-bold text-[#374151] text-[15px]"
                 >
-                  Quiz
+                  Questions
                   {quizExpanded ? (
                     <ChevronUp className="text-gray-500 w-5 h-5 ml-2" />
                   ) : (
@@ -2099,11 +2103,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                       {quizConfig.questions.map((q: any, qIndex: number) => (
                         <div
                           key={qIndex}
-                          className="bg-white border text-sm border-gray-200 rounded p-2 shadow-sm relative pt-4"
+                          className="bg-white border text-sm border-gray-200 rounded-lg p-3 shadow-sm relative"
                         >
-                          <span className="absolute top-1 left-2 text-[10px] font-bold text-gray-400">
-                            Q{qIndex + 1}
-                          </span>
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <span className="text-[10px] font-bold text-gray-400">Q{qIndex + 1}</span>
+                              <p className="font-semibold text-[13px] text-[#111] truncate">{q.q || "Untitled question"}</p>
+                            </div>
+                            <button
+                              onClick={() => setExpandedQuizQ(expandedQuizQ === qIndex ? null : qIndex)}
+                              className="shrink-0 text-[11px] font-bold text-[#5e35b1] border border-purple-200 bg-white px-2.5 py-1 rounded-lg"
+                            >
+                              {expandedQuizQ === qIndex ? "Close" : "Edit"}
+                            </button>
+                          </div>
+                          {expandedQuizQ === qIndex && (
+                          <div className="mt-2">
                           <input
                             className="w-full border border-gray-300 rounded p-1.5 mb-2 font-semibold"
                             value={q.q}
@@ -2142,6 +2157,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                               </div>
                             ))}
                           </div>
+                          </div>
+                          )}
                         </div>
                       ))}
                       
@@ -2197,10 +2214,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
               {earnExpanded && (
                  <div className="p-4 space-y-4">
                     {earnTasks.map((task, index) => (
-                      <div key={task.id} className="border border-gray-200 p-3 rounded-lg bg-gray-50 flex flex-col gap-2">
-                         <div className="flex justify-between items-center">
-                            <span className="font-bold text-sm">{task.title}</span>
+                      <div key={task.id} className="bg-white border border-gray-200 p-3 rounded-lg shadow-sm flex flex-col gap-2">
+                         <div className="flex justify-between items-center gap-2">
+                            <span className="font-bold text-sm truncate">{task.title || "Untitled task"}</span>
+                            <button
+                              onClick={() => setExpandedEarnTask(expandedEarnTask === index ? null : index)}
+                              className="shrink-0 text-[11px] font-bold text-[#5e35b1] border border-purple-200 bg-white px-2.5 py-1 rounded-lg"
+                            >
+                              {expandedEarnTask === index ? "Close" : "Edit"}
+                            </button>
                          </div>
+                         {expandedEarnTask === index && (
+                         <div className="flex flex-col gap-2">
                          <div>
                             <label className="text-[11px] font-bold text-gray-500 mb-1 block uppercase tracking-wide">URL</label>
                             <input
@@ -2229,6 +2254,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                               }}
                             />
                          </div>
+                         </div>
+                         )}
                        </div>
                     ))}
                  </div>
