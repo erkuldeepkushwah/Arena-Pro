@@ -61,12 +61,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   >("product");
   const [expandedMatch, setExpandedMatch] = useState<any>(null);
   const [createMenuOpen, setCreateMenuOpen] = useState(false);
+  const [taskMenuOpen, setTaskMenuOpen] = useState(false);
+  const [taskTab, setTaskTab] = useState<
+    "reward" | "promotion" | "target" | "redeem"
+  >("reward");
 
   const goToSection = (id: string) => {
     setSidebarOpen(false);
     setActiveSection(id as typeof activeSection);
     if (id === "users") setUsersExpanded(true);
     if (id === "create") setCreateMenuOpen(true);
+    if (id === "task") setTaskMenuOpen(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -74,6 +79,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     setCreateTab(tab);
     setActiveSection("create");
     setCreateMenuOpen(true);
+    setSidebarOpen(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const goToTaskTab = (tab: "reward" | "promotion" | "target" | "redeem") => {
+    setTaskTab(tab);
+    setActiveSection("task");
+    setRewardsExpanded(true);
+    setTaskMenuOpen(true);
     setSidebarOpen(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -507,8 +521,32 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                 </div>
               )}
 
+              <button
+                onClick={() => setTaskMenuOpen(!taskMenuOpen)}
+                className={`w-full flex items-center gap-3 px-5 py-3.5 text-[15px] font-medium ${activeSection === "task" ? "bg-white/15 text-white" : "text-white/85"} hover:bg-white/10`}
+              >
+                <CheckCircle2 className="w-5 h-5" />
+                Task
+                <ChevronDown
+                  className={`w-4 h-4 ml-auto transition-transform ${taskMenuOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+
+              {taskMenuOpen && (
+                <div className="pb-1">
+                  {(["reward", "promotion", "target", "redeem"] as const).map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => goToTaskTab(tab)}
+                      className={`w-full flex items-center gap-3 pl-12 pr-5 py-2.5 text-[14px] font-medium capitalize ${activeSection === "task" && taskTab === tab ? "bg-white/10 text-white" : "text-white/70"} hover:bg-white/10`}
+                    >
+                      {tab}
+                    </button>
+                  ))}
+                </div>
+              )}
+
               {[
-                { id: "task", label: "Task", Icon: CheckCircle2 },
                 { id: "settings", label: "Settings", Icon: Settings },
               ].map((item) => (
                 <button
@@ -633,7 +671,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
 
               {rewardsExpanded && (
                 <div className="p-4 space-y-7">
-                  <div className="pt-2">
+                  <div className={`pt-2 ${taskTab === "redeem" ? "" : "hidden"}`}>
                     <h3 className="font-bold text-[#4b5563] text-[15px] mb-3">
                       Daily Redeem Code
                     </h3>
@@ -665,8 +703,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                     </div>
                   </div>
 
-                  <div className="border-t border-gray-200 pt-7">
-                    <h3 className="font-bold text-[#4b5563] text-[15px] mb-3">
+                  <div className={`border-t border-gray-200 pt-7 ${taskTab === "redeem" ? "hidden" : ""}`}>
+                    <h3 className={`font-bold text-[#4b5563] text-[15px] mb-3 ${taskTab === "reward" ? "" : "hidden"}`}>
                       System Date: {new Date().toISOString().slice(0, 10)}
                     </h3>
                     <div className="flex gap-2">
@@ -704,7 +742,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             notify("Failed to advance date.");
                           }
                         }}
-                        className="flex-1 bg-[#ea580c] text-white font-bold py-3 px-2 rounded flex items-center justify-center text-[13px] shadow-sm active:bg-orange-700"
+                        className={`flex-1 bg-[#ea580c] text-white font-bold py-3 px-2 rounded flex items-center justify-center text-[13px] shadow-sm active:bg-orange-700 ${taskTab === "reward" ? "" : "hidden"}`}
                       >
                         Progress
                       </button>
@@ -786,13 +824,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             notify("Failed to declare weekly results.");
                           }
                         }}
-                        className="flex-1 bg-[#eab308] text-white font-bold py-3 px-2 rounded flex flex-col items-center justify-center gap-1 text-[13px] shadow-sm active:bg-yellow-600">
+                        className={`flex-1 bg-[#eab308] text-white font-bold py-3 px-2 rounded flex flex-col items-center justify-center gap-1 text-[13px] shadow-sm active:bg-yellow-600 ${taskTab === "promotion" ? "" : "hidden"}`}>
                         <div className="flex items-center gap-1">
                           <Trophy className="w-4 h-4" /> Promotion
                         </div>
                       </button>
                     </div>
-                    <p className="text-[11px] text-gray-500 mt-2 font-medium">
+                    <p className={`text-[11px] text-gray-500 mt-2 font-medium ${taskTab === "promotion" ? "" : "hidden"}`}>
                       "Promotion" distributes prizes to Top 10 (₹100, ₹50, ₹20, and ₹5 for 4th-10th)
                     </p>
                     <button
@@ -814,7 +852,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                           notify("Failed to renew tasks.");
                         }
                       }}
-                      className="w-full bg-[#f59e0b] hover:bg-orange-600 text-white font-bold py-3 mt-4 rounded flex items-center justify-center text-sm shadow-sm transition-colors"
+                      className={`w-full bg-[#f59e0b] hover:bg-orange-600 text-white font-bold py-3 mt-4 rounded flex items-center justify-center text-sm shadow-sm transition-colors ${taskTab === "target" ? "" : "hidden"}`}
                     >
                       Task
                     </button>
