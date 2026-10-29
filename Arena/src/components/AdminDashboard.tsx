@@ -8,6 +8,13 @@ import {
   Edit2,
   Play,
   Check,
+  Menu,
+  Users,
+  Wallet,
+  LayoutGrid,
+  CheckCircle2,
+  Settings,
+  LogOut,
 } from "lucide-react";
 import {
   saveCricketMatches,
@@ -45,6 +52,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   const [uiExpanded, setUiExpanded] = useState(false);
   const [logoExpanded, setLogoExpanded] = useState(false);
   const [coinExpanded, setCoinExpanded] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const goToSection = (id: string) => {
+    setSidebarOpen(false);
+    if (id === "admin-users") setUsersExpanded(true);
+    requestAnimationFrame(() => {
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
   const [cricketExpanded, setCricketExpanded] = useState(false);
   const [esportsExpanded, setEsportsExpanded] = useState(false);
   const [esportsTab, setEsportsTab] = useState<'upcoming' | 'live' | 'result' | 'ended'>('upcoming');
@@ -394,7 +410,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f4f5f7] pb-10 text-[#1f2937]">
+    <div id="admin-top" className="min-h-screen bg-[#f4f5f7] pb-10 text-[#1f2937]">
       {toast && (
         <div
           role="status"
@@ -406,21 +422,67 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         </div>
       )}
       {/* Header */}
-      <div className="flex justify-between items-center bg-white p-4 shadow-sm border-b border-gray-200 z-10 sticky top-0">
-        <h1 className="text-[22px] font-bold text-[#1f2937] tracking-tight">
-          Admin Dashboard
-        </h1>
+      <div className="flex justify-between items-center bg-white p-4 shadow-sm border-b border-gray-200 z-20 sticky top-0">
         <button
-          onClick={onLogout}
-          className="bg-[#ef4444] text-white px-5 py-1.5 rounded font-medium shadow-sm transition-colors active:bg-red-600"
+          onClick={() => setSidebarOpen(true)}
+          aria-label="Open menu"
+          className="w-10 h-10 rounded-lg border border-gray-200 flex items-center justify-center active:bg-gray-50"
         >
-          Exit
+          <Menu className="w-5 h-5 text-[#1f2937]" />
         </button>
+        <h1 className="text-[18px] font-bold text-[#1f2937] tracking-tight">
+          Admin Panel
+        </h1>
+        <div className="w-10 h-10 rounded-full bg-[#1e3a8a] text-white flex items-center justify-center font-bold">
+          A
+        </div>
       </div>
+
+      {/* Sidebar */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-[200] flex">
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setSidebarOpen(false)}
+          />
+          <aside className="relative w-[265px] max-w-[82%] h-full bg-[#0b1b3f] text-white flex flex-col shadow-2xl">
+            <div className="px-5 py-5 border-b border-white/10">
+              <p className="text-[17px] font-bold">Arena Pro</p>
+              <p className="text-[12px] text-white/60">Admin panel</p>
+            </div>
+            <nav className="flex-1 py-3 overflow-y-auto">
+              {[
+                { id: "admin-top", label: "Dashboard", Icon: LayoutGrid },
+                { id: "admin-users", label: "Users", Icon: Users },
+                { id: "admin-payments", label: "Payment", Icon: Wallet },
+                { id: "admin-create", label: "Create", Icon: Plus },
+                { id: "admin-task", label: "Task", Icon: CheckCircle2 },
+                { id: "admin-settings", label: "Settings", Icon: Settings },
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => goToSection(item.id)}
+                  className="w-full flex items-center gap-3 px-5 py-3.5 text-[15px] font-medium text-white/85 hover:bg-white/10 active:bg-white/15"
+                >
+                  <item.Icon className="w-5 h-5" />
+                  {item.label}
+                </button>
+              ))}
+            </nav>
+            <button
+              onClick={onLogout}
+              className="flex items-center gap-3 px-5 py-5 text-[15px] font-medium text-red-300 border-t border-white/10"
+            >
+              <LogOut className="w-5 h-5" />
+              Logout
+            </button>
+          </aside>
+        </div>
+      )}
 
       <div className="px-4 mt-6 space-y-6">
         {/* Requests */}
-        <div>
+        <div id="admin-payments" className="scroll-mt-24">
           <div className="bg-[#e5e7eb] px-4 py-3 rounded-t-lg">
             <h2 className="font-bold text-[#1f2937] text-[15px]">
               Recharge Requests
@@ -886,7 +948,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         </div>
 
         {/* Manage Play Games */}
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+        <div id="admin-create" className="scroll-mt-24 bg-white border border-gray-200 rounded-lg shadow-sm">
           <div className="p-4 border-b border-gray-200">
             <h2 className="font-bold text-[17px]">Play</h2>
           </div>
@@ -1883,7 +1945,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         </div>
 
         {/* Earn Tasks */}
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm mb-6">
+        <div id="admin-task" className="scroll-mt-24 bg-white border border-gray-200 rounded-lg shadow-sm mb-6">
           <div className="p-4 border-b border-gray-200">
             <h2 className="font-bold text-[17px]">Earn</h2>
           </div>
@@ -2009,7 +2071,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         </div>
 
         {/* General Settings */}
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm mb-6 pb-2">
+        <div id="admin-settings" className="scroll-mt-24 bg-white border border-gray-200 rounded-lg shadow-sm mb-6 pb-2">
           <div className="p-4 border-b border-gray-100">
             <h2 className="font-bold text-[17px]">General</h2>
           </div>
@@ -2157,7 +2219,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             </div>
 
             <div
-              className={`border border-gray-200 rounded-lg ${usersExpanded ? "shadow-sm" : ""}`}
+              id="admin-users"
+              className={`scroll-mt-24 border border-gray-200 rounded-lg ${usersExpanded ? "shadow-sm" : ""}`}
             >
               <button
                 onClick={() => setUsersExpanded(!usersExpanded)}
