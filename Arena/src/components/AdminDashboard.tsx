@@ -123,7 +123,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
   const [cricketExpanded, setCricketExpanded] = useState(false);
-  const [esportsExpanded, setEsportsExpanded] = useState(false);
+  const [esportsExpanded, setEsportsExpanded] = useState(true);
   const [esportsTab, setEsportsTab] = useState<'new' | 'upcoming' | 'live' | 'result'>('new');
   const [quizExpanded, setQuizExpanded] = useState(false);
   const [bannersExpanded, setBannersExpanded] = useState(false);
@@ -1622,22 +1622,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             <div
               className={`border border-gray-200 rounded-lg ${esportsExpanded ? "shadow-sm" : ""} ${createTab === "match" ? "" : "hidden"}`}
             >
-              <div
-                className={`flex justify-between items-center w-full p-4 ${esportsExpanded ? "bg-[#f8f9fa] border-b border-gray-200 rounded-t-lg" : "bg-white rounded-lg"}`}
-              >
-                <button
-                  onClick={() => setEsportsExpanded(!esportsExpanded)}
-                  className="flex-1 flex justify-between items-center font-bold text-[#374151] text-[15px]"
-                >
-                  Match
-                  {esportsExpanded ? (
-                    <ChevronUp className="text-gray-500 w-5 h-5 ml-2" />
-                  ) : (
-                    <ChevronDown className="text-gray-500 w-5 h-5 ml-2" />
-                  )}
-                </button>
-              </div>
-
               {esportsExpanded && (
                 <div className="p-4 space-y-4">
                   <div className="flex bg-gray-100 p-1 rounded-lg">
