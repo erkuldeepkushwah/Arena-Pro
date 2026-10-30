@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   Settings,
   LogOut,
+  ChevronLeft,
 } from "lucide-react";
 import {
   saveCricketMatches,
@@ -85,6 +86,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     "product" | "match" | "cricket" | "quiz" | "earn"
   >("product");
   const [expandedMatch, setExpandedMatch] = useState<any>(null);
+  // Match/Cricket each have two pages: the list, and a separate Add Match page.
+  const [matchPage, setMatchPage] = useState<"list" | "add">("list");
+  const [cricketPage, setCricketPage] = useState<"list" | "add">("list");
   const [createMenuOpen, setCreateMenuOpen] = useState(false);
   const [taskMenuOpen, setTaskMenuOpen] = useState(false);
   const [taskTab, setTaskTab] = useState<
@@ -1078,8 +1082,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             </h2>
           </div>
           <div className="p-4 space-y-4">
-            {/* Add Match — kept outside the accordion so it is always reachable */}
-            {createTab === "cricket" && (
+            {/* Add Match lives on its own page, above the list */}
+            {createTab === "cricket" && cricketPage === "add" && (
+              <button
+                onClick={() => setCricketPage("list")}
+                className="flex items-center gap-1 text-[#2563eb] font-bold text-[13px] -mb-1"
+              >
+                <ChevronLeft className="w-4 h-4" strokeWidth={2.5} /> Back to match list
+              </button>
+            )}
+            {createTab === "cricket" && cricketPage === "add" && (
               <div className="bg-white border border-gray-200 rounded-xl p-3 flex items-center gap-3 shadow-sm">
                 <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
                   <Plus className="w-5 h-5 text-[#2563eb]" />
@@ -1111,6 +1123,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                   <Plus className="w-4 h-4" /> Add Match
                 </button>
               </div>
+            )}
+
+            {createTab === "cricket" && cricketPage === "list" && (
+              <button
+                onClick={() => setCricketPage("add")}
+                className="w-full bg-[#2563eb] text-white font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 shadow-sm"
+              >
+                <Plus className="w-4 h-4" /> Add Match
+              </button>
             )}
 
             {/* Cricket Matches Accordion */}
@@ -1532,8 +1553,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
               )}
             </div>
 
-            {/* Add Match — standalone, always visible for the Match tab */}
-            {createTab === "match" && (
+            {/* Add Match lives on its own page, above the list */}
+            {createTab === "match" && matchPage === "add" && (
+              <button
+                onClick={() => setMatchPage("list")}
+                className="flex items-center gap-1 text-[#2563eb] font-bold text-[13px] -mb-1"
+              >
+                <ChevronLeft className="w-4 h-4" strokeWidth={2.5} /> Back to match list
+              </button>
+            )}
+            {createTab === "match" && matchPage === "add" && (
               <div className="bg-white border border-gray-200 rounded-xl p-3 flex items-center gap-3 shadow-sm">
                 <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
                   <Plus className="w-5 h-5 text-[#2563eb]" />
@@ -1578,6 +1607,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                   <Plus className="w-4 h-4" /> Add Match
                 </button>
               </div>
+            )}
+
+            {createTab === "match" && matchPage === "list" && (
+              <button
+                onClick={() => setMatchPage("add")}
+                className="w-full bg-[#2563eb] text-white font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 shadow-sm"
+              >
+                <Plus className="w-4 h-4" /> Add Match
+              </button>
             )}
 
             {/* eSports Tournaments Accordion */}
