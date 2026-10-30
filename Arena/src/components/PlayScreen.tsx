@@ -72,6 +72,10 @@ const LiveCountdown: React.FC<{ liveAt: number; windowMs?: number }> = ({
   );
 };
 
+/** Game names are typed by the admin, so compare them case- and space-insensitively. */
+const sameGame = (a?: string | null, b?: string | null): boolean =>
+  (a ?? "").trim().toLowerCase() === (b ?? "").trim().toLowerCase();
+
 /** Progress-bar width that never produces NaN% or an out-of-range value. */
 const pct = (value: number, total: number): number => {
   const t = Number(total) || 0;
@@ -259,9 +263,11 @@ export const PlayScreen: React.FC = () => {
     }
 
     if (matchView === "rooms") {
-      const selectedGameObj = GAMES_LIST.find((g) => g.gameName === selectedGame);
+      const selectedGameObj = GAMES_LIST.find((g) => sameGame(g.gameName, selectedGame));
       const filteredRooms = ROOMS.filter((room: any) => {
-         if (room.game !== selectedGame) return false;
+         // A tournament the admin just created is stored with whatever game name
+         // was typed, so "FREE FIRE MAX" and "Free Fire Max" must be the same game.
+         if (!sameGame(room.game, selectedGame)) return false;
          if (roomViewFilter === "upcoming") return room.status === "upcoming";
          if (roomViewFilter === "ongoing") return room.status === "live";
          if (roomViewFilter === "result") return room.status === "ended";
