@@ -1053,6 +1053,41 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             </h2>
           </div>
           <div className="p-4 space-y-4">
+            {/* Add Match — kept outside the accordion so it is always reachable */}
+            {createTab === "cricket" && (
+              <div className="bg-white border border-gray-200 rounded-xl p-3 flex items-center gap-3 shadow-sm">
+                <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
+                  <Plus className="w-5 h-5 text-[#2563eb]" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-bold text-[16px] text-[#111]">Add Match</p>
+                  <p className="text-[12px] text-gray-500">Creates an upcoming cricket match</p>
+                </div>
+                <button
+                  onClick={() => {
+                    const newMatch = {
+                      id: Date.now(),
+                      team1: { name: "Team A", short: "TMA" },
+                      team2: { name: "Team B", short: "TMB" },
+                      title: "New Match",
+                      time: "Apr 12, 7:00 PM",
+                      entryFee: 10,
+                      status: "upcoming",
+                    };
+                    const newM = [newMatch, ...cricketMatches];
+                    setCricketMatches(newM);
+                    saveCricketMatches(newM);
+                    setCricketExpanded(true);
+                    setExpandedMatch(newMatch.id);
+                    window.dispatchEvent(new Event("admin_config_updated"));
+                  }}
+                  className="shrink-0 bg-[#2563eb] text-white font-bold text-[13px] px-4 py-2 rounded-lg flex items-center gap-1"
+                >
+                  <Plus className="w-4 h-4" /> Add Match
+                </button>
+              </div>
+            )}
+
             {/* Cricket Matches Accordion */}
             <div
               className={`border border-gray-200 rounded-lg ${cricketExpanded ? "shadow-sm" : ""} ${createTab === "cricket" ? "" : "hidden"}`}
@@ -1075,36 +1110,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
 
               {cricketExpanded && (
                 <div className="p-4 space-y-4">
-                  <div className="bg-white border border-gray-200 rounded-xl p-3 flex items-center gap-3 shadow-sm">
-                    <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
-                      <Plus className="w-5 h-5 text-[#2563eb]" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-bold text-[16px] text-[#111]">Add Match</p>
-                      <p className="text-[12px] text-gray-500">Create and manage your matches</p>
-                    </div>
-                    <button
-                      onClick={() => {
-                        const newMatch = {
-                          id: Date.now(),
-                          team1: { name: "Team A", short: "TMA" },
-                          team2: { name: "Team B", short: "TMB" },
-                          title: "New Match",
-                          time: "Apr 12, 7:00 PM",
-                          entryFee: 10,
-                          status: "upcoming",
-                        };
-                        const newM = [newMatch, ...cricketMatches];
-                        setCricketMatches(newM);
-                        saveCricketMatches(newM);
-                        setExpandedMatch(newMatch.id);
-                        window.dispatchEvent(new Event("admin_config_updated"));
-                      }}
-                      className="shrink-0 bg-[#2563eb] text-white font-bold text-[13px] px-4 py-2 rounded-lg flex items-center gap-1"
-                    >
-                      <Plus className="w-4 h-4" /> Add Match
-                    </button>
-                  </div>
                   {cricketMatches.map((match: any, index: number) => (
                     <div
                       key={match.id}
@@ -1493,6 +1498,54 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
               )}
             </div>
 
+            {/* Add Match — standalone, always visible for the Match tab */}
+            {createTab === "match" && (
+              <div className="bg-white border border-gray-200 rounded-xl p-3 flex items-center gap-3 shadow-sm">
+                <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
+                  <Plus className="w-5 h-5 text-[#2563eb]" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-bold text-[16px] text-[#111]">Add Match</p>
+                  <p className="text-[12px] text-gray-500">Creates a match in the Upcoming tab</p>
+                </div>
+                <button
+                  onClick={() => {
+                    const today = new Date().toISOString().slice(0, 10);
+                    const newTournament = {
+                      id: Date.now(),
+                      game: "Free Fire Max",
+                      title: "New Match",
+                      date: today,
+                      time: "08:00 PM",
+                      entryFee: 10,
+                      perKill: 5,
+                      prizePool: 500,
+                      matchType: "Squad",
+                      map: "Bermuda",
+                      status: "upcoming",
+                      totalSlots: 40,
+                      joinedPlayers: [],
+                      roomDetails: { id: "", password: "" },
+                      streamLink: "",
+                      results: [],
+                    };
+                    const n = [newTournament, ...tournaments];
+                    setTournaments(n);
+                    saveMatchRooms(n);
+                    // Jump straight to Upcoming so the new row is visible, and
+                    // open the accordion on it.
+                    setEsportsTab("upcoming");
+                    setEsportsExpanded(true);
+                    setExpandedMatch(newTournament.id);
+                    window.dispatchEvent(new Event("admin_config_updated"));
+                  }}
+                  className="shrink-0 bg-[#2563eb] text-white font-bold text-[13px] px-4 py-2 rounded-lg flex items-center gap-1"
+                >
+                  <Plus className="w-4 h-4" /> Add Match
+                </button>
+              </div>
+            )}
+
             {/* eSports Tournaments Accordion */}
             <div
               className={`border border-gray-200 rounded-lg ${esportsExpanded ? "shadow-sm" : ""} ${createTab === "match" ? "" : "hidden"}`}
@@ -1515,45 +1568,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
 
               {esportsExpanded && (
                 <div className="p-4 space-y-4">
-                  <div className="bg-white border border-gray-200 rounded-xl p-3 flex items-center gap-3 shadow-sm">
-                    <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
-                      <Plus className="w-5 h-5 text-[#2563eb]" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-bold text-[16px] text-[#111]">Add Match</p>
-                      <p className="text-[12px] text-gray-500">Create and manage your matches</p>
-                    </div>
-                    <button
-                      onClick={() => {
-                        const newTournament = {
-                          id: Date.now(),
-                          game: "Free Fire Max",
-                          title: "New Match",
-                          date: "2024-06-01",
-                          time: "08:00 PM",
-                          entryFee: 10,
-                          perKill: 5,
-                          prizePool: 500,
-                          matchType: "Squad",
-                          map: "Bermuda",
-                          status: "upcoming",
-                          totalSlots: 40,
-                          joinedPlayers: [],
-                          roomDetails: { id: "", password: "" },
-                          streamLink: "",
-                          results: [],
-                        };
-                        const n = [newTournament, ...tournaments];
-                        setTournaments(n);
-                        saveMatchRooms(n);
-                        setExpandedMatch(newTournament.id);
-                        window.dispatchEvent(new Event("admin_config_updated"));
-                      }}
-                      className="shrink-0 bg-[#2563eb] text-white font-bold text-[13px] px-4 py-2 rounded-lg flex items-center gap-1"
-                    >
-                      <Plus className="w-4 h-4" /> Add Match
-                    </button>
-                  </div>
                   <div className="flex bg-gray-100 p-1 rounded-lg">
                     <button
                       onClick={() => setEsportsTab('upcoming')}
