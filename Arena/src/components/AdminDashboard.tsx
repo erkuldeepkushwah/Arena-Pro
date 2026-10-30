@@ -1797,7 +1797,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         )}
                       </div>
 
-                      {esportsTab === "upcoming" && (
+                      {(esportsTab === "upcoming" || esportsTab === "new") && (
                         <div className="grid grid-cols-2 gap-2 mb-2">
                           <input
                             className="border border-gray-200 p-1.5 text-xs rounded"
@@ -1893,7 +1893,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         </div>
                       )}
 
-                      {esportsTab === "upcoming" && (
+                      {(esportsTab === "upcoming" || esportsTab === "new") && (
                         <div className="grid grid-cols-3 gap-2 mb-3 bg-white p-2 rounded border border-gray-100">
                           <div className="space-y-1">
                             <label className="text-[10px] text-gray-500 font-bold block">
@@ -1959,7 +1959,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         </div>
                       )}
 
-                      {(esportsTab === "upcoming" || esportsTab === "live" || esportsTab === "result") && (
+                      {((esportsTab === "upcoming" || esportsTab === "new") || esportsTab === "live" || esportsTab === "result") && (
                         <div className="mb-3">
                           <div className="text-xs font-bold text-gray-600 bg-gray-100 p-2 rounded flex justify-between items-center border border-gray-200">
                             <span>JOINED PLAYERS:</span>
@@ -1976,7 +1976,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         </div>
                       )}
 
-                      {(esportsTab === "upcoming" || esportsTab === "live") && (
+                      {((esportsTab === "upcoming" || esportsTab === "new") || esportsTab === "live") && (
                         <div className="bg-blue-50 border border-blue-200 p-2 rounded mb-3">
                           <label className="text-[10px] text-blue-700 font-bold block mb-2">
                             ROOM ID & PASSWORD (Only visible to joined players)
