@@ -1111,19 +1111,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             {createTab === "cricket" && cricketPage === "add" && (
               <button
                 onClick={() => setCricketPage("list")}
-                className="flex items-center gap-1 text-[#2563eb] font-bold text-[13px] -mb-1"
+                className="flex items-center gap-1 text-[#2563eb] font-bold text-[13px] mb-1"
               >
                 <ChevronLeft className="w-4 h-4" strokeWidth={2.5} /> Back to match list
               </button>
             )}
             {createTab === "cricket" && cricketPage === "add" && (
               <div className="bg-white border border-gray-200 rounded-xl p-3 flex items-center gap-3 shadow-sm">
-                <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
                   <Plus className="w-5 h-5 text-[#2563eb]" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="font-bold text-[16px] text-[#111]">Add Match</p>
-                  <p className="text-[12px] text-gray-500">Creates an upcoming cricket match</p>
+                  <p className="font-bold text-[15px] text-[#111] leading-tight">Create a new match</p>
+                  <p className="text-[12px] text-gray-500 leading-snug">Adds it to Upcoming</p>
                 </div>
                 <button
                   onClick={() => {
@@ -1591,19 +1591,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             {createTab === "match" && matchPage === "add" && (
               <button
                 onClick={() => setMatchPage("list")}
-                className="flex items-center gap-1 text-[#2563eb] font-bold text-[13px] -mb-1"
+                className="flex items-center gap-1 text-[#2563eb] font-bold text-[13px] mb-1"
               >
                 <ChevronLeft className="w-4 h-4" strokeWidth={2.5} /> Back to match list
               </button>
             )}
             {createTab === "match" && matchPage === "add" && (
               <div className="bg-white border border-gray-200 rounded-xl p-3 flex items-center gap-3 shadow-sm">
-                <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
                   <Plus className="w-5 h-5 text-[#2563eb]" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="font-bold text-[16px] text-[#111]">Add Match</p>
-                  <p className="text-[12px] text-gray-500">Creates a match in the Upcoming tab</p>
+                  <p className="font-bold text-[15px] text-[#111] leading-tight">Create a new match</p>
+                  <p className="text-[12px] text-gray-500 leading-snug">Adds it to Upcoming</p>
                 </div>
                 <button
                   onClick={() => {
