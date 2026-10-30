@@ -462,6 +462,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     };
     setProducts([newProduct, ...products]);
     setManageExpanded(newProduct.id);
+    // The new product is prepended and opened; scroll the panel to the top so
+    // the row you just created is the first thing you see.
+    setTimeout(() => {
+      document.getElementById("admin-products")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 120);
   };
 
   const handleRemoveProduct = (e: React.MouseEvent, id: number) => {
@@ -895,9 +900,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         </div>
 
         {/* Manage Products */}
-        <div className={`bg-white border border-gray-200 rounded-lg shadow-sm ${activeSection === "create" && createTab === "product" ? "" : "hidden"}`}>
+        <div id="admin-products" className={`bg-white border border-gray-200 rounded-lg shadow-sm ${activeSection === "create" && createTab === "product" ? "" : "hidden"}`}>
           <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-            <h2 className="font-bold text-[17px]">Product</h2>
+            <h2 className="font-bold text-[17px]">
+              Product
+              <span className="ml-2 text-[13px] font-medium text-gray-400">
+                {products.length} items
+              </span>
+            </h2>
             <button
               onClick={handleAddProduct}
               className="bg-[#2563eb] hover:bg-blue-700 text-white p-1.5 rounded transition-colors shadow-sm"
