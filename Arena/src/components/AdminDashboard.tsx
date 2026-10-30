@@ -917,7 +917,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             </button>
           </div>
           <div className="p-4 space-y-3">
-            {products.map((product) => {
+            {/* Whatever row is open is rendered first, so the card you are
+                editing is always the one at the top of the list. Render-time
+                ordering only — the saved order is untouched. */}
+            {(manageExpanded == null
+              ? products
+              : [...products].sort((a, b) =>
+                  a.id === manageExpanded ? -1 : b.id === manageExpanded ? 1 : 0,
+                )
+            ).map((product) => {
               const isExpanded = manageExpanded === product.id;
 
               return (
