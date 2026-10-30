@@ -751,7 +751,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
 
               {rewardsExpanded && (
                 <div className="p-4 space-y-7">
-                  <div className={`pt-2 ${taskTab === "redeem" ? "" : "hidden"}`}>
+                  <div className={`pt-2 `}>
                     <div className="border border-gray-200 rounded-xl p-4 bg-[#fafafa]">
                       <div className="flex items-center justify-between mb-3">
                         <h3 className="font-bold text-[#4b5563] text-[13px] tracking-wide">
@@ -793,8 +793,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                     </div>
                   </div>
 
-                  <div className={`border-t border-gray-200 pt-7 ${taskTab === "redeem" ? "hidden" : ""}`}>
-                    <h3 className={`font-bold text-[#4b5563] text-[15px] mb-3 ${taskTab === "reward" ? "" : "hidden"}`}>
+                  <div className={`border-t border-gray-200 pt-7 `}>
+                    <h3 className={`font-bold text-[#4b5563] text-[15px] mb-3 `}>
                       System Date: {new Date().toISOString().slice(0, 10)}
                     </h3>
                     <div className="flex gap-2">
@@ -832,7 +832,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             notify("Failed to advance date.");
                           }
                         }}
-                        className={`flex-1 bg-[#ea580c] text-white font-bold py-3 px-2 rounded flex items-center justify-center text-[13px] shadow-sm active:bg-orange-700 ${taskTab === "reward" ? "" : "hidden"}`}
+                        className={`flex-1 bg-[#ea580c] text-white font-bold py-3 px-2 rounded flex items-center justify-center text-[13px] shadow-sm active:bg-orange-700 `}
                       >
                         Progress
                       </button>
@@ -914,13 +914,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             notify("Failed to declare weekly results.");
                           }
                         }}
-                        className={`flex-1 bg-[#eab308] text-white font-bold py-3 px-2 rounded flex flex-col items-center justify-center gap-1 text-[13px] shadow-sm active:bg-yellow-600 ${taskTab === "promotion" ? "" : "hidden"}`}>
+                        className={`flex-1 bg-[#eab308] text-white font-bold py-3 px-2 rounded flex flex-col items-center justify-center gap-1 text-[13px] shadow-sm active:bg-yellow-600 `}>
                         <div className="flex items-center gap-1">
                           <Trophy className="w-4 h-4" /> Promotion
                         </div>
                       </button>
                     </div>
-                    <p className={`text-[11px] text-gray-500 mt-2 font-medium ${taskTab === "promotion" ? "" : "hidden"}`}>
+                    <p className={`text-[11px] text-gray-500 mt-2 font-medium `}>
                       "Promotion" distributes prizes to Top 10 (₹100, ₹50, ₹20, and ₹5 for 4th-10th)
                     </p>
                     <button
@@ -942,7 +942,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                           notify("Failed to renew tasks.");
                         }
                       }}
-                      className={`w-full bg-[#f59e0b] hover:bg-orange-600 text-white font-bold py-3 mt-4 rounded flex items-center justify-center text-sm shadow-sm transition-colors ${taskTab === "target" ? "" : "hidden"}`}
+                      className={`w-full bg-[#f59e0b] hover:bg-orange-600 text-white font-bold py-3 mt-4 rounded flex items-center justify-center text-sm shadow-sm transition-colors `}
                     >
                       Task
                     </button>
