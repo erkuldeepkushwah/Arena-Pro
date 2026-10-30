@@ -54,15 +54,15 @@ const SwipeToDelete: React.FC<{ onDelete: () => void; onAdvance?: () => void; ch
     <motion.div
       drag="x"
       dragDirectionLock
-      dragConstraints={{ left: -120, right: onAdvance ? 120 : 0 }}
+      dragConstraints={{ left: -180, right: onAdvance ? 180 : 0 }}
       dragElastic={0.08}
       onDragEnd={(_, info) => {
-        // Far enough, or a decisive flick — otherwise framer snaps it back.
-        if (onAdvance && (info.offset.x > 72 || info.velocity.x > 450)) {
+        // Only a full swipe counts — a half drag snaps back.
+        if (onAdvance && info.offset.x >= 160) {
           onAdvance();
           return;
         }
-        if (info.offset.x < -72 || info.velocity.x < -450) onDelete();
+        if (info.offset.x <= -160) onDelete();
       }}
       className="relative bg-white touch-pan-y"
     >
@@ -1242,7 +1242,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                       key={match.id}
                       className="bg-white border border-gray-200 rounded-xl p-3.5 shadow-sm relative"
                     >
-                      <div className="flex items-start justify-between gap-2">
+                      <div
+                        className="flex items-start justify-between gap-2 cursor-pointer"
+                        onClick={() => setExpandedMatch(expandedMatch === match.id ? null : match.id)}
+                      >
                         <div className="min-w-0">
                           <p className="font-bold text-[15px] text-[#111] truncate">
                             {match.title || "Untitled match"}
@@ -1263,32 +1266,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             </span>
                           </div>
                         </div>
-                        <button
-                          onClick={() => {
-                            if (expandedMatch === match.id) {
-                              setExpandedMatch(null);
-                              return;
-                            }
-                            setExpandedMatch(match.id);
-                            const next =
-                              match.status === "upcoming"
-                                ? "live"
-                                : match.status === "live"
-                                  ? "ended"
-                                  : "upcoming";
-                            setCricketMatches(patchAt(cricketMatches, index, { status: next }));
-                            window.dispatchEvent(new Event("admin_config_updated"));
-                          }}
-                          className="shrink-0 text-[12px] font-bold text-white bg-[#2563eb] px-3 py-1.5 rounded-lg"
-                        >
-                          {expandedMatch === match.id
-                            ? "Close"
-                            : match.status === "upcoming"
-                              ? "Live"
-                              : match.status === "live"
-                                ? "Result"
-                                : "Open"}
-                        </button>
                       </div>
 
                       {expandedMatch === match.id && (
@@ -1691,7 +1668,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                       key={t.id}
                       className="bg-white border border-gray-200 rounded-xl p-3.5 shadow-sm relative"
                     >
-                      <div className="flex items-start justify-between gap-2">
+                      <div
+                        className="flex items-start justify-between gap-2 cursor-pointer"
+                        onClick={() => setExpandedMatch(expandedMatch === t.id ? null : t.id)}
+                      >
                         <div className="min-w-0">
                           <p className="font-bold text-[15px] text-[#111] truncate">
                             {t.title || "Untitled match"}
@@ -1713,32 +1693,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             </span>
                           </div>
                         </div>
-                        <button
-                          onClick={() => {
-                            setExpandedMatch(t.id);
-                            const next =
-                              t.status === "upcoming"
-                                ? "live"
-                                : t.status === "live"
-                                  ? "ended"
-                                  : "upcoming";
-                            setTournaments(
-                              patchAt(tournaments, index, {
-                                status: next,
-                                ...(next === "live" ? { liveAt: Date.now() } : {}),
-                                ...(next === "ended" ? { endedAt: Date.now() } : {}),
-                              }),
-                            );
-                            window.dispatchEvent(new Event("admin_config_updated"));
-                          }}
-                          className="shrink-0 text-[12px] font-bold text-white bg-[#2563eb] px-3 py-1.5 rounded-lg"
-                        >
-                          {t.status === "upcoming"
-                            ? "Live"
-                            : t.status === "live"
-                              ? "Result"
-                              : "Open"}
-                        </button>
                       </div>
 
                       {esportsTab === "new" && expandedMatch === t.id && (
