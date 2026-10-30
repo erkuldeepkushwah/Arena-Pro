@@ -38,21 +38,30 @@ import { rtdb } from "../firebase";
 import { logTransaction } from "../utils/transactions";
 import { fileToImageDataUrl } from "../utils/imageUpload";
 
-/** Swipe a match row to the left to reveal Delete. */
-const SwipeToDelete: React.FC<{ onDelete: () => void; children: React.ReactNode }> = ({ onDelete, children }) => (
+/** Swipe left to delete, swipe right to move the match to its next step. */
+const SwipeToDelete: React.FC<{ onDelete: () => void; onAdvance?: () => void; children: React.ReactNode }> = ({ onDelete, onAdvance, children }) => (
   <div className="relative rounded-xl overflow-hidden mb-3">
     <div className="absolute inset-0 bg-red-500 flex items-center justify-end pr-5">
       <span className="text-white font-bold text-[13px] flex items-center gap-1.5">
         <Trash2 className="w-4 h-4" /> Delete
       </span>
     </div>
+    {onAdvance && (
+      <div className="absolute inset-0 bg-green-600 flex items-center justify-start pl-5">
+        <span className="text-white font-bold text-[13px]">Next step</span>
+      </div>
+    )}
     <motion.div
       drag="x"
       dragDirectionLock
-      dragConstraints={{ left: -120, right: 0 }}
+      dragConstraints={{ left: -120, right: onAdvance ? 120 : 0 }}
       dragElastic={0.08}
       onDragEnd={(_, info) => {
         // Far enough, or a decisive flick — otherwise framer snaps it back.
+        if (onAdvance && (info.offset.x > 72 || info.velocity.x > 450)) {
+          onAdvance();
+          return;
+        }
         if (info.offset.x < -72 || info.velocity.x < -450) onDelete();
       }}
       className="relative bg-white touch-pan-y"
@@ -1658,6 +1667,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                     return (
                     <SwipeToDelete
                       key={t.id}
+                      onAdvance={() => {
+                        const next =
+                          t.status === "upcoming" ? "live" : t.status === "live" ? "ended" : "upcoming";
+                        setTournaments(
+                          patchAt(tournaments, index, {
+                            status: next,
+                            ...(next === "live" ? { liveAt: Date.now() } : {}),
+                            ...(next === "ended" ? { endedAt: Date.now() } : {}),
+                          }),
+                        );
+                        setEsportsTab(next === "ended" ? "result" : next === "live" ? "live" : "upcoming");
+                        window.dispatchEvent(new Event("admin_config_updated"));
+                      }}
                       onDelete={() => {
                         if (!window.confirm("Delete this match?")) return;
                         const n = tournaments.filter((tr: any) => tr.id !== t.id);
@@ -1693,10 +1715,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         </div>
                         <button
                           onClick={() => {
-                            if (expandedMatch === t.id) {
-                              setExpandedMatch(null);
-                              return;
-                            }
                             setExpandedMatch(t.id);
                             const next =
                               t.status === "upcoming"
@@ -1715,13 +1733,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                           }}
                           className="shrink-0 text-[12px] font-bold text-white bg-[#2563eb] px-3 py-1.5 rounded-lg"
                         >
-                          {expandedMatch === t.id
-                            ? "Close"
-                            : t.status === "upcoming"
-                              ? "Live"
-                              : t.status === "live"
-                                ? "Result"
-                                : "Open"}
+                          {t.status === "upcoming"
+                            ? "Live"
+                            : t.status === "live"
+                              ? "Result"
+                              : "Open"}
                         </button>
                       </div>
 
@@ -1976,7 +1992,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         </div>
                       )}
 
-                      {((esportsTab === "upcoming" || esportsTab === "new") || esportsTab === "live") && (
+                      {esportsTab === "upcoming" && (
                         <div className="bg-blue-50 border border-blue-200 p-2 rounded mb-3">
                           <label className="text-[10px] text-blue-700 font-bold block mb-2">
                             ROOM ID & PASSWORD (Only visible to joined players)
@@ -2020,6 +2036,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                 );
                               }}
                             />
+                          </div>
+                          <div className="mb-2">
+                            <label className="text-[10px] text-blue-700 font-bold block mb-1">
+                              COUNTDOWN (MINUTES)
+                            </label>
+                            <select
+                              className="w-full border border-blue-200 rounded p-1 text-xs"
+                              value={t.countdownMin || 5}
+                              onChange={(e) => {
+                                setTournaments(patchAt(tournaments, index, { countdownMin: Number(e.target.value) }));
+                                window.dispatchEvent(new Event("admin_config_updated"));
+                              }}
+                            >
+                              <option value={5}>5 minutes</option>
+                              <option value={10}>10 minutes</option>
+                            </select>
                           </div>
                           <input
                             className="w-full border border-blue-200 rounded p-1 text-xs"
@@ -2166,22 +2198,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         </>
                       )}
 
-                      <div className="flex justify-between items-center pt-2 border-t border-gray-200 mt-3">
-                        <span className="text-xs text-gray-500"></span>
-                        <button
-                          onClick={() => {
-                            const n = tournaments.filter((_, i) => i !== index);
-                            setTournaments(n);
-                            saveMatchRooms(n);
-                            window.dispatchEvent(
-                              new Event("admin_config_updated"),
-                            );
-                          }}
-                          className="text-red-500 hover:bg-red-50 px-3 py-1.5 font-bold text-xs rounded border border-red-200"
-                        >
-                          <Trash2 className="w-4 h-4 inline-block mr-1" /> Delete Match
-                        </button>
-                      </div>
                     </div></SwipeToDelete>
                   )})}
                 </div>
