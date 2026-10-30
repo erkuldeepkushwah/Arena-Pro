@@ -91,7 +91,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   const [taskMenuOpen, setTaskMenuOpen] = useState(false);
   const [taskTab, setTaskTab] = useState<
     "reward" | "promotion" | "target" | "redeem"
-  >("reward");
+  >("redeem");
   const [expandedQuizQ, setExpandedQuizQ] = useState<number | null>(null);
   const [expandedEarnTask, setExpandedEarnTask] = useState<number | null>(null);
 
@@ -616,29 +616,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
               )}
 
               <button
-                onClick={() => setTaskMenuOpen(!taskMenuOpen)}
+                onClick={() => goToTaskTab("redeem")}
                 className={`w-full flex items-center gap-3 px-5 py-3.5 text-[15px] font-medium ${activeSection === "task" ? "bg-white/15 text-white" : "text-white/85"} hover:bg-white/10`}
               >
                 <CheckCircle2 className="w-5 h-5" />
                 Task
-                <ChevronDown
-                  className={`w-4 h-4 ml-auto transition-transform ${taskMenuOpen ? "rotate-180" : ""}`}
-                />
               </button>
-
-              {taskMenuOpen && (
-                <div className="pb-1">
-                  {(["reward", "promotion", "target", "redeem"] as const).map((tab) => (
-                    <button
-                      key={tab}
-                      onClick={() => goToTaskTab(tab)}
-                      className={`w-full flex items-center gap-3 pl-12 pr-5 py-2.5 text-[14px] font-medium capitalize ${activeSection === "task" && taskTab === tab ? "bg-white/10 text-white" : "text-white/70"} hover:bg-white/10`}
-                    >
-                      {tab}
-                    </button>
-                  ))}
-                </div>
-              )}
 
               {[
                 { id: "settings", label: "Settings", Icon: Settings },
@@ -744,8 +727,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
 
         {/* Daily Operations */}
         <div className={`bg-white border border-gray-200 rounded-lg shadow-sm ${activeSection === "task" ? "" : "hidden"}`}>
-          <div className="p-4 border-b border-gray-200">
+          <div className="p-4 border-b border-gray-200 flex items-center justify-between">
             <h2 className="font-bold text-[17px]">Daily</h2>
+            <span className="text-[11px] font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded">
+              Active
+            </span>
           </div>
           <div className="p-4">
             <div
@@ -766,9 +752,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
               {rewardsExpanded && (
                 <div className="p-4 space-y-7">
                   <div className={`pt-2 ${taskTab === "redeem" ? "" : "hidden"}`}>
-                    <h3 className="font-bold text-[#4b5563] text-[15px] mb-3">
-                      Daily Redeem Code
-                    </h3>
+                    <div className="border border-gray-200 rounded-xl p-4 bg-[#fafafa]">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="font-bold text-[#4b5563] text-[13px] tracking-wide">
+                          DAILY REDEEM CODE
+                        </h3>
+                        <button
+                          onClick={() => goToTaskTab("redeem")}
+                          className="text-[12px] font-bold text-[#2563eb]"
+                        >
+                          Manage Voucher
+                        </button>
+                      </div>
                     <div className="space-y-3">
                       <input
                         className="w-full border border-gray-200 rounded p-2.5 text-[15px] focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
@@ -794,6 +789,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                       >
                         Update Code
                       </button>
+                    </div>
                     </div>
                   </div>
 
