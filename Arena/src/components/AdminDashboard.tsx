@@ -86,7 +86,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   >("product");
   const [expandedMatch, setExpandedMatch] = useState<any>(null);
   // Match/Cricket each have two pages: the list, and a separate Add Match page.
-  const [matchPage, setMatchPage] = useState<"list" | "add">("list");
   const [cricketPage, setCricketPage] = useState<"list" | "add">("list");
   const [createMenuOpen, setCreateMenuOpen] = useState(false);
   const [taskMenuOpen, setTaskMenuOpen] = useState(false);
@@ -108,7 +107,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   const goToCreateTab = (tab: "product" | "match" | "cricket" | "quiz" | "earn") => {
     setCreateTab(tab);
     // Match and Cricket open on the Add Match panel, like the reference design.
-    if (tab === "match") setMatchPage("add");
     if (tab === "cricket") setCricketPage("add");
     setActiveSection("create");
     setCreateMenuOpen(true);
@@ -126,7 +124,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   };
   const [cricketExpanded, setCricketExpanded] = useState(false);
   const [esportsExpanded, setEsportsExpanded] = useState(false);
-  const [esportsTab, setEsportsTab] = useState<'upcoming' | 'live' | 'result' | 'ended'>('upcoming');
+  const [esportsTab, setEsportsTab] = useState<'new' | 'upcoming' | 'live' | 'result'>('new');
   const [quizExpanded, setQuizExpanded] = useState(false);
   const [bannersExpanded, setBannersExpanded] = useState(false);
   const [earnExpanded, setEarnExpanded] = useState(false);
@@ -529,7 +527,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                     setEsportsTab("upcoming");
                     setEsportsExpanded(true);
                     setExpandedMatch(newTournament.id);
-                    setMatchPage("add");
                     setTimeout(() => {
                       document.getElementById("admin-create")?.scrollIntoView({ behavior: "smooth", block: "start" });
                     }, 120);
@@ -1625,34 +1622,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             </div>
 
             {/* Add Match lives on its own page, above the list */}
-            {createTab === "match" && matchPage === "add" && (
+            {createTab === "match" && esportsTab === "new" && (
               <div className="bg-white border border-gray-200 rounded-xl p-3 flex items-center gap-3 shadow-sm">
                 <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
                   <Plus className="w-5 h-5 text-[#2563eb]" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="font-bold text-[15px] text-[#111] leading-tight">Add Match</p>
+                  <p className="font-bold text-[15px] text-[#111] leading-tight">New</p>
                   <p className="text-[12px] text-gray-500 leading-snug">Configure and create a new match</p>
                 </div>
                 <button
                   onClick={() => {
                     if (expandedMatch == null) createTournament();
-                    else setMatchPage("list");
+                    else {
+                      setExpandedMatch(null);
+                      setEsportsTab("upcoming");
+                    }
                   }}
                   className="shrink-0 bg-[#2563eb] text-white font-bold text-[13px] px-4 py-2 rounded-lg"
                 >
                   {expandedMatch == null ? "Add Match" : "Close"}
                 </button>
               </div>
-            )}
-
-            {createTab === "match" && matchPage === "list" && (
-              <button
-                onClick={createTournament}
-                className="w-full bg-[#2563eb] text-white font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 shadow-sm"
-              >
-                <Plus className="w-4 h-4" /> Add Match
-              </button>
             )}
 
             {/* eSports Tournaments Accordion */}
@@ -1678,37 +1669,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
               {esportsExpanded && (
                 <div className="p-4 space-y-4">
                   <div className="flex bg-gray-100 p-1 rounded-lg">
-                    <button
-                      onClick={() => setEsportsTab('upcoming')}
-                      className={`flex-1 py-1.5 text-xs font-bold rounded-md ${esportsTab === 'upcoming' ? 'bg-white shadow text-[#6D28D9]' : 'text-gray-500 hover:text-gray-700'}`}
-                    >
-                      Upcoming
-                    </button>
-                    <button
-                      onClick={() => setEsportsTab('live')}
-                      className={`flex-1 py-1.5 text-xs font-bold rounded-md ${esportsTab === 'live' ? 'bg-white shadow text-[#6D28D9]' : 'text-gray-500 hover:text-gray-700'}`}
-                    >
-                      Live
-                    </button>
-                    <button
-                      onClick={() => setEsportsTab('result')}
-                      className={`flex-1 py-1.5 text-xs font-bold rounded-md ${esportsTab === 'result' ? 'bg-white shadow text-[#6D28D9]' : 'text-gray-500 hover:text-gray-700'}`}
-                    >
-                      Result
-                    </button>
-                    <button
-                      onClick={() => setEsportsTab('ended')}
-                      className={`flex-1 py-1.5 text-xs font-bold rounded-md ${esportsTab === 'ended' ? 'bg-white shadow text-[#6D28D9]' : 'text-gray-500 hover:text-gray-700'}`}
-                    >
-                      Delete
-                    </button>
+                    {(['new', 'upcoming', 'live', 'result'] as const).map((tab) => (
+                      <button
+                        key={tab}
+                        onClick={() => setEsportsTab(tab)}
+                        className={`flex-1 py-1.5 text-xs font-bold rounded-md capitalize ${esportsTab === tab ? 'bg-white shadow text-[#6D28D9]' : 'text-gray-500 hover:text-gray-700'}`}
+                      >
+                        {tab}
+                      </button>
+                    ))}
                   </div>
 
                   {tournaments.filter((t: any) => {
                     if (esportsTab === 'upcoming') return t.status === 'upcoming';
                     if (esportsTab === 'live') return t.status === 'live';
-                    if (esportsTab === 'result' || esportsTab === 'ended') return t.status === 'ended';
-                    return true;
+                    if (esportsTab === 'result') return t.status === 'ended';
+                    return false; // the New tab shows the create panel, not the list
                   })
                   // Same as Product: whatever row is open is rendered first.
                   // filter() already returned a fresh array, so sorting is safe.
