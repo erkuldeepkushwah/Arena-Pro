@@ -1184,7 +1184,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
 
               {cricketExpanded && (
                 <div className="p-4 space-y-4">
-                  {cricketMatches.map((match: any, index: number) => (
+                  {/* Same as Product: whatever row is open is rendered first. */}
+                  {(expandedMatch == null
+                    ? cricketMatches
+                    : [...cricketMatches].sort((a: any, b: any) =>
+                        a.id === expandedMatch ? -1 : b.id === expandedMatch ? 1 : 0,
+                      )
+                  ).map((match: any, index: number) => (
                     <SwipeToDelete
                       key={match.id}
                       onDelete={() => {
@@ -1703,7 +1709,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                     if (esportsTab === 'live') return t.status === 'live';
                     if (esportsTab === 'result' || esportsTab === 'ended') return t.status === 'ended';
                     return true;
-                  }).map((t: any) => {
+                  })
+                  // Same as Product: whatever row is open is rendered first.
+                  // filter() already returned a fresh array, so sorting is safe.
+                  .sort((a: any, b: any) =>
+                    a.id === expandedMatch ? -1 : b.id === expandedMatch ? 1 : 0,
+                  )
+                  .map((t: any) => {
                     const index = tournaments.findIndex((tr: any) => tr.id === t.id);
                     return (
                     <SwipeToDelete
