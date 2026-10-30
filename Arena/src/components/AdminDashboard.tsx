@@ -522,9 +522,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                     const n = [newTournament, ...tournaments];
                     setTournaments(n);
                     saveMatchRooms(n);
-                    // Jump straight to Upcoming so the new row is visible, and
-                    // open the accordion on it.
-                    setEsportsTab("upcoming");
+                    // Stay on the New tab so the create form is visible.
+                    setEsportsTab("new");
                     setEsportsExpanded(true);
                     setExpandedMatch(newTournament.id);
                     setTimeout(() => {
