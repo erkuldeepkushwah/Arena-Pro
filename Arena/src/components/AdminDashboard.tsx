@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 import {
   ChevronDown,
   ChevronUp,
@@ -36,6 +37,30 @@ import { saveEarnTasks } from "../gameplayConfig";
 import { rtdb } from "../firebase";
 import { logTransaction } from "../utils/transactions";
 import { fileToImageDataUrl } from "../utils/imageUpload";
+
+/** Swipe a match row to the left to reveal Delete. */
+const SwipeToDelete: React.FC<{ onDelete: () => void; children: React.ReactNode }> = ({ onDelete, children }) => (
+  <div className="relative rounded-xl overflow-hidden mb-3">
+    <div className="absolute inset-0 bg-red-500 flex items-center justify-end pr-5">
+      <span className="text-white font-bold text-[13px] flex items-center gap-1.5">
+        <Trash2 className="w-4 h-4" /> Delete
+      </span>
+    </div>
+    <motion.div
+      drag="x"
+      dragDirectionLock
+      dragConstraints={{ left: -120, right: 0 }}
+      dragElastic={0.08}
+      onDragEnd={(_, info) => {
+        // Far enough, or a decisive flick — otherwise framer snaps it back.
+        if (info.offset.x < -72 || info.velocity.x < -450) onDelete();
+      }}
+      className="relative bg-white touch-pan-y"
+    >
+      {children}
+    </motion.div>
+  </div>
+);
 
 /** Matches marked "ended" are kept this long before the dashboard sweeps them. */
 const FINISHED_RETENTION_MS = 24 * 60 * 60 * 1000;
@@ -1111,9 +1136,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
               {cricketExpanded && (
                 <div className="p-4 space-y-4">
                   {cricketMatches.map((match: any, index: number) => (
+                    <SwipeToDelete
+                      key={match.id}
+                      onDelete={() => {
+                        if (!window.confirm("Delete this match?")) return;
+                        const n = cricketMatches.filter((m: any) => m.id !== match.id);
+                        setCricketMatches(n);
+                        window.dispatchEvent(new Event("admin_config_updated"));
+                      }}
+                    >
                     <div
                       key={match.id}
-                      className="bg-white border border-gray-200 rounded-xl p-3.5 shadow-sm relative mb-3"
+                      className="bg-white border border-gray-200 rounded-xl p-3.5 shadow-sm relative"
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
@@ -1492,7 +1526,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
-                    </div>
+                    </div></SwipeToDelete>
                   ))}
                 </div>
               )}
@@ -1603,9 +1637,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                   }).map((t: any) => {
                     const index = tournaments.findIndex((tr: any) => tr.id === t.id);
                     return (
+                    <SwipeToDelete
+                      key={t.id}
+                      onDelete={() => {
+                        if (!window.confirm("Delete this match?")) return;
+                        const n = tournaments.filter((tr: any) => tr.id !== t.id);
+                        setTournaments(n);
+                        window.dispatchEvent(new Event("admin_config_updated"));
+                      }}
+                    >
                     <div
                       key={t.id}
-                      className="bg-white border border-gray-200 rounded-xl p-3.5 shadow-sm relative mb-3"
+                      className="bg-white border border-gray-200 rounded-xl p-3.5 shadow-sm relative"
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
@@ -2120,7 +2163,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                           <Trash2 className="w-4 h-4 inline-block mr-1" /> Delete Match
                         </button>
                       </div>
-                    </div>
+                    </div></SwipeToDelete>
                   )})}
                 </div>
               )}
