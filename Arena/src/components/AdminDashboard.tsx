@@ -39,8 +39,8 @@ import { logTransaction } from "../utils/transactions";
 import { fileToImageDataUrl } from "../utils/imageUpload";
 
 /** Swipe a match row to the left to reveal Delete. */
-const SwipeToDelete: React.FC<{ onDelete: () => void; children: React.ReactNode }> = ({ onDelete, children }) => (
-  <div className="relative rounded-xl overflow-hidden mb-3">
+const SwipeToDelete: React.FC<{ onDelete: () => void; children: React.ReactNode; id?: string }> = ({ onDelete, children, id }) => (
+  <div id={id} className="relative rounded-xl overflow-hidden mb-3">
     <div className="absolute inset-0 bg-red-500 flex items-center justify-end pr-5">
       <span className="text-white font-bold text-[13px] flex items-center gap-1.5">
         <Trash2 className="w-4 h-4" /> Delete
@@ -1099,11 +1099,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                       entryFee: 10,
                       status: "upcoming",
                     };
-                    const newM = [newMatch, ...cricketMatches];
+                    // Appended, not prepended: the Add Match block stays at the
+                    // top of the panel and the new match lands below the list.
+                    const newM = [...cricketMatches, newMatch];
                     setCricketMatches(newM);
                     saveCricketMatches(newM);
                     setCricketExpanded(true);
                     setExpandedMatch(newMatch.id);
+                    setTimeout(() => {
+                      document.getElementById(`admin-cricket-${newMatch.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }, 150);
                     window.dispatchEvent(new Event("admin_config_updated"));
                   }}
                   className="shrink-0 bg-[#2563eb] text-white font-bold text-[13px] px-4 py-2 rounded-lg flex items-center gap-1"
@@ -1138,6 +1143,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                   {cricketMatches.map((match: any, index: number) => (
                     <SwipeToDelete
                       key={match.id}
+                      id={`admin-cricket-${match.id}`}
                       onDelete={() => {
                         if (!window.confirm("Delete this match?")) return;
                         const n = cricketMatches.filter((m: any) => m.id !== match.id);
@@ -1563,7 +1569,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                       streamLink: "",
                       results: [],
                     };
-                    const n = [newTournament, ...tournaments];
+                    // Appended, not prepended, so Add Match stays on top and the
+                    // created match appears below the existing ones.
+                    const n = [...tournaments, newTournament];
                     setTournaments(n);
                     saveMatchRooms(n);
                     // Jump straight to Upcoming so the new row is visible, and
@@ -1571,6 +1579,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                     setEsportsTab("upcoming");
                     setEsportsExpanded(true);
                     setExpandedMatch(newTournament.id);
+                    // The row is appended at the bottom, so bring it into view.
+                    setTimeout(() => {
+                      document.getElementById(`admin-match-${newTournament.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }, 150);
                     window.dispatchEvent(new Event("admin_config_updated"));
                   }}
                   className="shrink-0 bg-[#2563eb] text-white font-bold text-[13px] px-4 py-2 rounded-lg flex items-center gap-1"
@@ -1639,6 +1651,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                     return (
                     <SwipeToDelete
                       key={t.id}
+                      id={`admin-match-${t.id}`}
                       onDelete={() => {
                         if (!window.confirm("Delete this match?")) return;
                         const n = tournaments.filter((tr: any) => tr.id !== t.id);
