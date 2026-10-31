@@ -41,28 +41,28 @@ import { fileToImageDataUrl } from "../utils/imageUpload";
 /** Swipe left to delete, swipe right to move the match to its next step. */
 const SwipeToDelete: React.FC<{ onDelete: () => void; onAdvance?: () => void; children: React.ReactNode }> = ({ onDelete, onAdvance, children }) => (
   <div className="relative rounded-xl overflow-hidden mb-3">
-    <div className="absolute inset-0 bg-red-500 flex items-center justify-end pr-5">
-      <span className="text-white font-bold text-[13px] flex items-center gap-1.5">
-        <Trash2 className="w-4 h-4" /> Delete
+    <div className="absolute inset-y-0 right-0 w-28 bg-red-500 flex items-center justify-end pr-3">
+      <span className="text-white font-bold text-[12px] flex items-center gap-1">
+        <Trash2 className="w-3.5 h-3.5" /> Delete
       </span>
     </div>
     {onAdvance && (
-      <div className="absolute inset-0 bg-green-600 flex items-center justify-start pl-5">
-        <span className="text-white font-bold text-[13px]">Next step</span>
+      <div className="absolute inset-y-0 left-0 w-28 bg-green-600 flex items-center justify-start pl-3">
+        <span className="text-white font-bold text-[12px]">Next step</span>
       </div>
     )}
     <motion.div
       drag="x"
       dragDirectionLock
-      dragConstraints={{ left: -180, right: onAdvance ? 180 : 0 }}
+      dragConstraints={{ left: -90, right: onAdvance ? 90 : 0 }}
       dragElastic={0.08}
       onDragEnd={(_, info) => {
         // Only a full swipe counts — a half drag snaps back.
-        if (onAdvance && info.offset.x >= 160) {
+        if (onAdvance && info.offset.x >= 72) {
           onAdvance();
           return;
         }
-        if (info.offset.x <= -160) onDelete();
+        if (info.offset.x <= -72) onDelete();
       }}
       className="relative bg-white touch-pan-y"
     >
@@ -1302,6 +1302,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                       </div>
 
                       <div className="flex gap-2 mb-3">
+                        {match.status !== "live" && match.status !== "ended" && (
+                          <button
+                            onClick={() => {
+                              setCricketMatches(patchAt(cricketMatches, index, { status: "live" }));
+                              window.dispatchEvent(new Event("admin_config_updated"));
+                            }}
+                            className="flex-1 bg-red-600 text-white font-bold py-1.5 rounded text-xs"
+                          >
+                            Go Live
+                          </button>
+                        )}
                         {match.status === "live" && (
                           <button
                             onClick={() => {
@@ -1727,6 +1738,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                       </div>
 
                       <div className="flex gap-2 mb-3">
+                        {t.status !== "live" && t.status !== "ended" && (
+                          <button
+                            onClick={() => {
+                              setTournaments(patchAt(tournaments, index, { status: "live", liveAt: Date.now() }));
+                              window.dispatchEvent(new Event("admin_config_updated"));
+                            }}
+                            className="flex-1 bg-red-600 text-white font-bold py-1.5 rounded text-xs"
+                          >
+                            Go Live
+                          </button>
+                        )}
                         {t.status === "live" && (
                           <button
                             onClick={() => {
@@ -1924,7 +1946,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         </div>
                       )}
 
-                      {(
+                      {esportsTab === "upcoming" && (
                         <div className="bg-blue-50 border border-blue-200 p-2 rounded mb-3">
                           <label className="text-[10px] text-blue-700 font-bold block mb-2">
                             ROOM ID & PASSWORD (Only visible to joined players)
