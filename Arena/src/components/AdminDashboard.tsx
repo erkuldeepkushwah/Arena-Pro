@@ -96,7 +96,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   const [expandedMatch, setExpandedMatch] = useState<any>(null);
   // Match/Cricket each have two pages: the list, and a separate Add Match page.
   // Cricket now mirrors Match: New / Upcoming / Live / Result.
-  const [cricketTab, setCricketTab] = useState<"none" | "upcoming" | "live" | "result">("none");
+  const [cricketTab, setCricketTab] = useState<"new" | "upcoming" | "live" | "result">("new");
   const [createMenuOpen, setCreateMenuOpen] = useState(false);
   const [taskMenuOpen, setTaskMenuOpen] = useState(false);
   const [taskTab, setTaskTab] = useState<
@@ -134,7 +134,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   };
   const [cricketExpanded, setCricketExpanded] = useState(false);
   const [esportsExpanded, setEsportsExpanded] = useState(true);
-  const [esportsTab, setEsportsTab] = useState<'none' | 'upcoming' | 'live' | 'result'>('none');
+  const [esportsTab, setEsportsTab] = useState<'new' | 'upcoming' | 'live' | 'result'>('new');
   const [quizExpanded, setQuizExpanded] = useState(false);
   const [bannersExpanded, setBannersExpanded] = useState(false);
   const [earnExpanded, setEarnExpanded] = useState(false);
@@ -533,7 +533,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                     setTournaments(n);
                     saveMatchRooms(n);
                     // Stay on the New tab so the create form is visible.
-                    setEsportsTab("none");
+                    setEsportsTab("new");
                     setEsportsExpanded(true);
                     setExpandedMatch(newTournament.id);
                     setTimeout(() => {
@@ -1193,11 +1193,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
               {cricketExpanded && (
                 <div className="p-4 space-y-4">
                   <div className="flex bg-gray-100 p-1 rounded-lg">
-                    {(['none', 'upcoming', 'live', 'result'] as const).map((tab) => (
+                    {(['new', 'upcoming', 'live', 'result'] as const).map((tab) => (
                       <button
                         key={tab}
                         onClick={() => {
-                          if (tab === "none" && expandedMatch == null) {
+                          if (tab === "new" && expandedMatch == null) {
                             createCricketMatch();
                             return;
                           }
@@ -1213,7 +1213,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                   {/* Same as Product: whatever row is open is rendered first. */}
                   {cricketMatches
                     .filter((m: any) => {
-                      if (cricketTab === 'none') return m.id === expandedMatch;
+                      if (cricketTab === 'new') return m.id === expandedMatch;
                       if (cricketTab === 'upcoming') return (m.status || 'upcoming') === 'upcoming';
                       if (cricketTab === 'live') return m.status === 'live';
                       return m.status === 'ended';
@@ -1264,7 +1264,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         </div>
                       </div>
 
-                      {cricketTab === "none" && expandedMatch === match.id && (
+                      {cricketTab === "new" && expandedMatch === match.id && (
                         <>
 
                       <div className="mt-3 pt-3 border-t border-gray-100">
@@ -1292,9 +1292,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             );
                           }}
                         >
+                          <option value="">NONE</option>
                           <option value="upcoming">UPCOMING</option>
                           <option value="live">LIVE</option>
-                          <option value="ended">ENDED</option>
+                          <option value="ended">RESULT</option>
                         </select>
                       </div>
 
@@ -1597,11 +1598,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
               {esportsExpanded && (
                 <div className="p-4 space-y-4">
                   <div className="flex bg-gray-100 p-1 rounded-lg">
-                    {(['none', 'upcoming', 'live', 'result'] as const).map((tab) => (
+                    {(['new', 'upcoming', 'live', 'result'] as const).map((tab) => (
                       <button
                         key={tab}
                         onClick={() => {
-                          if (tab === "none" && expandedMatch == null) {
+                          if (tab === "new" && expandedMatch == null) {
                             createTournament();
                             return;
                           }
@@ -1618,7 +1619,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                     if (esportsTab === 'upcoming') return t.status === 'upcoming';
                     if (esportsTab === 'live') return t.status === 'live';
                     if (esportsTab === 'result') return t.status === 'ended';
-                    if (esportsTab === 'none') return t.id === expandedMatch; // only the match being edited
+                    if (esportsTab === 'new') return t.id === expandedMatch; // only the match being edited
                     return false;
                   })
                   // Same as Product: whatever row is open is rendered first.
@@ -1682,7 +1683,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         </div>
                       </div>
 
-                      {esportsTab === "none" && expandedMatch === t.id && (
+                      {esportsTab === "new" && expandedMatch === t.id && (
                         <>
                       <div className="mt-3 pt-3 border-t border-gray-100">
                       <div className="flex justify-between items-center mb-3">
@@ -1718,9 +1719,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             );
                           }}
                         >
+                          <option value="">NONE</option>
                           <option value="upcoming">UPCOMING</option>
                           <option value="live">LIVE</option>
-                          <option value="ended">ENDED</option>
+                          <option value="ended">RESULT</option>
                         </select>
                       </div>
 
@@ -1743,7 +1745,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         )}
                       </div>
 
-                      {(esportsTab === "upcoming" || esportsTab === "none") && (
+                      {(esportsTab === "upcoming" || esportsTab === "new") && (
                         <div className="grid grid-cols-2 gap-2 mb-2">
                           <input
                             className="border border-gray-200 p-1.5 text-xs rounded"
@@ -1839,7 +1841,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         </div>
                       )}
 
-                      {(esportsTab === "upcoming" || esportsTab === "none") && (
+                      {(esportsTab === "upcoming" || esportsTab === "new") && (
                         <div className="grid grid-cols-3 gap-2 mb-3 bg-white p-2 rounded border border-gray-100">
                           <div className="space-y-1">
                             <label className="text-[10px] text-gray-500 font-bold block">
@@ -1905,7 +1907,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         </div>
                       )}
 
-                      {((esportsTab === "upcoming" || esportsTab === "none") || esportsTab === "live" || esportsTab === "result") && (
+                      {((esportsTab === "upcoming" || esportsTab === "new") || esportsTab === "live" || esportsTab === "result") && (
                         <div className="mb-3">
                           <div className="text-xs font-bold text-gray-600 bg-gray-100 p-2 rounded flex justify-between items-center border border-gray-200">
                             <span>JOINED PLAYERS:</span>
