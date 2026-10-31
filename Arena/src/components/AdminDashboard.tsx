@@ -132,7 +132,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     setSidebarOpen(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-  const [cricketExpanded, setCricketExpanded] = useState(false);
+  const [cricketExpanded, setCricketExpanded] = useState(true);
   const [esportsExpanded, setEsportsExpanded] = useState(true);
   const [esportsTab, setEsportsTab] = useState<'new' | 'upcoming' | 'live' | 'result'>('new');
   const [quizExpanded, setQuizExpanded] = useState(false);
