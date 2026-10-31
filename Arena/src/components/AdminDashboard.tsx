@@ -1302,17 +1302,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                       </div>
 
                       <div className="flex gap-2 mb-3">
-                        {match.status !== "live" && match.status !== "ended" && (
-                          <button
-                            onClick={() => {
-                              setCricketMatches(patchAt(cricketMatches, index, { status: "live" }));
-                              window.dispatchEvent(new Event("admin_config_updated"));
-                            }}
-                            className="flex-1 bg-red-600 text-white font-bold py-1.5 rounded text-xs"
-                          >
-                            Go Live
-                          </button>
-                        )}
                         {match.status === "live" && (
                           <button
                             onClick={() => {
@@ -1738,17 +1727,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                       </div>
 
                       <div className="flex gap-2 mb-3">
-                        {t.status !== "live" && t.status !== "ended" && (
-                          <button
-                            onClick={() => {
-                              setTournaments(patchAt(tournaments, index, { status: "live", liveAt: Date.now() }));
-                              window.dispatchEvent(new Event("admin_config_updated"));
-                            }}
-                            className="flex-1 bg-red-600 text-white font-bold py-1.5 rounded text-xs"
-                          >
-                            Go Live
-                          </button>
-                        )}
                         {t.status === "live" && (
                           <button
                             onClick={() => {
@@ -1946,7 +1924,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         </div>
                       )}
 
-                      {esportsTab === "upcoming" && (
+                      {(
                         <div className="bg-blue-50 border border-blue-200 p-2 rounded mb-3">
                           <label className="text-[10px] text-blue-700 font-bold block mb-2">
                             ROOM ID & PASSWORD (Only visible to joined players)
