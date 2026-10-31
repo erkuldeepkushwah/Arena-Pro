@@ -1298,33 +1298,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
 
                       {cricketTab === "new" && expandedMatch === match.id && (
                         <>
-                      <div className="bg-blue-50 border border-blue-200 p-2 rounded mb-3">
-                        <label className="text-[10px] text-blue-700 font-bold block mb-2">
-                          ROOM ID & PASSWORD (Only visible to joined players)
-                        </label>
-                        <div className="flex gap-2">
-                          <input
-                            className="flex-1 border border-blue-200 rounded p-1 text-xs"
-                            placeholder="Room ID"
-                            value={match.roomDetails?.id || ""}
-                            onChange={(e) =>
-                              setCricketMatches(patchAt(cricketMatches, index, {
-                                roomDetails: { ...(match.roomDetails || { id: "", password: "" }), id: e.target.value },
-                              }))
-                            }
-                          />
-                          <input
-                            className="flex-1 border border-blue-200 rounded p-1 text-xs"
-                            placeholder="Password"
-                            value={match.roomDetails?.password || ""}
-                            onChange={(e) =>
-                              setCricketMatches(patchAt(cricketMatches, index, {
-                                roomDetails: { ...(match.roomDetails || { id: "", password: "" }), password: e.target.value },
-                              }))
-                            }
-                          />
-                        </div>
-                      </div>
+
                       <div className="mt-3 pt-3 border-t border-gray-100">
                       <div className="flex justify-between items-center mb-3">
                         <input
