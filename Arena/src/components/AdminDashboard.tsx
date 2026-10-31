@@ -494,7 +494,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                       title: "New Match",
                       time: "Apr 12, 7:00 PM",
                       entryFee: 10,
-                      status: "upcoming",
+                      status: "", // NONE by default — pick a status in the dropdown
                     };
                     const newM = [newMatch, ...cricketMatches];
                     setCricketMatches(newM);
@@ -522,7 +522,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                       prizePool: 500,
                       matchType: "Squad",
                       map: "Bermuda",
-                      status: "upcoming",
+                      status: "", // NONE by default — pick a status in the dropdown
                       totalSlots: 40,
                       joinedPlayers: [],
                       roomDetails: { id: "", password: "" },
