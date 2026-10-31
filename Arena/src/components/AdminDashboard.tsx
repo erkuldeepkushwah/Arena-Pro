@@ -95,7 +95,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   >("product");
   const [expandedMatch, setExpandedMatch] = useState<any>(null);
   // Match/Cricket each have two pages: the list, and a separate Add Match page.
-  const [cricketPage, setCricketPage] = useState<"list" | "add">("list");
   // Cricket now mirrors Match: New / Upcoming / Live / Result.
   const [cricketTab, setCricketTab] = useState<"new" | "upcoming" | "live" | "result">("new");
   const [createMenuOpen, setCreateMenuOpen] = useState(false);
@@ -1171,37 +1170,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             </h2>
           </div>
           <div className="p-4 space-y-4">
-            {/* Add Match lives on its own page, above the list */}
-            {createTab === "cricket" && cricketPage === "add" && (
-              <div className="bg-white border border-gray-200 rounded-xl p-3 flex items-center gap-3 shadow-sm">
-                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
-                  <Plus className="w-5 h-5 text-[#2563eb]" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="font-bold text-[15px] text-[#111] leading-tight">Add Match</p>
-                  <p className="text-[12px] text-gray-500 leading-snug">Configure and create a new match</p>
-                </div>
-                <button
-                  onClick={() => {
-                    if (expandedMatch == null) createCricketMatch();
-                    else setCricketPage("list");
-                  }}
-                  className="shrink-0 bg-[#2563eb] text-white font-bold text-[13px] px-4 py-2 rounded-lg"
-                >
-                  {expandedMatch == null ? "Add Match" : "Close"}
-                </button>
-              </div>
-            )}
-
-            {createTab === "cricket" && cricketPage === "list" && (
-              <button
-                onClick={createCricketMatch}
-                className="w-full bg-[#2563eb] text-white font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 shadow-sm"
-              >
-                <Plus className="w-4 h-4" /> Add Match
-              </button>
-            )}
-
             {/* Cricket Matches Accordion */}
             <div
               className={`border border-gray-200 rounded-lg ${cricketExpanded ? "shadow-sm" : ""} ${createTab === "cricket" ? "" : "hidden"}`}
