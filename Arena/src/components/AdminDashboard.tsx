@@ -117,7 +117,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   const goToCreateTab = (tab: "product" | "match" | "cricket" | "quiz" | "earn") => {
     setCreateTab(tab);
     // Match and Cricket open on the Add Match panel, like the reference design.
-    if (tab === "cricket") setCricketPage("add");
     setActiveSection("create");
     setCreateMenuOpen(true);
     setSidebarOpen(false);
@@ -501,7 +500,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                     saveCricketMatches(newM);
                     setCricketExpanded(true);
                     setExpandedMatch(newMatch.id);
-                    setCricketPage("add");
                     setTimeout(() => {
                       document.getElementById("admin-create")?.scrollIntoView({ behavior: "smooth", block: "start" });
                     }, 120);
