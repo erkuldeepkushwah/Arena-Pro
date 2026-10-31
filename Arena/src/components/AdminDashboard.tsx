@@ -1195,9 +1195,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                       <button
                         key={tab}
                         onClick={() => {
-                          if (tab === "new" && expandedMatch == null) {
-                            createCricketMatch();
-                            return;
+                          if (tab === "new") {
+                            const open = cricketMatches.find((m: any) => m.id === expandedMatch);
+                            if (!open || open.status) { createCricketMatch(); return; }
                           }
                           setCricketTab(tab);
                         }}
@@ -1211,7 +1211,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                   {/* Same as Product: whatever row is open is rendered first. */}
                   {cricketMatches
                     .filter((m: any) => {
-                      if (cricketTab === 'new') return m.id === expandedMatch;
+                      if (cricketTab === 'new') return m.id === expandedMatch && !m.status;
                       if (cricketTab === 'upcoming') return (m.status || 'upcoming') === 'upcoming';
                       if (cricketTab === 'live') return m.status === 'live';
                       return m.status === 'ended';
@@ -1316,7 +1316,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         )}
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2 mb-3">
+                      <div className="grid grid-cols-2 gap-2 mb-3 [&>div]:min-w-0 min-w-0">
                         <div className="space-y-1">
                           <label className="text-[10px] text-gray-500 font-bold">
                             TEAM 1 (Short)
@@ -1371,7 +1371,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2 mb-3">
+                      <div className="grid grid-cols-2 gap-2 mb-3 [&>div]:min-w-0 min-w-0">
                         <div className="space-y-1">
                           <label className="text-[10px] text-gray-500 font-bold">
                             TEAM 1 LOGO URL
@@ -1412,7 +1412,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2 mb-3">
+                      <div className="grid grid-cols-2 gap-2 mb-3 [&>div]:min-w-0 min-w-0">
                         <div className="space-y-1">
                           <label className="text-[10px] text-gray-500 font-bold">
                             DATE & TIME
@@ -1576,9 +1576,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                               new Event("admin_config_updated"),
                             );
                           }}
-                          className="text-red-500 hover:bg-red-50 p-1.5 rounded"
+                          className="w-full flex items-center justify-center gap-1.5 border border-red-200 text-red-600 font-bold text-[13px] py-2 rounded-lg hover:bg-red-50"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-4 h-4" /> Delete Match
                         </button>
                       </div>
                     </div></SwipeToDelete>
@@ -1600,9 +1600,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                       <button
                         key={tab}
                         onClick={() => {
-                          if (tab === "new" && expandedMatch == null) {
-                            createTournament();
-                            return;
+                          if (tab === "new") {
+                            const open = tournaments.find((t: any) => t.id === expandedMatch);
+                            if (!open || open.status) { createTournament(); return; }
                           }
                           setEsportsTab(tab);
                         }}
@@ -1617,7 +1617,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                     if (esportsTab === 'upcoming') return t.status === 'upcoming';
                     if (esportsTab === 'live') return t.status === 'live';
                     if (esportsTab === 'result') return t.status === 'ended';
-                    if (esportsTab === 'new') return t.id === expandedMatch; // only the match being edited
+                    if (esportsTab === 'new') return t.id === expandedMatch && !t.status; // only the match being edited
                     return false;
                   })
                   // Same as Product: whatever row is open is rendered first.
