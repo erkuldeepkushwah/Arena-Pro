@@ -96,6 +96,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   const [expandedMatch, setExpandedMatch] = useState<any>(null);
   // Match/Cricket each have two pages: the list, and a separate Add Match page.
   const [cricketPage, setCricketPage] = useState<"list" | "add">("list");
+  // Cricket now mirrors Match: New / Upcoming / Live / Result.
+  const [cricketTab, setCricketTab] = useState<"new" | "upcoming" | "live" | "result">("new");
   const [createMenuOpen, setCreateMenuOpen] = useState(false);
   const [taskMenuOpen, setTaskMenuOpen] = useState(false);
   const [taskTab, setTaskTab] = useState<
@@ -1222,13 +1224,39 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
 
               {cricketExpanded && (
                 <div className="p-4 space-y-4">
+                  <div className="flex bg-gray-100 p-1 rounded-lg">
+                    {(['new', 'upcoming', 'live', 'result'] as const).map((tab) => (
+                      <button
+                        key={tab}
+                        onClick={() => {
+                          if (tab === "new" && expandedMatch == null) {
+                            createCricketMatch();
+                            return;
+                          }
+                          setCricketTab(tab);
+                        }}
+                        className={`flex-1 py-1.5 text-xs font-bold rounded-md capitalize ${cricketTab === tab ? 'bg-white shadow text-[#6D28D9]' : 'text-gray-500 hover:text-gray-700'}`}
+                      >
+                        {tab}
+                      </button>
+                    ))}
+                  </div>
+
                   {/* Same as Product: whatever row is open is rendered first. */}
-                  {(expandedMatch == null
-                    ? cricketMatches
-                    : [...cricketMatches].sort((a: any, b: any) =>
-                        a.id === expandedMatch ? -1 : b.id === expandedMatch ? 1 : 0,
-                      )
-                  ).map((match: any, index: number) => (
+                  {cricketMatches
+                    .filter((m: any) => {
+                      if (cricketTab === 'new') return m.id === expandedMatch;
+                      if (cricketTab === 'upcoming') return (m.status || 'upcoming') === 'upcoming';
+                      if (cricketTab === 'live') return m.status === 'live';
+                      return m.status === 'ended';
+                    })
+                    .sort((a: any, b: any) =>
+                      a.id === expandedMatch ? -1 : b.id === expandedMatch ? 1 : 0,
+                    )
+                    .map((match: any, _i: number) => {
+                      // The list is filtered, so map's index is not the source index.
+                      const index = cricketMatches.findIndex((m: any) => m.id === match.id);
+                      return (
                     <SwipeToDelete
                       key={match.id}
                       onDelete={() => {
@@ -1268,8 +1296,35 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         </div>
                       </div>
 
-                      {expandedMatch === match.id && (
+                      {cricketTab === "new" && expandedMatch === match.id && (
                         <>
+                      <div className="bg-blue-50 border border-blue-200 p-2 rounded mb-3">
+                        <label className="text-[10px] text-blue-700 font-bold block mb-2">
+                          ROOM ID & PASSWORD (Only visible to joined players)
+                        </label>
+                        <div className="flex gap-2">
+                          <input
+                            className="flex-1 border border-blue-200 rounded p-1 text-xs"
+                            placeholder="Room ID"
+                            value={match.roomDetails?.id || ""}
+                            onChange={(e) =>
+                              setCricketMatches(patchAt(cricketMatches, index, {
+                                roomDetails: { ...(match.roomDetails || { id: "", password: "" }), id: e.target.value },
+                              }))
+                            }
+                          />
+                          <input
+                            className="flex-1 border border-blue-200 rounded p-1 text-xs"
+                            placeholder="Password"
+                            value={match.roomDetails?.password || ""}
+                            onChange={(e) =>
+                              setCricketMatches(patchAt(cricketMatches, index, {
+                                roomDetails: { ...(match.roomDetails || { id: "", password: "" }), password: e.target.value },
+                              }))
+                            }
+                          />
+                        </div>
+                      </div>
                       <div className="mt-3 pt-3 border-t border-gray-100">
                       <div className="flex justify-between items-center mb-3">
                         <input
@@ -1586,7 +1641,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         </button>
                       </div>
                     </div></SwipeToDelete>
-                  ))}
+                      );
+                    })}
                 </div>
               )}
             </div>
