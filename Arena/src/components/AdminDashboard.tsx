@@ -1264,303 +1264,261 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
 
                       {cricketTab === "new" && expandedMatch === match.id && (
                         <>
+                        <div className="mb-3">
+                          <p className="font-bold text-[15px] text-[#111] truncate">
+                            {match.title || "New Match"}
+                          </p>
+                          <p className="text-[12px] text-gray-500 font-medium mt-0.5 truncate">
+                            {match.team1.short} vs {match.team2.short} - {match.time}
+                          </p>
+                          <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${match.status === "live" ? "bg-red-50 text-red-600" : match.status === "ended" ? "bg-gray-100 text-gray-600" : "bg-purple-50 text-purple-600"}`}>
+                              {(match.status || "upcoming").toUpperCase()}
+                            </span>
+                            <span className="text-[10px] font-bold text-gray-500 bg-gray-50 border border-gray-200 px-1.5 py-0.5 rounded">
+                              Entry {match.entryFee || 0}
+                            </span>
+                            <span className="text-[10px] font-bold text-gray-500 bg-gray-50 border border-gray-200 px-1.5 py-0.5 rounded">
+                              {allUsers.filter((u) => u.joinedMatches && u.joinedMatches[match.id]).length} joined
+                            </span>
+                          </div>
+                        </div>
 
-                      <div className="mt-3 pt-3 border-t border-gray-100">
-                      <div className="flex justify-between items-center mb-3">
-                        <input
-                          className="border border-gray-300 rounded p-1 text-sm font-bold w-1/2"
-                          value={match.title}
-                          onChange={(e) => {
-                            setCricketMatches(patchAt(cricketMatches, index, { title: e.target.value }));
-                          }}
-                          onBlur={() => {
-                            saveCricketMatches(cricketMatches);
-                            window.dispatchEvent(
-                              new Event("admin_config_updated"),
-                            );
-                          }}
-                        />
-                        <select
-                          className={`text-xs font-bold px-2 py-1 rounded border ${match.status === "live" ? "bg-red-50 text-red-600 border-red-200" : match.status === "ended" ? "bg-gray-100 text-gray-600 border-gray-300" : "bg-purple-50 text-purple-600 border-purple-200"}`}
-                          value={match.status}
-                          onChange={(e) => {
-                            setCricketMatches(patchAt(cricketMatches, index, { status: e.target.value }));
-                            window.dispatchEvent(
-                              new Event("admin_config_updated"),
-                            );
-                          }}
-                        >
-                          <option value="">NONE</option>
-                          <option value="upcoming">UPCOMING</option>
-                          <option value="live">LIVE</option>
-                          <option value="ended">RESULT</option>
-                        </select>
-                      </div>
-
-                      <div className="flex gap-2 mb-3">
-                        {match.status === "live" && (
-                          <button
-                            onClick={() => {
-                              setCricketMatches(patchAt(cricketMatches, index, { status: "ended" }));
+                        <div className="flex items-center gap-2 mb-3">
+                          <input
+                            className="flex-1 min-w-0 border border-gray-200 rounded-lg px-2.5 py-2 text-sm font-bold focus:outline-none focus:border-blue-500"
+                            value={match.title}
+                            onChange={(e) => {
+                              setCricketMatches(patchAt(cricketMatches, index, { title: e.target.value }));
+                            }}
+                            onBlur={() => {
+                              saveCricketMatches(cricketMatches);
                               window.dispatchEvent(new Event("admin_config_updated"));
                             }}
-                            className="flex-1 bg-gray-800 text-white font-bold py-1.5 rounded text-xs"
+                          />
+                          <select
+                            className={`w-[120px] shrink-0 border rounded-lg px-2 py-2 text-xs font-bold uppercase focus:outline-none focus:border-blue-500 ${match.status === "live" ? "bg-red-50 text-red-600 border-red-200" : match.status === "ended" ? "bg-gray-100 text-gray-600 border-gray-300" : "bg-purple-50 text-purple-600 border-purple-200"}`}
+                            value={match.status}
+                            onChange={(e) => {
+                              setCricketMatches(patchAt(cricketMatches, index, { status: e.target.value }));
+                              window.dispatchEvent(new Event("admin_config_updated"));
+                            }}
                           >
-                            End Match - enter score
-                          </button>
-                        )}
+                            <option value="">NONE</option>
+                            <option value="upcoming">UPCOMING</option>
+                            <option value="live">LIVE</option>
+                            <option value="ended">RESULT</option>
+                          </select>
+                        </div>
+
                         {match.status === "ended" && (
-                          <p className="text-[11px] font-bold text-green-700 bg-green-50 border border-green-200 rounded px-2 py-1.5 w-full text-center">
+                          <div className="bg-green-50 border border-green-200 text-green-800 text-xs font-bold rounded-lg p-2.5 text-center mb-3">
                             Match ended - pick the winning team below to pay out.
-                          </p>
+                          </div>
                         )}
-                      </div>
 
-                      <div className="grid grid-cols-2 gap-2 mb-3 [&>div]:min-w-0 min-w-0">
-                        <div className="space-y-1">
-                          <label className="text-[10px] text-gray-500 font-bold">
-                            TEAM 1 (Short)
-                          </label>
-                          <input
-                            className="w-full border border-gray-200 rounded p-1.5 text-sm uppercase"
-                            value={match.team1.short}
-                            onChange={(e) => {
-                              setCricketMatches(
-                                patchAt(cricketMatches, index, {
-                                  team1: {
-                                    ...cricketMatches[index].team1,
-                                    short: e.target.value,
-                                    name: e.target.value,
-                                  },
-                                }),
-                              );
-                            }}
-                            onBlur={() => {
-                              saveCricketMatches(cricketMatches);
-                              window.dispatchEvent(
-                                new Event("admin_config_updated"),
-                              );
-                            }}
-                          />
+                        <div className="grid grid-cols-2 gap-2 mb-3">
+                          <div className="min-w-0">
+                            <label className="text-[10px] text-gray-500 font-bold uppercase block mb-1">TEAM 1 (SHORT)</label>
+                            <input
+                              className="w-full border border-gray-200 rounded-lg px-2.5 py-2 text-sm focus:outline-none focus:border-blue-500 uppercase"
+                              value={match.team1.short}
+                              onChange={(e) => {
+                                setCricketMatches(
+                                  patchAt(cricketMatches, index, {
+                                    team1: {
+                                      ...cricketMatches[index].team1,
+                                      short: e.target.value,
+                                      name: e.target.value,
+                                    },
+                                  }),
+                                );
+                              }}
+                              onBlur={() => {
+                                saveCricketMatches(cricketMatches);
+                                window.dispatchEvent(new Event("admin_config_updated"));
+                              }}
+                            />
+                          </div>
+                          <div className="min-w-0">
+                            <label className="text-[10px] text-gray-500 font-bold uppercase block mb-1">TEAM 2 (SHORT)</label>
+                            <input
+                              className="w-full border border-gray-200 rounded-lg px-2.5 py-2 text-sm focus:outline-none focus:border-blue-500 uppercase"
+                              value={match.team2.short}
+                              onChange={(e) => {
+                                setCricketMatches(
+                                  patchAt(cricketMatches, index, {
+                                    team2: {
+                                      ...cricketMatches[index].team2,
+                                      short: e.target.value,
+                                      name: e.target.value,
+                                    },
+                                  }),
+                                );
+                              }}
+                              onBlur={() => {
+                                saveCricketMatches(cricketMatches);
+                                window.dispatchEvent(new Event("admin_config_updated"));
+                              }}
+                            />
+                          </div>
                         </div>
-                        <div className="space-y-1">
-                          <label className="text-[10px] text-gray-500 font-bold">
-                            TEAM 2 (Short)
-                          </label>
-                          <input
-                            className="w-full border border-gray-200 rounded p-1.5 text-sm uppercase"
-                            value={match.team2.short}
-                            onChange={(e) => {
-                              setCricketMatches(
-                                patchAt(cricketMatches, index, {
-                                  team2: {
-                                    ...cricketMatches[index].team2,
-                                    short: e.target.value,
-                                    name: e.target.value,
-                                  },
-                                }),
-                              );
-                            }}
-                            onBlur={() => {
-                              saveCricketMatches(cricketMatches);
-                              window.dispatchEvent(
-                                new Event("admin_config_updated"),
-                              );
-                            }}
-                          />
-                        </div>
-                      </div>
 
-                      <div className="grid grid-cols-2 gap-2 mb-3 [&>div]:min-w-0 min-w-0">
-                        <div className="space-y-1">
-                          <label className="text-[10px] text-gray-500 font-bold">
-                            TEAM 1 LOGO URL
-                          </label>
-                          <input
-                            className="w-full border border-gray-200 rounded p-1.5 text-sm"
-                            placeholder="https://..."
-                            value={match.team1.logoUrl || ""}
-                            onChange={(e) => {
-                              setCricketMatches(patchAt(cricketMatches, index, { team1: { ...(cricketMatches[index].team1 || {}), logoUrl: e.target.value } }));
-                            }}
-                            onBlur={() => {
-                              saveCricketMatches(cricketMatches);
-                              window.dispatchEvent(
-                                new Event("admin_config_updated"),
-                              );
-                            }}
-                          />
+                        <div className="grid grid-cols-2 gap-2 mb-3">
+                          <div className="min-w-0">
+                            <label className="text-[10px] text-gray-500 font-bold uppercase block mb-1">TEAM 1 LOGO URL</label>
+                            <input
+                              className="w-full border border-gray-200 rounded-lg px-2.5 py-2 text-sm focus:outline-none focus:border-blue-500"
+                              placeholder="https://..."
+                              value={match.team1.logoUrl || ""}
+                              onChange={(e) => {
+                                setCricketMatches(patchAt(cricketMatches, index, { team1: { ...(cricketMatches[index].team1 || {}), logoUrl: e.target.value } }));
+                              }}
+                              onBlur={() => {
+                                saveCricketMatches(cricketMatches);
+                                window.dispatchEvent(new Event("admin_config_updated"));
+                              }}
+                            />
+                          </div>
+                          <div className="min-w-0">
+                            <label className="text-[10px] text-gray-500 font-bold uppercase block mb-1">TEAM 2 LOGO URL</label>
+                            <input
+                              className="w-full border border-gray-200 rounded-lg px-2.5 py-2 text-sm focus:outline-none focus:border-blue-500"
+                              placeholder="https://..."
+                              value={match.team2.logoUrl || ""}
+                              onChange={(e) => {
+                                setCricketMatches(patchAt(cricketMatches, index, { team2: { ...(cricketMatches[index].team2 || {}), logoUrl: e.target.value } }));
+                              }}
+                              onBlur={() => {
+                                saveCricketMatches(cricketMatches);
+                                window.dispatchEvent(new Event("admin_config_updated"));
+                              }}
+                            />
+                          </div>
                         </div>
-                        <div className="space-y-1">
-                          <label className="text-[10px] text-gray-500 font-bold">
-                            TEAM 2 LOGO URL
-                          </label>
-                          <input
-                            className="w-full border border-gray-200 rounded p-1.5 text-sm"
-                            placeholder="https://..."
-                            value={match.team2.logoUrl || ""}
-                            onChange={(e) => {
-                              setCricketMatches(patchAt(cricketMatches, index, { team2: { ...(cricketMatches[index].team2 || {}), logoUrl: e.target.value } }));
-                            }}
-                            onBlur={() => {
-                              saveCricketMatches(cricketMatches);
-                              window.dispatchEvent(
-                                new Event("admin_config_updated"),
-                              );
-                            }}
-                          />
-                        </div>
-                      </div>
 
-                      <div className="grid grid-cols-2 gap-2 mb-3 [&>div]:min-w-0 min-w-0">
-                        <div className="space-y-1">
-                          <label className="text-[10px] text-gray-500 font-bold">
-                            DATE & TIME
-                          </label>
-                          <input
-                            type="text"
-                            placeholder="e.g., Apr 12, 7:00 PM"
-                            className="w-full border border-gray-200 rounded p-1.5 text-sm"
-                            value={match.time}
-                            onChange={(e) => {
-                              setCricketMatches(patchAt(cricketMatches, index, { time: e.target.value }));
-                            }}
-                            onBlur={() => {
-                              saveCricketMatches(cricketMatches);
-                              window.dispatchEvent(
-                                new Event("admin_config_updated"),
-                              );
-                            }}
-                          />
+                        <div className="grid grid-cols-2 gap-2 mb-3">
+                          <div className="min-w-0">
+                            <label className="text-[10px] text-gray-500 font-bold uppercase block mb-1">DATE & TIME</label>
+                            <input
+                              type="text"
+                              placeholder="e.g., Apr 12, 7:00 PM"
+                              className="w-full border border-gray-200 rounded-lg px-2.5 py-2 text-sm focus:outline-none focus:border-blue-500"
+                              value={match.time}
+                              onChange={(e) => {
+                                setCricketMatches(patchAt(cricketMatches, index, { time: e.target.value }));
+                              }}
+                              onBlur={() => {
+                                saveCricketMatches(cricketMatches);
+                                window.dispatchEvent(new Event("admin_config_updated"));
+                              }}
+                            />
+                          </div>
+                          <div className="min-w-0">
+                            <label className="text-[10px] text-gray-500 font-bold uppercase block mb-1">ENTRY FEE (COINS)</label>
+                            <input
+                              type="number"
+                              className="w-full border border-gray-200 rounded-lg px-2.5 py-2 text-sm focus:outline-none focus:border-blue-500"
+                              value={match.entryFee}
+                              onChange={(e) => {
+                                setCricketMatches(patchAt(cricketMatches, index, { entryFee: Number(e.target.value) }));
+                              }}
+                              onBlur={() => {
+                                saveCricketMatches(cricketMatches);
+                                window.dispatchEvent(new Event("admin_config_updated"));
+                              }}
+                            />
+                          </div>
                         </div>
-                        <div className="space-y-1">
-                          <label className="text-[10px] text-gray-500 font-bold">
-                            ENTRY FEE (Coins)
-                          </label>
-                          <input
-                            type="number"
-                            className="w-full border border-gray-200 rounded p-1.5 text-sm"
-                            value={match.entryFee}
-                            onChange={(e) => {
-                              setCricketMatches(patchAt(cricketMatches, index, { entryFee: Number(e.target.value) }));
-                            }}
-                            onBlur={() => {
-                              saveCricketMatches(cricketMatches);
-                              window.dispatchEvent(
-                                new Event("admin_config_updated"),
-                              );
-                            }}
-                          />
-                        </div>
-                      </div>
 
-                      <div className="mb-3">
-                        <div className="text-xs font-bold text-gray-600 bg-gray-100 p-2 rounded flex justify-between items-center border border-gray-200">
-                          <span>JOINED PLAYERS:</span>
-                          <span className="text-purple-600 bg-purple-50 px-2 py-0.5 rounded border border-purple-100">
+                        <div className="bg-gray-100 border border-gray-200 rounded-lg px-2.5 py-2 mb-3 flex justify-between items-center gap-2">
+                          <span className="text-xs font-bold text-gray-600">JOINED PLAYERS:</span>
+                          <span className="text-[11px] font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded border border-purple-100 shrink-0">
                             {allUsers.filter((u) => u.joinedMatches && u.joinedMatches[match.id]).length} Joined
                           </span>
                         </div>
-                        {allUsers.filter((u) => u.joinedMatches && u.joinedMatches[match.id]).length > 0 && (
-                          <div className="mt-2 text-[11px] border border-gray-200 rounded p-2 bg-white space-y-1.5 max-h-32 overflow-y-auto">
-                            {allUsers.filter((u) => u.joinedMatches && u.joinedMatches[match.id]).map((u) => (
-                              <div key={u.uid} className="flex justify-between items-center text-gray-700">
-                                <span>{u.bankDetails?.mobileNumber || "Player"}</span>
-                                <span className="font-bold text-gray-500">[{u.joinedMatches[match.id]}]</span>
+
+                        {(match.status === "live" || match.status === "ended") && (
+                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
+                            <label className="text-[10px] text-blue-700 font-bold uppercase block mb-2">
+                              LIVE SCORE UPDATES
+                            </label>
+                            <div className="grid grid-cols-2 gap-2">
+                              <div className="min-w-0">
+                                <input
+                                  className="w-full border border-gray-200 rounded-lg px-2.5 py-2 text-sm focus:outline-none focus:border-blue-500"
+                                  placeholder={`${match.team1.short} Score`}
+                                  value={match.liveDetails?.team1Score || ""}
+                                  onChange={(e) => {
+                                    setCricketMatches(
+                                      patchAt(cricketMatches, index, {
+                                        liveDetails: {
+                                          ...(cricketMatches[index].liveDetails || {}),
+                                          team1Score: e.target.value,
+                                        },
+                                      }),
+                                    );
+                                  }}
+                                  onBlur={() => {
+                                    saveCricketMatches(cricketMatches);
+                                    window.dispatchEvent(new Event("admin_config_updated"));
+                                  }}
+                                />
                               </div>
-                            ))}
+                              <div className="min-w-0">
+                                <input
+                                  className="w-full border border-gray-200 rounded-lg px-2.5 py-2 text-sm focus:outline-none focus:border-blue-500"
+                                  placeholder={`${match.team2.short} Score`}
+                                  value={match.liveDetails?.team2Score || ""}
+                                  onChange={(e) => {
+                                    setCricketMatches(
+                                      patchAt(cricketMatches, index, {
+                                        liveDetails: {
+                                          ...(cricketMatches[index].liveDetails || {}),
+                                          team2Score: e.target.value,
+                                        },
+                                      }),
+                                    );
+                                  }}
+                                  onBlur={() => {
+                                    saveCricketMatches(cricketMatches);
+                                    window.dispatchEvent(new Event("admin_config_updated"));
+                                  }}
+                                />
+                              </div>
+                            </div>
                           </div>
                         )}
-                      </div>
 
-                      {/* Distribution (End Match) */}
-                      {(match.status === "live" || match.status === "ended") && (
-                        <div className="bg-blue-50 border border-blue-200 p-2 rounded mb-3">
-                          <label className="text-[10px] text-blue-700 font-bold block mb-1">
-                            LIVE SCORE UPDATES
-                          </label>
-                          <div className="flex gap-2">
-                            <input
-                              className="flex-1 border border-blue-200 rounded p-1 text-xs"
-                              placeholder={`${match.team1.short} Score`}
-                              value={match.liveDetails?.team1Score || ""}
-                              onChange={(e) => {
-                                setCricketMatches(
-                                  patchAt(cricketMatches, index, {
-                                    liveDetails: {
-                                      ...(cricketMatches[index].liveDetails || {}),
-                                      team1Score: e.target.value,
-                                    },
-                                  }),
-                                );
-                              }}
-                              onBlur={() => {
-                                saveCricketMatches(cricketMatches);
-                                window.dispatchEvent(
-                                  new Event("admin_config_updated"),
-                                );
-                              }}
-                            />
-                            <input
-                              className="flex-1 border border-blue-200 rounded p-1 text-xs"
-                              placeholder={`${match.team2.short} Score`}
-                              value={match.liveDetails?.team2Score || ""}
-                              onChange={(e) => {
-                                setCricketMatches(
-                                  patchAt(cricketMatches, index, {
-                                    liveDetails: {
-                                      ...(cricketMatches[index].liveDetails || {}),
-                                      team2Score: e.target.value,
-                                    },
-                                  }),
-                                );
-                              }}
-                              onBlur={() => {
-                                saveCricketMatches(cricketMatches);
-                                window.dispatchEvent(
-                                  new Event("admin_config_updated"),
-                                );
-                              }}
-                            />
+                        {match.status === "ended" && (
+                          <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3 mb-3">
+                            <label className="text-[10px] text-amber-700 font-bold uppercase block mb-2">
+                              SET WINNING TEAM (Distribute 2x Coins)
+                            </label>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => {
+                                  setCricketMatches(patchAt(cricketMatches, index, { winningTeam: match.team1.short }));
+                                  handleDistributeCricketWinnings(match.id, match.team1.short, match.entryFee);
+                                  window.dispatchEvent(new Event("admin_config_updated"));
+                                }}
+                                className={`flex-1 min-w-0 py-2 rounded-lg text-xs font-bold border ${match.winningTeam === match.team1.short ? "bg-amber-400 text-amber-900 border-amber-500" : "bg-white border-amber-300 text-amber-700 hover:bg-amber-100"}`}
+                              >
+                                {match.team1.short} Won
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setCricketMatches(patchAt(cricketMatches, index, { winningTeam: match.team2.short }));
+                                  handleDistributeCricketWinnings(match.id, match.team2.short, match.entryFee);
+                                  window.dispatchEvent(new Event("admin_config_updated"));
+                                }}
+                                className={`flex-1 min-w-0 py-2 rounded-lg text-xs font-bold border ${match.winningTeam === match.team2.short ? "bg-amber-400 text-amber-900 border-amber-500" : "bg-white border-amber-300 text-amber-700 hover:bg-amber-100"}`}
+                              >
+                                {match.team2.short} Won
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                      )}
-
-                      {match.status === "ended" && (
-                        <div className="bg-yellow-50 border border-yellow-200 p-2 rounded mb-3 flex flex-col gap-2">
-                          <label className="text-[10px] text-yellow-800 font-bold">
-                            SET WINNING TEAM (Distribute 2x Coins)
-                          </label>
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => {
-                                setCricketMatches(patchAt(cricketMatches, index, { winningTeam: match.team1.short }));
-                                handleDistributeCricketWinnings(match.id, match.team1.short, match.entryFee);
-                                window.dispatchEvent(
-                                  new Event("admin_config_updated"),
-                                );
-                              }}
-                              className={`flex-1 py-1.5 rounded text-xs font-bold ${match.winningTeam === match.team1.short ? "bg-yellow-400 text-yellow-900 border border-yellow-500" : "bg-white border border-yellow-300 text-yellow-700 hover:bg-yellow-100"}`}
-                            >
-                              {match.team1.short} Won
-                            </button>
-                            <button
-                              onClick={() => {
-                                setCricketMatches(patchAt(cricketMatches, index, { winningTeam: match.team2.short }));
-                                handleDistributeCricketWinnings(match.id, match.team2.short, match.entryFee);
-                                window.dispatchEvent(
-                                  new Event("admin_config_updated"),
-                                );
-                              }}
-                              className={`flex-1 py-1.5 rounded text-xs font-bold ${match.winningTeam === match.team2.short ? "bg-yellow-400 text-yellow-900 border border-yellow-500" : "bg-white border border-yellow-300 text-yellow-700 hover:bg-yellow-100"}`}
-                            >
-                              {match.team2.short} Won
-                            </button>
-                          </div>
-                        </div>
-                      )}
-
-                      </div>
+                        )}
                         </>
                       )}
 
