@@ -1640,7 +1640,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         </div>
                       </div>
 
-                      {esportsTab === "new" && expandedMatch === t.id && (
+                      {expandedMatch === t.id && (
                         <>
                       <div className="mt-3 pt-3 border-t border-gray-100">
                       <div className="flex justify-between items-center mb-3">
