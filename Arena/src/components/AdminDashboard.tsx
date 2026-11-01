@@ -1599,6 +1599,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                           }),
                         );
                         setEsportsTab(next === "ended" ? "result" : next === "live" ? "live" : "upcoming");
+                        setExpandedMatch(t.id);
                         window.dispatchEvent(new Event("admin_config_updated"));
                       }}
                       onDelete={() => {
@@ -1971,7 +1972,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                 <div key={u.uid} className="flex gap-2 items-center p-2 border-b border-gray-100 last:border-0 hover:bg-gray-50">
                                   <div className="flex-1 min-w-0">
                                     <div className="font-bold text-gray-800 text-xs truncate">
-                                      {u.tournamentDetails?.[t.id]?.inGameName || u.bankDetails?.mobileNumber || "Player"}
+                                      {u.tournamentDetails?.[t.id]?.inGameName || u.displayName || u.bankDetails?.mobileNumber || "Player"}
                                     </div>
                                     <div className="text-[9px] text-gray-500 truncate">{u.uid}</div>
                                   </div>
