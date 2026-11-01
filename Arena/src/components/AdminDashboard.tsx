@@ -1575,7 +1575,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                     if (esportsTab === 'upcoming') return t.status === 'upcoming';
                     if (esportsTab === 'live') return t.status === 'live';
                     if (esportsTab === 'result') return t.status === 'ended';
-                    if (esportsTab === 'new') return t.id === expandedMatch && !t.status; // only the match being edited
+                    if (esportsTab === 'new') return t.id === expandedMatch; // the match being created/edited
                     return false;
                   })
                   // Same as Product: whatever row is open is rendered first.
@@ -1634,7 +1634,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                               Entry {t.entryFee || 0}
                             </span>
                             <span className="text-[10px] font-bold text-gray-500 bg-gray-50 border border-gray-200 px-1.5 py-0.5 rounded">
-                              {allUsers.filter((u: any) => u.joinedTournaments?.includes(t.id)).length} / {t.totalSlots || 0} joined
+                              {allUsers.filter((u: any) => (u.joinedTournaments?.includes(t.id) || (t.joinedPlayers || []).includes(u.uid))).length} / {t.totalSlots || 0} joined
                             </span>
                           </div>
                         </div>
@@ -1870,12 +1870,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             <span>JOINED PLAYERS:</span>
                             <span
                               className={
-                                allUsers.filter((u: any) => u.joinedTournaments?.includes(t.id)).length >= t.totalSlots
+                                allUsers.filter((u: any) => (u.joinedTournaments?.includes(t.id) || (t.joinedPlayers || []).includes(u.uid))).length >= t.totalSlots
                                   ? "text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-100"
                                   : "text-purple-600 bg-purple-50 px-2 py-0.5 rounded border border-purple-100"
                               }
                             >
-                              {allUsers.filter((u: any) => u.joinedTournaments?.includes(t.id)).length} / {t.totalSlots} Joined
+                              {allUsers.filter((u: any) => (u.joinedTournaments?.includes(t.id) || (t.joinedPlayers || []).includes(u.uid))).length} / {t.totalSlots} Joined
                             </span>
                           </div>
                         </div>
@@ -1964,8 +1964,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
 
                           {/* List of joined users with inputs */}
                           <div className="bg-white border border-yellow-200 rounded max-h-64 overflow-y-auto">
-                            {allUsers.filter((u: any) => u.joinedTournaments?.includes(t.id)).length > 0 ? (
-                              allUsers.filter((u: any) => u.joinedTournaments?.includes(t.id)).map((u: any) => {
+                            {allUsers.filter((u: any) => (u.joinedTournaments?.includes(t.id) || (t.joinedPlayers || []).includes(u.uid))).length > 0 ? (
+                              allUsers.filter((u: any) => (u.joinedTournaments?.includes(t.id) || (t.joinedPlayers || []).includes(u.uid))).map((u: any) => {
                                 const existingResult = t.results?.find((r: any) => r.uid === u.uid) || { kills: 0, isWinner: false, distributed: false };
                                 
                                 return (
@@ -2011,7 +2011,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
 
                           <button
                             onClick={async () => {
-                              const players = allUsers.filter((u: any) => u.joinedTournaments?.includes(t.id));
+                              const players = allUsers.filter((u: any) => (u.joinedTournaments?.includes(t.id) || (t.joinedPlayers || []).includes(u.uid)));
                               if (players.length === 0) return;
                               
                               const existingResults: any[] = tournaments[index].results || [];
